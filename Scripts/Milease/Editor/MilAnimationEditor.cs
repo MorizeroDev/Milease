@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using Milease.Core;
 using Milease.Utils;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -18,7 +22,12 @@ namespace Milease.Editor
 
         private EaseUtility.EaseType easeType;
         private EaseUtility.EaseFunction easeFunction;
-        
+
+        private MilAnimation editingAnimation;
+
+        private List<List<string>> reflected;
+        private string currentDepth;
+
         private static Stopwatch watch = new();
         
         [MenuItem("Milease/Open MilAnimation Editor")]
@@ -27,21 +36,61 @@ namespace Milease.Editor
             GetWindow(typeof(MilAnimationEditor), false, "MilAnimation Editor");
             watch.Restart();
         }
+
+        private void ShowMemberMenu()
+        {
+            IEnumerable<string> fields;
+            if (currentDepth == "")
+            {
+                fields = reflected.Select(x => x[0]).Distinct();
+            }
+            else
+            {
+                var depth = currentDepth.Split('.').Length;
+                fields = reflected.Where(x => x.Count > depth && string.Join('.', x).StartsWith(currentDepth))
+                                  .Select(x => x[depth]).Distinct();
+            }
+            
+            var menu = new GenericMenu();
+            foreach (var field in fields)
+            {
+                menu.AddItem(new GUIContent(field), false, () =>
+                {
+                    currentDepth += (currentDepth != "" ? "." : "") + field;
+                    ShowMemberMenu();
+                });
+            }
+
+            if (currentDepth == "")
+            {
+                menu.ShowAsContext();
+            }
+            else
+            {
+                menu.DropDown(new Rect(0f, 0f, 0, 0));
+            }
+        }
         
         private void OnGUI()
         {
-            if (Selection.objects.Length == 0)
+            if (Selection.objects[0] is MilAnimation)
+            {
+                editingAnimation = (MilAnimation)Selection.objects[0];
+            }
+
+            if (!editingAnimation)
             {
                 return;
             }
 
-            if (Selection.objects[0] is not MilAnimation)
+            var ani = editingAnimation;
+            var timeLen = 1f;
+            if (ani.Parts.Count > 0)
             {
-                return;
+                timeLen = ani.Parts.Max(x => x.StartTime + x.Duration);
             }
+            var keys = ani.Parts.Select(x => x.Binding).Distinct().ToList();
 
-            var ani = Selection.objects[0] as MilAnimation;
-            
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, true, true, 
                 GUILayout.Height(position.height - 160f));
             {
@@ -49,7 +98,23 @@ namespace Milease.Editor
                 {
                     GUILayout.BeginHorizontal();
                     {
-                        for (float i = 0; i < timeLineLength; i += timeInterval)
+                        GUILayout.BeginVertical();
+                        {
+                            GUILayout.Label("");
+                            foreach (var key in keys)
+                            {
+                                GUILayout.Label(string.Join('.', key), GUILayout.MaxWidth(160f));
+                            }
+                            if (GUILayout.Button("+", GUILayout.MaxWidth(160f)) && Selection.objects[0] is GameObject go)
+                            {
+                                reflected = EditorUtils.GetAnimatableFields(go);
+                                currentDepth = "";
+                                ShowMemberMenu();
+                            }
+                        }
+                        GUILayout.EndVertical();
+                        
+                        for (float i = 0; i < timeLen; i += timeInterval)
                         {
                             GUILayout.Label(i.ToString("F1"), GUILayout.Width(boxWidth));
 

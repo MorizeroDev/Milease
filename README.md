@@ -6,9 +6,13 @@ An advanced UI animation tool with a wide range of easing options to choose from
 
 Current Status:  **WIP**
 
+**Special Thanks**: 
+
+* https://easings.net
+
 # Introduction
 
-The animation system in Unity is often not well-suited for creating UI animations, and its ease of use in terms of tween editing is relatively limited. Milease integrates tween functions from easings.net, allowing you to visually design and edit them, as well as quickly generate and control them through code. Additionally, Milease automatically handles tween calculations under vertical sync toggles to ensure smooth animation effects.
+The animation system in Unity is often not well-suited for creating UI animations, and its ease of use in terms of tween editing is relatively limited. Milease integrates tween functions from https://easings.net, allowing you to visually design and edit them, as well as quickly generate and control them through code. Additionally, Milease automatically handles tween calculations under vertical sync toggles to ensure smooth animation effects.
 
 # Why Milease is Better
 

@@ -8,10 +8,6 @@ namespace Milease.Core
     [CreateAssetMenu(menuName = "Milease/New MilAnimation", fileName = "New MilAnimation")]
     public class MilAnimation : ScriptableObject
     {
-        public enum AnimationBindingType
-        {
-            Position, LocalPosition, LocalScale, Rotation, LocalRotation, Other
-        }
         [Serializable]
         public struct AnimationPart
         {
@@ -19,6 +15,8 @@ namespace Milease.Core
             public float Duration;
             public EaseUtility.EaseType EaseType;
             public EaseUtility.EaseFunction EaseFunction;
+            public AnimationCurve CustomCurve;
+            public List<string> Binding;
             public string StartValue;
             public string ToValue;
         }
