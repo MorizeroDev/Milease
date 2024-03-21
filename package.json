@@ -1,0 +1,9 @@
+{
+    "name": "com.morizero.milease",
+    "author": "Morizero",
+    "displayName": "Milease",
+    "version": "0.0.1",
+    "unity": "2022.3",
+    "description": "An advanced UI animation tool with a wide range of easing options to choose from. Perfect for adding dynamic and polished animations to your user interface!",
+    "dependencies": {}
+  }
