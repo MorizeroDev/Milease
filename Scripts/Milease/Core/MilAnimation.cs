@@ -11,20 +11,21 @@ namespace Milease.Core
     [CreateAssetMenu(menuName = "Milease/New MilAnimation", fileName = "New MilAnimation")]
     public class MilAnimation : ScriptableObject
     {
-        public class RuntimeAnimationPart<T>
+        public class RuntimeAnimationPart
         {
             public readonly MemberInfo BindMember;
             public readonly MethodInfo AdditionOperator, SubtractionOperator, MultiplyOperator;
             public readonly bool OverrideOperators;
             public readonly bool Valid;
-            public readonly T StartValue, ToValue;
+            public readonly object StartValue, ToValue;
+            public readonly object Target;
 
-            public RuntimeAnimationPart(AnimationPart animation)
+            public RuntimeAnimationPart(object target, AnimationPart animation, Type baseType)
             {
-                var curType = typeof(T);
+                var curType = baseType;
                 for (var i = 0; i < animation.Binding.Count; i++)
                 {
-                    var list = curType!.GetMember(animation.Binding[i], BindingFlags.GetField | BindingFlags.GetProperty);
+                    var list = curType!.GetMember(animation.Binding[i]);
                     if (list.Length == 0)
                     {
                         Valid = false;
@@ -38,12 +39,24 @@ namespace Milease.Core
                         MemberTypes.Property => ((PropertyInfo)BindMember).PropertyType,
                         _ => null
                     };
+                    
+                    if (i != animation.Binding.Count - 1)
+                    {
+                        target = BindMember.MemberType switch
+                        {
+                            MemberTypes.Field => ((FieldInfo)BindMember).GetValue(target),
+                            MemberTypes.Property => ((PropertyInfo)BindMember).GetValue(target),
+                            _ => null
+                        };
+                    }
                 }
+
+                Target = target;
 
                 Valid = true;
 
-                StartValue = JsonUtility.FromJson<T>(animation.StartValue);
-                ToValue = JsonUtility.FromJson<T>(animation.ToValue);
+                StartValue = JsonUtility.FromJson(animation.StartValue, curType);
+                ToValue = JsonUtility.FromJson(animation.ToValue, curType);
                 
                 var methods = curType!.GetMethods(BindingFlags.Public | BindingFlags.Static).ToList();
                 AdditionOperator = methods.Find(x =>
@@ -67,11 +80,29 @@ namespace Milease.Core
                 OverrideOperators = AdditionOperator != null && SubtractionOperator != null && MultiplyOperator != null;
             }
 
-            public static void SetValue(object target, RuntimeAnimationPart<T> ani, float pro)
+            public static void SetValue(RuntimeAnimationPart ani, float pro)
             {
                 if (ani.BindMember.MemberType == MemberTypes.Field)
                 {
-                    ((FieldInfo)ani.BindMember).SetValue(target,
+                    ((FieldInfo)ani.BindMember).SetValue(ani.Target,
+                        ani.AdditionOperator.Invoke(null, new object[] 
+                        {
+                            ani.StartValue, 
+                            ani.MultiplyOperator.Invoke(null, new object[]
+                            {
+                                ani.SubtractionOperator.Invoke(null, new object[]
+                                {
+                                    ani.ToValue, 
+                                    ani.StartValue
+                                }), 
+                                pro
+                            })
+                        })
+                    );
+                }
+                else
+                {
+                    ((PropertyInfo)ani.BindMember).SetValue(ani.Target,
                         ani.AdditionOperator.Invoke(null, new object[] 
                         {
                             ani.StartValue, 
