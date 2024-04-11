@@ -13,9 +13,14 @@ namespace Milease.Core
     {
         public class RuntimeAnimationPart
         {
+            public enum ValueTypeEnum
+            {
+                PrimitiveType, CustomType, Other
+            }
             public readonly MemberInfo BindMember;
             public readonly MethodInfo AdditionOperator, SubtractionOperator, MultiplyOperator;
-            public readonly bool OverrideOperators;
+            public readonly ValueTypeEnum ValueType;
+            public readonly Type ValueTypeInfo;
             public readonly bool Valid;
             public readonly object StartValue, ToValue;
             public readonly object Target;
@@ -54,9 +59,21 @@ namespace Milease.Core
                 Target = target;
 
                 Valid = true;
+                
+                ValueTypeInfo = curType;
 
-                StartValue = JsonUtility.FromJson(animation.StartValue, curType);
-                ToValue = JsonUtility.FromJson(animation.ToValue, curType);
+                if (curType!.IsPrimitive)
+                {
+                    StartValue = double.Parse(animation.StartValue);
+                    ToValue = double.Parse(animation.ToValue);
+                    ValueType = ValueTypeEnum.PrimitiveType;
+                    return;
+                }
+                else
+                {
+                    StartValue = JsonUtility.FromJson(animation.StartValue, curType);
+                    ToValue = JsonUtility.FromJson(animation.ToValue, curType);
+                }
                 
                 var methods = curType!.GetMethods(BindingFlags.Public | BindingFlags.Static).ToList();
                 AdditionOperator = methods.Find(x =>
@@ -77,14 +94,15 @@ namespace Milease.Core
                     return x.Name == "op_Multiply" && param[0].ParameterType == curType &&
                            (param[1].ParameterType == typeof(Single) || param[1].ParameterType == typeof(Double)) && x.ReturnType == curType;
                 });
-                OverrideOperators = AdditionOperator != null && SubtractionOperator != null && MultiplyOperator != null;
+                ValueType = AdditionOperator != null && SubtractionOperator != null && MultiplyOperator != null ? ValueTypeEnum.CustomType : ValueTypeEnum.Other;
             }
 
             public static void SetValue(RuntimeAnimationPart ani, float pro)
             {
-                if (ani.BindMember.MemberType == MemberTypes.Field)
+                var result = ani.ValueType switch
                 {
-                    ((FieldInfo)ani.BindMember).SetValue(ani.Target,
+                    ValueTypeEnum.PrimitiveType => Convert.ChangeType((double)ani.StartValue + ((double)ani.ToValue - (double)ani.StartValue) * pro, ani.ValueTypeInfo),
+                    ValueTypeEnum.CustomType => 
                         ani.AdditionOperator.Invoke(null, new object[] 
                         {
                             ani.StartValue, 
@@ -97,26 +115,17 @@ namespace Milease.Core
                                 }), 
                                 pro
                             })
-                        })
-                    );
+                        }),
+                    ValueTypeEnum.Other => pro >= 1f ? ani.ToValue : ani.StartValue,
+                    _ => default
+                };
+                if (ani.BindMember.MemberType == MemberTypes.Field)
+                {
+                    ((FieldInfo)ani.BindMember).SetValue(ani.Target, result);
                 }
                 else
                 {
-                    ((PropertyInfo)ani.BindMember).SetValue(ani.Target,
-                        ani.AdditionOperator.Invoke(null, new object[] 
-                        {
-                            ani.StartValue, 
-                            ani.MultiplyOperator.Invoke(null, new object[]
-                            {
-                                ani.SubtractionOperator.Invoke(null, new object[]
-                                {
-                                    ani.ToValue, 
-                                    ani.StartValue
-                                }), 
-                                pro
-                            })
-                        })
-                    );
+                    ((PropertyInfo)ani.BindMember).SetValue(ani.Target,result);
                 }
             }
         }
@@ -134,5 +143,20 @@ namespace Milease.Core
         }
         [HideInInspector]
         public List<AnimationPart> Parts;
+
+        public static AnimationPart Part<T>(string binding, T startValue, T toValue, float startTime, float duration,
+            EaseUtility.EaseType easeType, EaseUtility.EaseFunction easeFunction)
+        {
+            return new AnimationPart()
+            {
+                StartTime = startTime,
+                Duration = duration,
+                EaseType = easeType,
+                EaseFunction = easeFunction,
+                Binding = binding.Split('.').ToList(),
+                StartValue = typeof(T).IsPrimitive ? startValue.ToString() : JsonUtility.ToJson(startValue),
+                ToValue = typeof(T).IsPrimitive ? toValue.ToString() : JsonUtility.ToJson(toValue)
+            };
+        }
     }
 }

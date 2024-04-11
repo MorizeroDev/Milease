@@ -8,20 +8,20 @@ using UnityEngine;
 //[ExecuteInEditMode]
 public class MilAnimator : MonoBehaviour
 {
-    public GameObject TestObject;
+    public Object TestObject;
+    private MilAnimation.AnimationPart ani;
     private MilAnimation.RuntimeAnimationPart test;
     private float time = 0f;
+    public float testValue;
     void Start()
     {
-        var ani = new MilAnimation.AnimationPart()
-        {
-            StartValue = JsonUtility.ToJson(new Vector3(0, 0, 0)),
-            ToValue = JsonUtility.ToJson(new Vector3(1, 1, 0)),
-            EaseType = EaseUtility.EaseType.IO,
-            EaseFunction = EaseUtility.EaseFunction.Circ,
-            Binding = new List<string>() { "transform", "position" }
-        };
-        test = new MilAnimation.RuntimeAnimationPart(TestObject, ani, typeof(GameObject));
+        ani = MilAnimation.Part("transform.position",
+            new Vector3(0, 0, 0), new Vector3(0, -2.5f, 0),
+            0f, 1f, EaseUtility.EaseType.In, EaseUtility.EaseFunction.Back);
+        ani = MilAnimation.Part("testValue",
+            0f, 100f,
+            0f, 1f, EaseUtility.EaseType.In, EaseUtility.EaseFunction.Back);
+        test = new MilAnimation.RuntimeAnimationPart(TestObject, ani, typeof(MilAnimator));
     }
     
     void Update()
@@ -31,6 +31,6 @@ public class MilAnimator : MonoBehaviour
         {
             time -= 1f;
         }
-        MilAnimation.RuntimeAnimationPart.SetValue(test, time);
+        MilAnimation.RuntimeAnimationPart.SetValue(test, EaseUtility.GetEasedProgress(time, ani.EaseType, ani.EaseFunction));
     }
 }
