@@ -24,10 +24,19 @@ namespace Milease.Core
             public readonly bool Valid;
             public readonly object StartValue, ToValue;
             public readonly object Target;
+            public readonly AnimationPart Source;
 
-            public RuntimeAnimationPart(object target, AnimationPart animation, Type baseType)
+            public RuntimeAnimationPart(object target, AnimationPart animation, Type baseType, MemberInfo memberInfo = null)
             {
+                Source = animation;
+                
                 var curType = baseType;
+                if (memberInfo != null)
+                {
+                    BindMember = memberInfo;
+                    goto skip_seek_member;
+                }
+                
                 for (var i = 0; i < animation.Binding.Count; i++)
                 {
                     var list = curType!.GetMember(animation.Binding[i]);
@@ -54,7 +63,9 @@ namespace Milease.Core
                             _ => null
                         };
                     }
-                }
+                } 
+                
+                skip_seek_member:
 
                 Target = target;
 
@@ -144,9 +155,10 @@ namespace Milease.Core
         [HideInInspector]
         public List<AnimationPart> Parts;
 
-        public static AnimationPart Part<T>(string binding, T startValue, T toValue, float startTime, float duration,
+        public static AnimationPart Part(string binding, object startValue, object toValue, float startTime, float duration,
             EaseUtility.EaseType easeType, EaseUtility.EaseFunction easeFunction)
         {
+            var type = startValue.GetType();
             return new AnimationPart()
             {
                 StartTime = startTime,
@@ -154,8 +166,23 @@ namespace Milease.Core
                 EaseType = easeType,
                 EaseFunction = easeFunction,
                 Binding = binding.Split('.').ToList(),
-                StartValue = typeof(T).IsPrimitive ? startValue.ToString() : JsonUtility.ToJson(startValue),
-                ToValue = typeof(T).IsPrimitive ? toValue.ToString() : JsonUtility.ToJson(toValue)
+                StartValue = type.IsPrimitive ? startValue.ToString() : JsonUtility.ToJson(startValue),
+                ToValue = type.IsPrimitive ? toValue.ToString() : JsonUtility.ToJson(toValue)
+            };
+        }
+        
+        public static AnimationPart SimplePart(object startValue, object toValue, float duration,
+            EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+        {
+            var type = startValue.GetType();
+            return new AnimationPart()
+            {
+                StartTime = 0f,
+                Duration = duration,
+                EaseType = easeType,
+                EaseFunction = easeFunction,
+                StartValue = type.IsPrimitive ? startValue.ToString() : JsonUtility.ToJson(startValue),
+                ToValue = type.IsPrimitive ? toValue.ToString() : JsonUtility.ToJson(toValue)
             };
         }
     }
