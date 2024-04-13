@@ -13,6 +13,11 @@ namespace Milease.Core
             internal int PlayIndex = 0;
             internal float Time = 0f;
 
+            public static MilSimpleAnimation Empty()
+            {
+                return new MilSimpleAnimation();
+            }
+            
             public MilSimpleAnimation Delayed(float time)
             {
                 foreach (var part in Collection[^1])
@@ -83,6 +88,12 @@ namespace Milease.Core
                     Reset();
                 }
                 Instance.Animations.Add(this);
+            }
+
+            public void Stop()
+            {
+                Reset();
+                Pause();
             }
         }
         
