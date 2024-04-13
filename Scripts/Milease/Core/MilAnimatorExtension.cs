@@ -11,13 +11,13 @@ namespace Milease.Core
 {
     public static class MilAnimatorExtension
     {
-        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, MileaseHandleFunction handleFunction, float duration, float delay = 0f, EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction, float duration, float delay = 0f, EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
         {
             var animation = new MilSimpleAnimator.MilSimpleAnimation();
-            var ani = MilAnimation.SimplePart(handleFunction, duration, delay, easeType, easeFunction);
+            var ani = MilAnimation.SimplePart(handleFunction, resetFunction, duration, delay, easeType, easeFunction);
             animation.Collection.Add(new List<MilAnimation.RuntimeAnimationPart>()
             {
-                new (target, ani, handleFunction)
+                new (target, ani, handleFunction, resetFunction)
             });
             return animation;
         }

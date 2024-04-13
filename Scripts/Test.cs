@@ -49,13 +49,16 @@ public class Test : MonoBehaviour
                 {
                     var text = o as TMP_Text;
                     text.text = $"Hide after {((1f - p) * 2f):F1}s...";
-                }, 2f, 0f, EaseUtility.EaseType.In, EaseUtility.EaseFunction.Linear)
+                }, null,2f, 0f, EaseUtility.EaseType.In, EaseUtility.EaseFunction.Linear)
             )
             .Then(
                 Text.Milease((o, _) =>
                 {
                     var go = (o as TMP_Text).gameObject;
                     go.SetActive(false);
+                }, (o, _) =>
+                {
+                    (o as TMP_Text).gameObject.SetActive(true);
                 }, 0f)
             )
             .Then(

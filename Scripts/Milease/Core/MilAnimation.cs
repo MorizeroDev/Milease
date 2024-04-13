@@ -21,6 +21,7 @@ namespace Milease.Core
             }
 
             public readonly MileaseHandleFunction HandleFunction;
+            public readonly MileaseHandleFunction ResetFunction;
             public readonly MemberInfo BindMember;
             public readonly MethodInfo AdditionOperator, SubtractionOperator, MultiplyOperator;
             public readonly ValueTypeEnum ValueType;
@@ -32,13 +33,15 @@ namespace Milease.Core
             public bool IsPrepared { get; private set; }
             public string MemberPath { get; private set; }
 
-            public RuntimeAnimationPart(object target, AnimationPart animation, MileaseHandleFunction handleFunction)
+            public RuntimeAnimationPart(object target, AnimationPart animation, MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction = null)
             {
                 HandleFunction = handleFunction;
                 Source = animation;
                 Target = target;
                 Valid = true;
+                ResetFunction = resetFunction;
                 ValueType = ValueTypeEnum.SelfHandle;
+                MemberPath = handleFunction.GetHashCode().ToString();
             }
 
             public bool Reset()
@@ -47,7 +50,18 @@ namespace Milease.Core
                 {
                     return false;
                 }
+                
                 IsPrepared = false;
+                if (ResetFunction != null)
+                {
+                    ResetFunction(Target, 0f);
+                    return true;
+                }
+                if (ValueType == ValueTypeEnum.SelfHandle)
+                {
+                    return true;
+                }
+                
                 if (BindMember.MemberType == MemberTypes.Field)
                 {
                     ((FieldInfo)BindMember).SetValue(Target, OriginalValue);
@@ -154,26 +168,30 @@ namespace Milease.Core
 
             public static void SetValue(RuntimeAnimationPart ani, float pro)
             {
+                if (!ani.IsPrepared)
+                {
+                    ani.IsPrepared = true;
+                    if (ani.ValueType != ValueTypeEnum.SelfHandle)
+                    {
+                        ani.OriginalValue = ani.BindMember.MemberType switch
+                        {
+                            MemberTypes.Field => ((FieldInfo)ani.BindMember).GetValue(ani.Target),
+                            MemberTypes.Property => ((PropertyInfo)ani.BindMember).GetValue(ani.Target),
+                            _ => null
+                        };
+                        if (ani.Source.PendingTo)
+                        {
+                            ani.StartValue = ani.OriginalValue;
+                        }
+                    }
+                }
+                
                 if (ani.ValueType == ValueTypeEnum.SelfHandle)
                 {
                     ani.HandleFunction(ani.Target, pro);
                     return;
                 }
-
-                if (!ani.IsPrepared)
-                {
-                    ani.IsPrepared = true;
-                    ani.OriginalValue = ani.BindMember.MemberType switch
-                    {
-                        MemberTypes.Field => ((FieldInfo)ani.BindMember).GetValue(ani.Target),
-                        MemberTypes.Property => ((PropertyInfo)ani.BindMember).GetValue(ani.Target),
-                        _ => null
-                    };
-                    if (ani.Source.PendingTo)
-                    {
-                        ani.StartValue = ani.OriginalValue;
-                    }
-                }
+                
                 var result = ani.ValueType switch
                 {
                     ValueTypeEnum.PrimitiveType => Convert.ChangeType((double)ani.StartValue + ((double)ani.ToValue - (double)ani.StartValue) * pro, ani.ValueTypeInfo),
@@ -281,7 +299,7 @@ namespace Milease.Core
             };
         }
         
-        internal static AnimationPart SimplePart(MileaseHandleFunction handleFunction, float duration, float delay = 0f,
+        internal static AnimationPart SimplePart(MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction, float duration, float delay = 0f,
             EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
         {
             return new AnimationPart()

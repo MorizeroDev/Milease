@@ -72,6 +72,16 @@ namespace Milease.Core
 
             public void Start()
             {
+                if (Instance.Animations.Contains(this))
+                {
+                    Reset();
+                    return;
+                }
+
+                if (PlayIndex >= Collection.Count)
+                {
+                    Reset();
+                }
                 Instance.Animations.Add(this);
             }
         }
