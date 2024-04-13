@@ -11,22 +11,26 @@ namespace Milease.Core
 {
     public static class MilAnimatorExtension
     {
-        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, string memberName, object toValue, float duration, float delay = 0f, EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, MileaseHandleFunction handleFunction, float duration, float delay = 0f, EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+        {
+            var animation = new MilSimpleAnimator.MilSimpleAnimation();
+            var ani = MilAnimation.SimplePart(handleFunction, duration, delay, easeType, easeFunction);
+            animation.Collection.Add(new List<MilAnimation.RuntimeAnimationPart>()
+            {
+                new (target, ani, handleFunction)
+            });
+            MilSimpleAnimator.Instance.Animations.Add(animation);
+            return animation;
+        }
+        
+        public static MilSimpleAnimator.MilSimpleAnimation MileaseTo(this object target, string memberName, object toValue, float duration, float delay = 0f, EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
         {
             var animation = new MilSimpleAnimator.MilSimpleAnimation();
             var type = target.GetType();
             var info = type.GetMember(memberName)[0];
-            var ani = MilAnimation.SimplePart(toValue, duration, delay, easeType, easeFunction);
-            var startValue = info.MemberType switch
-            {
-                MemberTypes.Field => ((FieldInfo)info).GetValue(target),
-                MemberTypes.Property => ((PropertyInfo)info).GetValue(target),
-                _ => 0
-            };
-            ani.StartValue = type.IsPrimitive ? startValue.ToString() : JsonUtility.ToJson(startValue);
             animation.Collection.Add(new List<MilAnimation.RuntimeAnimationPart>()
             {
-                new (target, ani, info.MemberType switch
+                new (target, MilAnimation.SimplePartTo(toValue, duration, delay, easeType, easeFunction), info.MemberType switch
                 {
                     MemberTypes.Field => ((FieldInfo)info).FieldType,
                     MemberTypes.Property => ((PropertyInfo)info).PropertyType,

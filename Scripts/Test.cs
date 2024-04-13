@@ -10,6 +10,7 @@ public class Test : MonoBehaviour
     public TMP_Text Text;
     void Start()
     {
+        var animator =
         transform.Milease(nameof(transform.position),
                 new Vector3(0f, 0f, 0f), new Vector3(1f, 1f, 0f),
                 1f)
@@ -27,10 +28,21 @@ public class Test : MonoBehaviour
                 Text.Milease(nameof(Text.text), "Start!", "Finish!", 1f)
             )
             .Then(
-                Text.Milease(nameof(Text.text), "Hide After 2s...")
+                Text.Milease((o, p) =>
+                {
+                    var text = o as TMP_Text;
+                    text.text = $"Hide after {((1f - p) * 2f):F1}s...";
+                }, 2f, 0f, EaseUtility.EaseType.In, EaseUtility.EaseFunction.Linear)
             )
             .Then(
-                Text.Milease(nameof(Text.text), "Hide After 2s...")
-            ).Delayed(2f);
+                Text.Milease((o, _) =>
+                {
+                    var go = (o as TMP_Text).gameObject;
+                    go.SetActive(false);
+                }, 0f)
+            )
+            .Then(
+                transform.MileaseTo(nameof(transform.position), new Vector3(0f, 0f, 0f), 1f)
+            );
     }
 }

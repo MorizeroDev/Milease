@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Milease.Utils;
 using UnityEngine;
 using Object = System.Object;
 
 namespace Milease.Core
 {
+    public delegate void MileaseHandleFunction(object target, float progress);
     [CreateAssetMenu(menuName = "Milease/New MilAnimation", fileName = "New MilAnimation")]
     public class MilAnimation : ScriptableObject
     {
@@ -15,17 +17,29 @@ namespace Milease.Core
         {
             public enum ValueTypeEnum
             {
-                PrimitiveType, CustomType, Other
+                PrimitiveType, CustomType, Other, SelfHandle
             }
+
+            public readonly MileaseHandleFunction HandleFunction;
             public readonly MemberInfo BindMember;
             public readonly MethodInfo AdditionOperator, SubtractionOperator, MultiplyOperator;
             public readonly ValueTypeEnum ValueType;
             public readonly Type ValueTypeInfo;
             public readonly bool Valid;
-            public readonly object StartValue, ToValue;
+            public object StartValue, ToValue;
             public readonly object Target;
             public readonly AnimationPart Source;
+            public bool ConfirmedStart = false;
 
+            public RuntimeAnimationPart(object target, AnimationPart animation, MileaseHandleFunction handleFunction)
+            {
+                HandleFunction = handleFunction;
+                Source = animation;
+                Target = target;
+                Valid = true;
+                ValueType = ValueTypeEnum.SelfHandle;
+            }
+            
             public RuntimeAnimationPart(object target, AnimationPart animation, Type baseType, MemberInfo memberInfo = null)
             {
                 Source = animation;
@@ -73,7 +87,14 @@ namespace Milease.Core
                 
                 ValueTypeInfo = curType;
 
-                if (curType!.IsPrimitive)
+                if (curType == typeof(string))
+                {
+                    StartValue = animation.StartValue;
+                    ToValue = animation.ToValue;
+                    ValueType = ValueTypeEnum.Other;
+                    return;
+                }
+                else if (curType!.IsPrimitive)
                 {
                     StartValue = double.Parse(animation.StartValue);
                     ToValue = double.Parse(animation.ToValue);
@@ -110,6 +131,22 @@ namespace Milease.Core
 
             public static void SetValue(RuntimeAnimationPart ani, float pro)
             {
+                if (ani.ValueType == ValueTypeEnum.SelfHandle)
+                {
+                    ani.HandleFunction(ani.Target, pro);
+                    return;
+                }
+
+                if (ani.Source.PendingTo && !ani.ConfirmedStart)
+                {
+                    ani.ConfirmedStart = true;
+                    ani.StartValue = ani.BindMember.MemberType switch
+                    {
+                        MemberTypes.Field => ((FieldInfo)ani.BindMember).GetValue(ani.Target),
+                        MemberTypes.Property => ((PropertyInfo)ani.BindMember).GetValue(ani.Target),
+                        _ => null
+                    };
+                }
                 var result = ani.ValueType switch
                 {
                     ValueTypeEnum.PrimitiveType => Convert.ChangeType((double)ani.StartValue + ((double)ani.ToValue - (double)ani.StartValue) * pro, ani.ValueTypeInfo),
@@ -151,6 +188,7 @@ namespace Milease.Core
             public List<string> Binding;
             public string StartValue;
             public string ToValue;
+            public bool PendingTo = false;
         }
         [HideInInspector]
         public List<AnimationPart> Parts;
@@ -171,7 +209,7 @@ namespace Milease.Core
             };
         }
         
-        public static AnimationPart SimplePart(object toValue, float duration, float delay = 0f,
+        public static AnimationPart SimplePartTo(object toValue, float duration, float delay = 0f,
             EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
         {
             var type = toValue.GetType();
@@ -181,7 +219,8 @@ namespace Milease.Core
                 Duration = duration,
                 EaseType = easeType,
                 EaseFunction = easeFunction,
-                ToValue = type.IsPrimitive ? toValue.ToString() : JsonUtility.ToJson(toValue)
+                ToValue = type.IsPrimitive ? toValue.ToString() : JsonUtility.ToJson(toValue),
+                PendingTo = true
             };
         }
         
@@ -195,8 +234,8 @@ namespace Milease.Core
                 Duration = 0f,
                 EaseType = easeType,
                 EaseFunction = easeFunction,
-                StartValue = type.IsPrimitive ? startValue.ToString() : JsonUtility.ToJson(startValue),
-                ToValue = type.IsPrimitive ? startValue.ToString() : JsonUtility.ToJson(startValue)
+                StartValue = type.IsPrimitive || type == typeof(string) ? startValue.ToString() : JsonUtility.ToJson(startValue),
+                ToValue = type.IsPrimitive || type == typeof(string) ? startValue.ToString() : JsonUtility.ToJson(startValue)
             };
         }
         
@@ -210,8 +249,20 @@ namespace Milease.Core
                 Duration = duration,
                 EaseType = easeType,
                 EaseFunction = easeFunction,
-                StartValue = type.IsPrimitive ? startValue.ToString() : JsonUtility.ToJson(startValue),
-                ToValue = type.IsPrimitive ? toValue.ToString() : JsonUtility.ToJson(toValue)
+                StartValue = type.IsPrimitive || type == typeof(string) ? startValue.ToString() : JsonUtility.ToJson(startValue),
+                ToValue = type.IsPrimitive || type == typeof(string) ? toValue.ToString() : JsonUtility.ToJson(toValue)
+            };
+        }
+        
+        internal static AnimationPart SimplePart(MileaseHandleFunction handleFunction, float duration, float delay = 0f,
+            EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+        {
+            return new AnimationPart()
+            {
+                StartTime = delay,
+                Duration = duration,
+                EaseType = easeType,
+                EaseFunction = easeFunction
             };
         }
     }

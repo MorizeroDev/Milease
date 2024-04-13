@@ -51,6 +51,13 @@ namespace Milease.Core
             {
                 Time = 0f;
                 PlayIndex = 0;
+                foreach (var collection in Collection)
+                {
+                    foreach (var ani in collection)
+                    {
+                        ani.ConfirmedStart = false;
+                    }
+                }
                 Instance.Animations.Remove(this);
                 Instance.Animations.Add(this);
             }
@@ -83,11 +90,14 @@ namespace Milease.Core
                 for (var j = 0; j < cCnt; j++)
                 {
                     var ani = collection[j];
+                    var pro = 1f;
+                    if (ani.Source.Duration > 0f)
+                    {
+                        pro = Mathf.Clamp((set.Time - ani.Source.StartTime) / ani.Source.Duration, 0f, 1f);
+                    }
                     MilAnimation.RuntimeAnimationPart.SetValue(
                         ani, 
-                        EaseUtility.GetEasedProgress(
-                            Mathf.Clamp(set.Time - ani.Source.StartTime, 0f, 1f), 
-                            ani.Source.EaseType, ani.Source.EaseFunction)
+                        EaseUtility.GetEasedProgress(pro, ani.Source.EaseType, ani.Source.EaseFunction)
                         );
                     latestTime = Mathf.Max(latestTime, ani.Source.StartTime + ani.Source.Duration);
                 }
@@ -96,13 +106,17 @@ namespace Milease.Core
                 {
                     set.Time -= latestTime;
                     set.PlayIndex++;
-                }
-                
-                if (set.PlayIndex >= set.Collection.Count)
-                {
-                    Animations.RemoveAt(i);
-                    i--;
-                    cnt--;
+                    if (set.PlayIndex >= set.Collection.Count)
+                    {
+                        Animations.RemoveAt(i);
+                        i--;
+                        cnt--;
+                    }
+                    else
+                    {
+                        i--;
+                        continue;
+                    }
                 }
             }
         }
