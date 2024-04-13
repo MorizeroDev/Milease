@@ -171,13 +171,42 @@ namespace Milease.Core
             };
         }
         
-        public static AnimationPart SimplePart(object startValue, object toValue, float duration,
+        public static AnimationPart SimplePart(object toValue, float duration, float delay = 0f,
+            EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+        {
+            var type = toValue.GetType();
+            return new AnimationPart()
+            {
+                StartTime = delay,
+                Duration = duration,
+                EaseType = easeType,
+                EaseFunction = easeFunction,
+                ToValue = type.IsPrimitive ? toValue.ToString() : JsonUtility.ToJson(toValue)
+            };
+        }
+        
+        public static AnimationPart SimplePart(object startValue, float delay = 0f,
             EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
         {
             var type = startValue.GetType();
             return new AnimationPart()
             {
-                StartTime = 0f,
+                StartTime = delay,
+                Duration = 0f,
+                EaseType = easeType,
+                EaseFunction = easeFunction,
+                StartValue = type.IsPrimitive ? startValue.ToString() : JsonUtility.ToJson(startValue),
+                ToValue = type.IsPrimitive ? startValue.ToString() : JsonUtility.ToJson(startValue)
+            };
+        }
+        
+        public static AnimationPart SimplePart(object startValue, object toValue, float duration, float delay = 0f,
+            EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+        {
+            var type = startValue.GetType();
+            return new AnimationPart()
+            {
+                StartTime = delay,
                 Duration = duration,
                 EaseType = easeType,
                 EaseFunction = easeFunction,
