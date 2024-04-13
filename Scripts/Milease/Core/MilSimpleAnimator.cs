@@ -31,8 +31,7 @@ namespace Milease.Core
                         Collection[^1].Add(ani);
                     }
                 }
-
-                Instance.Animations.Remove(animation);
+                
                 return this;
             }
             
@@ -42,23 +41,37 @@ namespace Milease.Core
                 {
                     Collection.Add(part);
                 }
-
-                Instance.Animations.Remove(animation);
+                
                 return this;
             }
 
-            public void Restart()
+            public void Reset()
             {
                 Time = 0f;
-                PlayIndex = 0;
-                foreach (var collection in Collection)
+                var paths = new List<string>();
+                var cnt = Collection.Count;
+                for (var i = 0; i <= Math.Min(PlayIndex, cnt - 1); i++)
                 {
-                    foreach (var ani in collection)
+                    foreach (var ani in Collection[i])
                     {
-                        ani.ConfirmedStart = false;
+                        if (paths.Contains(ani.MemberPath))
+                            continue;
+                        if (ani.Reset())
+                        {
+                            paths.Add(ani.MemberPath);
+                        }
                     }
                 }
+                PlayIndex = 0;
+            }
+
+            public void Pause()
+            {
                 Instance.Animations.Remove(this);
+            }
+
+            public void Start()
+            {
                 Instance.Animations.Add(this);
             }
         }

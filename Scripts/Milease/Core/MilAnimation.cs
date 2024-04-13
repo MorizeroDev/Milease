@@ -26,10 +26,11 @@ namespace Milease.Core
             public readonly ValueTypeEnum ValueType;
             public readonly Type ValueTypeInfo;
             public readonly bool Valid;
-            public object StartValue, ToValue;
+            public object StartValue, ToValue, OriginalValue;
             public readonly object Target;
             public readonly AnimationPart Source;
-            public bool ConfirmedStart = false;
+            public bool IsPrepared { get; private set; }
+            public string MemberPath { get; private set; }
 
             public RuntimeAnimationPart(object target, AnimationPart animation, MileaseHandleFunction handleFunction)
             {
@@ -38,6 +39,25 @@ namespace Milease.Core
                 Target = target;
                 Valid = true;
                 ValueType = ValueTypeEnum.SelfHandle;
+            }
+
+            public bool Reset()
+            {
+                if (!IsPrepared)
+                {
+                    return false;
+                }
+                IsPrepared = false;
+                if (BindMember.MemberType == MemberTypes.Field)
+                {
+                    ((FieldInfo)BindMember).SetValue(Target, OriginalValue);
+                }
+                else
+                {
+                    ((PropertyInfo)BindMember).SetValue(Target, OriginalValue);
+                }
+
+                return true;
             }
             
             public RuntimeAnimationPart(object target, AnimationPart animation, Type baseType, MemberInfo memberInfo = null)
@@ -48,7 +68,12 @@ namespace Milease.Core
                 if (memberInfo != null)
                 {
                     BindMember = memberInfo;
+                    MemberPath = memberInfo.Name + target.GetHashCode();
                     goto skip_seek_member;
+                }
+                else
+                {
+                    MemberPath = string.Join('.', animation.Binding);
                 }
                 
                 for (var i = 0; i < animation.Binding.Count; i++)
@@ -82,9 +107,7 @@ namespace Milease.Core
                 skip_seek_member:
 
                 Target = target;
-
                 Valid = true;
-                
                 ValueTypeInfo = curType;
 
                 if (curType == typeof(string))
@@ -137,15 +160,19 @@ namespace Milease.Core
                     return;
                 }
 
-                if (ani.Source.PendingTo && !ani.ConfirmedStart)
+                if (!ani.IsPrepared)
                 {
-                    ani.ConfirmedStart = true;
-                    ani.StartValue = ani.BindMember.MemberType switch
+                    ani.IsPrepared = true;
+                    ani.OriginalValue = ani.BindMember.MemberType switch
                     {
                         MemberTypes.Field => ((FieldInfo)ani.BindMember).GetValue(ani.Target),
                         MemberTypes.Property => ((PropertyInfo)ani.BindMember).GetValue(ani.Target),
                         _ => null
                     };
+                    if (ani.Source.PendingTo)
+                    {
+                        ani.StartValue = ani.OriginalValue;
+                    }
                 }
                 var result = ani.ValueType switch
                 {

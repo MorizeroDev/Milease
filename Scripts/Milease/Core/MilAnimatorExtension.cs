@@ -19,7 +19,6 @@ namespace Milease.Core
             {
                 new (target, ani, handleFunction)
             });
-            MilSimpleAnimator.Instance.Animations.Add(animation);
             return animation;
         }
         
@@ -37,7 +36,6 @@ namespace Milease.Core
                     _ => null
                 }, info)
             });
-            MilSimpleAnimator.Instance.Animations.Add(animation);
             return animation;
         }
         
@@ -55,7 +53,6 @@ namespace Milease.Core
                     _ => null
                 }, info)
             });
-            MilSimpleAnimator.Instance.Animations.Add(animation);
             return animation;
         }
         
@@ -73,7 +70,6 @@ namespace Milease.Core
                     _ => null
                 }, info)
             });
-            MilSimpleAnimator.Instance.Animations.Add(animation);
             return animation;
         }
         
@@ -92,7 +88,6 @@ namespace Milease.Core
                         }, info)
                     ).ToList()
                 );
-            MilSimpleAnimator.Instance.Animations.Add(animation);
             return animation;
         }
     }

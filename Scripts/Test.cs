@@ -8,9 +8,26 @@ using UnityEngine;
 public class Test : MonoBehaviour
 {
     public TMP_Text Text;
+    private MilSimpleAnimator.MilSimpleAnimation Animation;
+
+    public void PauseAnimation()
+    {
+        Animation.Pause();
+    }
+
+    public void ResetAnimation()
+    {
+        Animation.Reset();
+    }
+
+    public void PlayAnimation()
+    {
+        Animation.Start();
+    }
+    
     void Start()
     {
-        var animator =
+        Animation =
         transform.Milease(nameof(transform.position),
                 new Vector3(0f, 0f, 0f), new Vector3(1f, 1f, 0f),
                 1f)
