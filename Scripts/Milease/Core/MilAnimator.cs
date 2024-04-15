@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Milease;
 using Milease.Core;
 using Milease.Utils;
 using UnityEditor;
@@ -17,10 +18,10 @@ public class MilAnimator : MonoBehaviour
     {
         ani = MilAnimation.Part("transform.position",
             new Vector3(0, 0, 0), new Vector3(0, -2.5f, 0),
-            0f, 1f, EaseUtility.EaseType.In, EaseUtility.EaseFunction.Back);
+            0f, 1f, EaseType.In, EaseFunction.Back);
         ani = MilAnimation.Part("testValue",
             0f, 100f,
-            0f, 1f, EaseUtility.EaseType.In, EaseUtility.EaseFunction.Back);
+            0f, 1f, EaseType.In, EaseFunction.Back);
         test = new MilAnimation.RuntimeAnimationPart(TestObject, ani, typeof(MilAnimator));
     }
     

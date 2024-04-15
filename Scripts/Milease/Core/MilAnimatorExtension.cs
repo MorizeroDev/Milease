@@ -11,7 +11,7 @@ namespace Milease.Core
 {
     public static class MilAnimatorExtension
     {
-        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction, float duration, float delay = 0f, EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction, float duration, float delay = 0f, EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
         {
             var animation = new MilSimpleAnimator.MilSimpleAnimation();
             var ani = MilAnimation.SimplePart(handleFunction, resetFunction, duration, delay, easeType, easeFunction);
@@ -22,7 +22,7 @@ namespace Milease.Core
             return animation;
         }
         
-        public static MilSimpleAnimator.MilSimpleAnimation MileaseTo(this object target, string memberName, object toValue, float duration, float delay = 0f, EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+        public static MilSimpleAnimator.MilSimpleAnimation MileaseTo(this object target, string memberName, object toValue, float duration, float delay = 0f, EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
         {
             var animation = new MilSimpleAnimator.MilSimpleAnimation();
             var type = target.GetType();
@@ -39,7 +39,7 @@ namespace Milease.Core
             return animation;
         }
         
-        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, string memberName, object startValue, float delay = 0f, EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, string memberName, object startValue, float delay = 0f, EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
         {
             var animation = new MilSimpleAnimator.MilSimpleAnimation();
             var type = target.GetType();
@@ -56,7 +56,7 @@ namespace Milease.Core
             return animation;
         }
         
-        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, string memberName, object startValue, object toValue, float duration, float delay = 0f, EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, string memberName, object startValue, object toValue, float duration, float delay = 0f, EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
         {
             var animation = new MilSimpleAnimator.MilSimpleAnimation();
             var type = target.GetType();

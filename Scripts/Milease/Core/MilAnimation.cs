@@ -227,8 +227,8 @@ namespace Milease.Core
         {
             public float StartTime;
             public float Duration;
-            public EaseUtility.EaseType EaseType;
-            public EaseUtility.EaseFunction EaseFunction;
+            public EaseType EaseType;
+            public EaseFunction EaseFunction;
             public AnimationCurve CustomCurve;
             public List<string> Binding;
             public string StartValue;
@@ -239,7 +239,7 @@ namespace Milease.Core
         public List<AnimationPart> Parts;
 
         public static AnimationPart Part(string binding, object startValue, object toValue, float startTime, float duration,
-            EaseUtility.EaseType easeType, EaseUtility.EaseFunction easeFunction)
+            EaseType easeType, EaseFunction easeFunction)
         {
             var type = startValue.GetType();
             return new AnimationPart()
@@ -255,7 +255,7 @@ namespace Milease.Core
         }
         
         public static AnimationPart SimplePartTo(object toValue, float duration, float delay = 0f,
-            EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+            EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
         {
             var type = toValue.GetType();
             return new AnimationPart()
@@ -270,7 +270,7 @@ namespace Milease.Core
         }
         
         public static AnimationPart SimplePart(object startValue, float delay = 0f,
-            EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+            EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
         {
             var type = startValue.GetType();
             return new AnimationPart()
@@ -285,7 +285,7 @@ namespace Milease.Core
         }
         
         public static AnimationPart SimplePart(object startValue, object toValue, float duration, float delay = 0f,
-            EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+            EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
         {
             var type = startValue.GetType();
             return new AnimationPart()
@@ -300,7 +300,7 @@ namespace Milease.Core
         }
         
         internal static AnimationPart SimplePart(MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction, float duration, float delay = 0f,
-            EaseUtility.EaseType easeType = EaseUtility.EaseType.In, EaseUtility.EaseFunction easeFunction = EaseUtility.EaseFunction.Quad)
+            EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
         {
             return new AnimationPart()
             {

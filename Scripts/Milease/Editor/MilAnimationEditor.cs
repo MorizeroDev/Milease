@@ -20,8 +20,8 @@ namespace Milease.Editor
         private float boxHeight = 20f; // 矩形高度
         private float timeInterval = 0.1f; // 时间刻度间隔
 
-        private EaseUtility.EaseType easeType;
-        private EaseUtility.EaseFunction easeFunction;
+        private EaseType easeType;
+        private EaseFunction easeFunction;
 
         private MilAnimation editingAnimation;
 
@@ -152,9 +152,9 @@ namespace Milease.Editor
                 GUILayout.BeginVertical();
                 {
                     EditorGUILayout.LabelField("Ease Type");
-                    easeType = (EaseUtility.EaseType)EditorGUILayout.EnumPopup(easeType);
+                    easeType = (EaseType)EditorGUILayout.EnumPopup(easeType);
                     EditorGUILayout.LabelField("Ease Function");
-                    easeFunction = (EaseUtility.EaseFunction)EditorGUILayout.EnumPopup(easeFunction);
+                    easeFunction = (EaseFunction)EditorGUILayout.EnumPopup(easeFunction);
                 }
                 GUILayout.EndVertical();
 
