@@ -11,7 +11,7 @@ public class MilAnimator : MonoBehaviour
 {
     public Object TestObject;
     private MilAnimation.AnimationPart ani;
-    private MilAnimation.RuntimeAnimationPart test;
+    private RuntimeAnimationPart test;
     private float time = 0f;
     public float testValue;
     void Start()
@@ -22,7 +22,7 @@ public class MilAnimator : MonoBehaviour
         ani = MilAnimation.Part("testValue",
             0f, 100f,
             0f, 1f, EaseFunction.Back);
-        test = new MilAnimation.RuntimeAnimationPart(TestObject, ani, typeof(MilAnimator));
+        test = new RuntimeAnimationPart(TestObject, ani, typeof(MilAnimator));
     }
     
     void Update()
@@ -32,6 +32,6 @@ public class MilAnimator : MonoBehaviour
         {
             time -= 1f;
         }
-        MilAnimation.RuntimeAnimationPart.SetValue(test, EaseUtility.GetEasedProgress(time, ani.EaseType, ani.EaseFunction));
+        RuntimeAnimationPart.SetValue(test, EaseUtility.GetEasedProgress(time, ani.EaseType, ani.EaseFunction));
     }
 }

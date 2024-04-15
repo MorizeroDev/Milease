@@ -9,7 +9,7 @@ using UnityEngine;
 public class Test : MonoBehaviour
 {
     public TMP_Text Text;
-    private MilSimpleAnimator.MilSimpleAnimation Animation;
+    private MilSimpleAnimation Animation;
 
     public void PauseAnimation()
     {
