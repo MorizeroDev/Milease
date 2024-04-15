@@ -239,7 +239,7 @@ namespace Milease.Core
         public List<AnimationPart> Parts;
 
         public static AnimationPart Part(string binding, object startValue, object toValue, float startTime, float duration,
-            EaseType easeType, EaseFunction easeFunction)
+            EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In)
         {
             var type = startValue.GetType();
             return new AnimationPart()
@@ -255,7 +255,7 @@ namespace Milease.Core
         }
         
         public static AnimationPart SimplePartTo(object toValue, float duration, float delay = 0f,
-            EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
+            EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In)
         {
             var type = toValue.GetType();
             return new AnimationPart()
@@ -270,7 +270,7 @@ namespace Milease.Core
         }
         
         public static AnimationPart SimplePart(object startValue, float delay = 0f,
-            EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
+            EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In)
         {
             var type = startValue.GetType();
             return new AnimationPart()
@@ -285,7 +285,7 @@ namespace Milease.Core
         }
         
         public static AnimationPart SimplePart(object startValue, object toValue, float duration, float delay = 0f,
-            EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
+            EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In)
         {
             var type = startValue.GetType();
             return new AnimationPart()
@@ -300,7 +300,7 @@ namespace Milease.Core
         }
         
         internal static AnimationPart SimplePart(MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction, float duration, float delay = 0f,
-            EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
+            EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In)
         {
             return new AnimationPart()
             {

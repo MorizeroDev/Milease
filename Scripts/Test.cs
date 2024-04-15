@@ -40,7 +40,7 @@ public class Test : MonoBehaviour
             .Then(
                 transform.Milease(nameof(transform.localScale),
                     new Vector3(1f, 1f, 1f), new Vector3(2f, 2f, 2f),
-                    1f, 0f, EaseType.In, EaseFunction.Bounce)
+                    1f, 0f, EaseFunction.Bounce)
             ).Delayed(1f)
             .Then(
                 Text.Milease(nameof(Text.text), "Start!", "Finish!", 1f)
@@ -50,7 +50,7 @@ public class Test : MonoBehaviour
                 {
                     var text = o as TMP_Text;
                     text.text = $"Hide after {((1f - p) * 2f):F1}s...";
-                }, null,2f, 0f, EaseType.In, EaseFunction.Linear)
+                }, null,2f, 0f, EaseFunction.Linear)
             )
             .Then(
                 Text.Milease((o, _) =>

@@ -11,10 +11,10 @@ namespace Milease.Core
 {
     public static class MilAnimatorExtension
     {
-        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction, float duration, float delay = 0f, EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
+        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction, float duration, float delay = 0f, EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In)
         {
             var animation = new MilSimpleAnimator.MilSimpleAnimation();
-            var ani = MilAnimation.SimplePart(handleFunction, resetFunction, duration, delay, easeType, easeFunction);
+            var ani = MilAnimation.SimplePart(handleFunction, resetFunction, duration, delay, easeFunction, easeType);
             animation.Collection.Add(new List<MilAnimation.RuntimeAnimationPart>()
             {
                 new (target, ani, handleFunction, resetFunction)
@@ -22,14 +22,14 @@ namespace Milease.Core
             return animation;
         }
         
-        public static MilSimpleAnimator.MilSimpleAnimation MileaseTo(this object target, string memberName, object toValue, float duration, float delay = 0f, EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
+        public static MilSimpleAnimator.MilSimpleAnimation MileaseTo(this object target, string memberName, object toValue, float duration, float delay = 0f, EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In)
         {
             var animation = new MilSimpleAnimator.MilSimpleAnimation();
             var type = target.GetType();
             var info = type.GetMember(memberName)[0];
             animation.Collection.Add(new List<MilAnimation.RuntimeAnimationPart>()
             {
-                new (target, MilAnimation.SimplePartTo(toValue, duration, delay, easeType, easeFunction), info.MemberType switch
+                new (target, MilAnimation.SimplePartTo(toValue, duration, delay, easeFunction, easeType), info.MemberType switch
                 {
                     MemberTypes.Field => ((FieldInfo)info).FieldType,
                     MemberTypes.Property => ((PropertyInfo)info).PropertyType,
@@ -39,14 +39,14 @@ namespace Milease.Core
             return animation;
         }
         
-        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, string memberName, object startValue, float delay = 0f, EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
+        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, string memberName, object startValue, float delay = 0f, EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In)
         {
             var animation = new MilSimpleAnimator.MilSimpleAnimation();
             var type = target.GetType();
             var info = type.GetMember(memberName)[0];
             animation.Collection.Add(new List<MilAnimation.RuntimeAnimationPart>()
             {
-                new (target, MilAnimation.SimplePart(startValue, delay, easeType, easeFunction), info.MemberType switch
+                new (target, MilAnimation.SimplePart(startValue, delay, easeFunction, easeType), info.MemberType switch
                 {
                     MemberTypes.Field => ((FieldInfo)info).FieldType,
                     MemberTypes.Property => ((PropertyInfo)info).PropertyType,
@@ -56,14 +56,14 @@ namespace Milease.Core
             return animation;
         }
         
-        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, string memberName, object startValue, object toValue, float duration, float delay = 0f, EaseType easeType = EaseType.In, EaseFunction easeFunction = EaseFunction.Quad)
+        public static MilSimpleAnimator.MilSimpleAnimation Milease(this object target, string memberName, object startValue, object toValue, float duration, float delay = 0f, EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In)
         {
             var animation = new MilSimpleAnimator.MilSimpleAnimation();
             var type = target.GetType();
             var info = type.GetMember(memberName)[0];
             animation.Collection.Add(new List<MilAnimation.RuntimeAnimationPart>()
             {
-                new (target, MilAnimation.SimplePart(startValue, toValue, duration, delay, easeType, easeFunction), info.MemberType switch
+                new (target, MilAnimation.SimplePart(startValue, toValue, duration, delay, easeFunction, easeType), info.MemberType switch
                 {
                     MemberTypes.Field => ((FieldInfo)info).FieldType,
                     MemberTypes.Property => ((PropertyInfo)info).PropertyType,
