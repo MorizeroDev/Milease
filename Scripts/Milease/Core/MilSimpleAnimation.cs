@@ -63,6 +63,13 @@ namespace Milease.Core
                     }
                 }
             }
+            for (var i = 0; i < cnt; i++)
+            {
+                foreach (var ani in Collection[i])
+                {
+                    ani.ResetAnimation();
+                }
+            }
             PlayIndex = 0;
         }
 

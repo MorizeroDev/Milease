@@ -26,6 +26,8 @@ namespace Milease.Core
         public bool IsPrepared { get; private set; }
         public string MemberPath { get; private set; }
 
+        private float lastProgress = -1f;
+
         public RuntimeAnimationPart(object target, MilAnimation.AnimationPart animation, MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction = null)
         {
             HandleFunction = handleFunction;
@@ -37,6 +39,17 @@ namespace Milease.Core
             MemberPath = handleFunction.GetHashCode().ToString();
         }
 
+        internal void ResetAnimation()
+        {
+            if (!IsPrepared)
+            {
+                return;
+            }
+            
+            IsPrepared = false;
+            lastProgress = -1f;
+        }
+        
         public bool Reset()
         {
             if (!IsPrepared)
@@ -44,7 +57,6 @@ namespace Milease.Core
                 return false;
             }
             
-            IsPrepared = false;
             if (ResetFunction != null)
             {
                 ResetFunction(Target, 0f);
@@ -162,6 +174,13 @@ namespace Milease.Core
 
         public static void SetValue(RuntimeAnimationPart ani, float pro)
         {
+            if (pro == ani.lastProgress)
+            {
+                return;
+            }
+
+            ani.lastProgress = pro;
+            
             if (!ani.IsPrepared)
             {
                 ani.IsPrepared = true;
