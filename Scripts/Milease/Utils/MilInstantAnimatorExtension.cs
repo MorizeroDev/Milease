@@ -10,7 +10,7 @@ using Debug = UnityEngine.Debug;
 
 namespace Milease.Utils
 {
-    public static class MilAnimatorExtension
+    public static class MilInstantAnimatorExtension
     {
         public static MilInstantAnimator MileaseAdditive(this object target, MileaseHandleFunction handleFunction,
             MileaseHandleFunction resetFunction, float duration, float delay = 0f,

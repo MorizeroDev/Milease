@@ -8,11 +8,6 @@ namespace Milease.Core
 {
     public class RuntimeAnimationPart
     {
-        public enum ValueTypeEnum
-        {
-            PrimitiveType, CustomType, Other, SelfHandle
-        }
-
         public readonly MileaseHandleFunction HandleFunction;
         public readonly MileaseHandleFunction ResetFunction;
         public readonly MemberInfo BindMember;

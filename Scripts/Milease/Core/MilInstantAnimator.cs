@@ -75,12 +75,12 @@ namespace Milease.Core
 
         public void Pause()
         {
-            MilAnimatorManager.Instance.Animations.Remove(this);
+            MilInstantAnimatorManager.Instance.Animations.Remove(this);
         }
 
-        public void Start()
+        public void Play()
         {
-            if (MilAnimatorManager.Instance.Animations.Contains(this))
+            if (MilInstantAnimatorManager.Instance.Animations.Contains(this))
             {
                 Reset();
                 return;
@@ -90,7 +90,7 @@ namespace Milease.Core
             {
                 Reset();
             }
-            MilAnimatorManager.Instance.Animations.Add(this);
+            MilInstantAnimatorManager.Instance.Animations.Add(this);
         }
 
         public void Stop()

@@ -10,7 +10,7 @@ public class Test : MonoBehaviour
 {
     public TMP_Text Text;
     private MilInstantAnimator Animation;
-
+    
     public void PauseAnimation()
     {
         Animation.Pause();
@@ -23,7 +23,7 @@ public class Test : MonoBehaviour
 
     public void PlayAnimation()
     {
-        Animation.Start();
+        Animation.Play();
     }
     
     void Start()

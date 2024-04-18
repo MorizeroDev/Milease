@@ -12,30 +12,35 @@ using UnityEngine.UI;
 public class TestButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     public RectTransform Arrow, Content, Wave;
-    private MilInstantAnimator PointerEnter, PointerExit, PointerClick;
+    private MilStateAnimator animator;
+    private MilInstantAnimator waveAnimator;
+
+    private enum State
+    {
+        Default, Hover
+    }
 
     private void Awake()
     {
-        PointerEnter =
-            Content.MileaseAdditive(nameof(Content.anchoredPosition),
-                Vector2.zero, new Vector2(-25, 0),
-                0.5f, 0f, EaseFunction.Back, EaseType.Out)
-            .While(
-                Arrow.GetComponent<TMP_Text>().Milease("color",
-                    new Color(1f, 1f, 1f, 0f), new Color(1f, 1f, 1f, 1f),
-                    0.5f)
-            )
-            .While(
-                GetComponent<Image>().MileaseAdditive("color",
-                    Color.clear, new Color(0f, 0f, 0f, 0.5f),
-                    0.5f)
-            )
-            .While(
-                Arrow.MileaseAdditive(nameof(Content.anchoredPosition),
-                    new Vector2(60, 0), Vector2.zero,
-                    0.5f, 0f, EaseFunction.Back, EaseType.Out)
-            );
-        PointerClick =
+        animator = new MilStateAnimator()
+            .AddState((int)State.Default, 0.5f, new[]
+            {
+                Content.MilState(nameof(Content.anchoredPosition), new Vector2(0, 4f), EaseFunction.Back, EaseType.Out),
+                Arrow.GetComponent<TMP_Text>().MilState("color", new Color(1f, 1f, 1f, 0f)),
+                GetComponent<Image>().MilState("color", new Color(94f / 255f, 11f / 255f, 255f / 255f, 0.5f)),
+                Arrow.MilState(nameof(Content.anchoredPosition), new Vector2(110, 0), EaseFunction.Back, EaseType.Out)
+            })
+            .AddState((int)State.Hover, 0.25f, new[]
+            {
+                Content.MilState(nameof(Content.anchoredPosition), new Vector2(-25, 4f), EaseFunction.Back,
+                    EaseType.Out),
+                Arrow.GetComponent<TMP_Text>().MilState("color", new Color(1f, 1f, 1f, 1f)),
+                GetComponent<Image>().MilState("color", new Color(11f / 255f, 255f / 255f, 232f / 255f, 0.5f)),
+                Arrow.MilState(nameof(Content.anchoredPosition), new Vector2(50, 0), EaseFunction.Back, EaseType.Out)
+            })
+            .SetDefaultState((int)State.Default);
+
+        waveAnimator =
             Wave.Milease(nameof(Wave.localScale),
                     new Vector3(0f, 0f, 0f), new Vector3(4f, 4f, 4f),
                     0.25f, 0f, EaseFunction.Circ)
@@ -53,12 +58,12 @@ public class TestButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        PointerEnter.Start();
+        animator.Transition((int)State.Hover);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-
+        animator.Transition((int)State.Default);
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -66,6 +71,6 @@ public class TestButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             (RectTransform)transform, eventData.position, eventData.pressEventCamera, out var localCursor);
         Wave.localPosition = localCursor;
-        PointerClick.Start();
+        waveAnimator.Play();
     }
 }
