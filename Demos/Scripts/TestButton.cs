@@ -27,7 +27,7 @@ public class TestButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             {
                 Content.MilState(nameof(Content.anchoredPosition), new Vector2(0, 4f), EaseFunction.Back, EaseType.Out),
                 Arrow.GetComponent<TMP_Text>().MilState("color", new Color(1f, 1f, 1f, 0f)),
-                GetComponent<Image>().MilState("color", new Color(94f / 255f, 11f / 255f, 255f / 255f, 0.5f)),
+                GetComponent<Image>().MilState("color", ColorUtils.RGBA(94, 11, 255, 0.5f)),
                 Arrow.MilState(nameof(Content.anchoredPosition), new Vector2(110, 0), EaseFunction.Back, EaseType.Out)
             })
             .AddState((int)State.Hover, 0.25f, new[]
@@ -35,7 +35,7 @@ public class TestButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
                 Content.MilState(nameof(Content.anchoredPosition), new Vector2(-25, 4f), EaseFunction.Back,
                     EaseType.Out),
                 Arrow.GetComponent<TMP_Text>().MilState("color", new Color(1f, 1f, 1f, 1f)),
-                GetComponent<Image>().MilState("color", new Color(11f / 255f, 255f / 255f, 232f / 255f, 0.5f)),
+                GetComponent<Image>().MilState("color", ColorUtils.RGBA(11, 255, 232, 0.5f)),
                 Arrow.MilState(nameof(Content.anchoredPosition), new Vector2(50, 0), EaseFunction.Back, EaseType.Out)
             })
             .SetDefaultState((int)State.Default);
