@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace Milease.Core
+namespace Milease.Core.Animation
 {
     public class MilStateAnimation
     {

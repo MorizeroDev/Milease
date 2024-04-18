@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using Milease.Utils;
 using UnityEngine;
-using Object = System.Object;
 
-namespace Milease.Core
+namespace Milease.Core.Animation
 {
     public delegate void MileaseHandleFunction(object target, float progress);
     [CreateAssetMenu(menuName = "Milease/New MilAnimation", fileName = "New MilAnimation")]

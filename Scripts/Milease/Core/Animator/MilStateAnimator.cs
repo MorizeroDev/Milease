@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Milease.Core.Animation;
+using Milease.Core.Manager;
 using UnityEngine;
 
-namespace Milease.Core
+namespace Milease.Core.Animator
 {
     public class MilStateParameter
     {

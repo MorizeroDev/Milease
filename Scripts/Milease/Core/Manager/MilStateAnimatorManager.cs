@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Milease.Core.Animation;
+using Milease.Core.Animator;
 using Milease.Utils;
 using UnityEngine;
 
-namespace Milease.Core
+namespace Milease.Core.Manager
 {
     public class MilStateAnimatorManager : MonoBehaviour
     {

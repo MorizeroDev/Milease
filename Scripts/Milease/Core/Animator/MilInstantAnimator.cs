@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Milease.Core.Manager;
 
-namespace Milease.Core
+namespace Milease.Core.Animator
 {
     public class MilInstantAnimator
     {
