@@ -53,14 +53,7 @@ public class Test : MonoBehaviour
                 }, null,2f, 0f, EaseFunction.Linear)
             )
             .Then(
-                Text.Milease((o, _) =>
-                {
-                    var go = (o as TMP_Text).gameObject;
-                    go.SetActive(false);
-                }, (o, _) =>
-                {
-                    (o as TMP_Text).gameObject.SetActive(true);
-                }, 0f)
+                Text.gameObject.Milease(HandleFunction.Hide, HandleFunction.AutoActiveReset(Text.gameObject), 0f)
             )
             .Then(
                 transform.MileaseTo(nameof(transform.position), new Vector3(0f, 0f, 0f), 1f)
