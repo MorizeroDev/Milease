@@ -5,19 +5,19 @@ using UnityEngine;
 
 namespace Milease.Core
 {
-    public class MilSimpleAnimator : MonoBehaviour
+    public class MilAnimatorManager : MonoBehaviour
     {
-        public static readonly MilSimpleAnimator Instance;
+        public static readonly MilAnimatorManager Instance;
 
-        static MilSimpleAnimator()
+        static MilAnimatorManager()
         {
-            var go = new GameObject("[MilSimpleAnimator]", typeof(MilSimpleAnimator));
+            var go = new GameObject("[MilAnimatorManager]", typeof(MilAnimatorManager));
             DontDestroyOnLoad(go);
             go.SetActive(true);
-            Instance = go.GetComponent<MilSimpleAnimator>();
+            Instance = go.GetComponent<MilAnimatorManager>();
         }
 
-        public readonly List<MilSimpleAnimation> Animations = new();
+        public readonly List<MilInstantAnimator> Animations = new();
 
         private void Update()
         {

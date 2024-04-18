@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 namespace Milease.Core
 {
-    public class MilSimpleAnimation
+    public class MilInstantAnimator
     {
         public readonly List<List<RuntimeAnimationPart>> Collection = new();
         internal int PlayIndex = 0;
         internal float Time = 0f;
 
-        public static MilSimpleAnimation Empty()
+        public static MilInstantAnimator Empty()
         {
-            return new MilSimpleAnimation();
+            return new MilInstantAnimator();
         }
         
-        public MilSimpleAnimation Delayed(float time)
+        public MilInstantAnimator Delayed(float time)
         {
             foreach (var part in Collection[^1])
             {
@@ -23,7 +23,7 @@ namespace Milease.Core
             return this;
         }
         
-        public MilSimpleAnimation While(MilSimpleAnimation animation)
+        public MilInstantAnimator While(MilInstantAnimator animation)
         {
             foreach (var part in animation.Collection)
             {
@@ -36,7 +36,7 @@ namespace Milease.Core
             return this;
         }
         
-        public MilSimpleAnimation Then(MilSimpleAnimation animation)
+        public MilInstantAnimator Then(MilInstantAnimator animation)
         {
             foreach (var part in animation.Collection)
             {
@@ -75,12 +75,12 @@ namespace Milease.Core
 
         public void Pause()
         {
-            MilSimpleAnimator.Instance.Animations.Remove(this);
+            MilAnimatorManager.Instance.Animations.Remove(this);
         }
 
         public void Start()
         {
-            if (MilSimpleAnimator.Instance.Animations.Contains(this))
+            if (MilAnimatorManager.Instance.Animations.Contains(this))
             {
                 Reset();
                 return;
@@ -90,7 +90,7 @@ namespace Milease.Core
             {
                 Reset();
             }
-            MilSimpleAnimator.Instance.Animations.Add(this);
+            MilAnimatorManager.Instance.Animations.Add(this);
         }
 
         public void Stop()

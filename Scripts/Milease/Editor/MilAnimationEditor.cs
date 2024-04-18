@@ -30,7 +30,7 @@ namespace Milease.Editor
 
         private static Stopwatch watch = new();
         
-        [MenuItem("Milease/Open MilAnimation Editor")]
+        //[MenuItem("Milease/Open MilAnimation Editor")]
         public static void ShowWindow()
         {
             GetWindow(typeof(MilAnimationEditor), false, "MilAnimation Editor");

@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using Milease.Core;
+using UnityEngine;
 
-namespace Milease.Core
+namespace Milease.Utils
 {
     public static class HandleFunction
     {

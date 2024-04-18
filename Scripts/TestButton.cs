@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Milease;
 using Milease.Core;
+using Milease.Utils;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -11,7 +12,7 @@ using UnityEngine.UI;
 public class TestButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     public RectTransform Arrow, Content, Wave;
-    private MilSimpleAnimation PointerEnter, PointerExit, PointerClick;
+    private MilInstantAnimator PointerEnter, PointerExit, PointerClick;
 
     private void Awake()
     {

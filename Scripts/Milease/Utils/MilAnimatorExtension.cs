@@ -3,25 +3,26 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Milease.Core;
 using Milease.Utils;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-namespace Milease.Core
+namespace Milease.Utils
 {
     public static class MilAnimatorExtension
     {
-        public static MilSimpleAnimation MileaseAdditive(this object target, MileaseHandleFunction handleFunction,
+        public static MilInstantAnimator MileaseAdditive(this object target, MileaseHandleFunction handleFunction,
             MileaseHandleFunction resetFunction, float duration, float delay = 0f,
             EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In)
             => Milease(target, handleFunction, resetFunction, duration, delay, easeFunction, easeType,
                 MilAnimation.BlendingMode.Additive);
-        public static MilSimpleAnimation Milease(this object target, MileaseHandleFunction handleFunction, 
+        public static MilInstantAnimator Milease(this object target, MileaseHandleFunction handleFunction, 
             MileaseHandleFunction resetFunction, float duration, float delay = 0f, 
             EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In, 
             MilAnimation.BlendingMode blendingMode = MilAnimation.BlendingMode.Default)
         {
-            var animation = new MilSimpleAnimation();
+            var animation = new MilInstantAnimator();
             var ani = MilAnimation.SimplePart(handleFunction, resetFunction, duration, delay, easeFunction, easeType, blendingMode);
             animation.Collection.Add(new List<RuntimeAnimationPart>()
             {
@@ -30,11 +31,11 @@ namespace Milease.Core
             return animation;
         }
         
-        public static MilSimpleAnimation MileaseTo(this object target, string memberName, object toValue, 
+        public static MilInstantAnimator MileaseTo(this object target, string memberName, object toValue, 
             float duration, float delay = 0f, EaseFunction easeFunction = EaseFunction.Quad, 
             EaseType easeType = EaseType.In)
         {
-            var animation = new MilSimpleAnimation();
+            var animation = new MilInstantAnimator();
             var type = target.GetType();
             var info = type.GetMember(memberName)[0];
             animation.Collection.Add(new List<RuntimeAnimationPart>()
@@ -49,16 +50,16 @@ namespace Milease.Core
             return animation;
         }
         
-        public static MilSimpleAnimation MileaseAdditive(this object target, string memberName, object startValue, 
+        public static MilInstantAnimator MileaseAdditive(this object target, string memberName, object startValue, 
             float delay = 0f, EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In)
             => Milease(target, memberName, startValue, delay, easeFunction, easeType,
                 MilAnimation.BlendingMode.Additive);
         
-        public static MilSimpleAnimation Milease(this object target, string memberName, object startValue, 
+        public static MilInstantAnimator Milease(this object target, string memberName, object startValue, 
             float delay = 0f, EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In, 
             MilAnimation.BlendingMode blendingMode = MilAnimation.BlendingMode.Default)
         {
-            var animation = new MilSimpleAnimation();
+            var animation = new MilInstantAnimator();
             var type = target.GetType();
             var info = type.GetMember(memberName)[0];
             animation.Collection.Add(new List<RuntimeAnimationPart>()
@@ -73,17 +74,17 @@ namespace Milease.Core
             return animation;
         }
         
-        public static MilSimpleAnimation MileaseAdditive(this object target, string memberName, object startValue, 
+        public static MilInstantAnimator MileaseAdditive(this object target, string memberName, object startValue, 
             object toValue, float duration, float delay = 0f, EaseFunction easeFunction = EaseFunction.Quad, 
             EaseType easeType = EaseType.In)
             => Milease(target, memberName, startValue, toValue, duration, delay, easeFunction, easeType,
                 MilAnimation.BlendingMode.Additive);
         
-        public static MilSimpleAnimation Milease(this object target, string memberName, object startValue, 
+        public static MilInstantAnimator Milease(this object target, string memberName, object startValue, 
             object toValue, float duration, float delay = 0f, EaseFunction easeFunction = EaseFunction.Quad, 
             EaseType easeType = EaseType.In, MilAnimation.BlendingMode blendingMode = MilAnimation.BlendingMode.Default)
         {
-            var animation = new MilSimpleAnimation();
+            var animation = new MilInstantAnimator();
             var type = target.GetType();
             var info = type.GetMember(memberName)[0];
             animation.Collection.Add(new List<RuntimeAnimationPart>()
@@ -98,9 +99,9 @@ namespace Milease.Core
             return animation;
         }
         
-        public static MilSimpleAnimation Milease(this object target, string memberName, params MilAnimation.AnimationPart[] animations)
+        public static MilInstantAnimator Milease(this object target, string memberName, params MilAnimation.AnimationPart[] animations)
         {
-            var animation = new MilSimpleAnimation();
+            var animation = new MilInstantAnimator();
             var type = target.GetType();
             var info = type.GetMember(memberName)[0];
             animation.Collection.Add(
