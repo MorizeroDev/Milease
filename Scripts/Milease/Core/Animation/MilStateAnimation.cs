@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Milease.Enums;
 using UnityEngine;
 
 namespace Milease.Core.Animation

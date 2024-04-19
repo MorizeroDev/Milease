@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Milease;
 using Milease.Core;
 using Milease.Core.Animator;
+using Milease.Enums;
 using Milease.Utils;
 using TMPro;
 using UnityEngine;
@@ -24,14 +25,14 @@ public class TestButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     private void Awake()
     {
         animator = new MilStateAnimator()
-            .AddState((int)State.Default, 0.5f, new[]
+            .AddState(State.Default, 0.5f, new[]
             {
                 Content.MilState(nameof(Content.anchoredPosition), new Vector2(0, 4f), EaseFunction.Back, EaseType.Out),
                 Arrow.GetComponent<TMP_Text>().MilState("color", new Color(1f, 1f, 1f, 0f)),
                 GetComponent<Image>().MilState("color", ColorUtils.RGBA(94, 11, 255, 0.5f)),
                 Arrow.MilState(nameof(Content.anchoredPosition), new Vector2(110, 0), EaseFunction.Back, EaseType.Out)
             })
-            .AddState((int)State.Hover, 0.25f, new[]
+            .AddState(State.Hover, 0.25f, new[]
             {
                 Content.MilState(nameof(Content.anchoredPosition), new Vector2(-25, 4f), EaseFunction.Back,
                     EaseType.Out),
@@ -39,7 +40,7 @@ public class TestButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
                 GetComponent<Image>().MilState("color", ColorUtils.RGBA(11, 255, 232, 0.5f)),
                 Arrow.MilState(nameof(Content.anchoredPosition), new Vector2(50, 0), EaseFunction.Back, EaseType.Out)
             })
-            .SetDefaultState((int)State.Default);
+            .SetDefaultState(State.Default);
 
         waveAnimator =
             Wave.Milease(nameof(Wave.localScale),
@@ -59,12 +60,12 @@ public class TestButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        animator.Transition((int)State.Hover);
+        animator.Transition(State.Hover);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        animator.Transition((int)State.Default);
+        animator.Transition(State.Default);
     }
 
     public void OnPointerClick(PointerEventData eventData)

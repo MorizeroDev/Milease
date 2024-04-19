@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Milease.Core.Animation;
 using Milease.Core.Manager;
+using Milease.Enums;
 using UnityEngine;
 
 namespace Milease.Core.Animator
@@ -21,10 +23,10 @@ namespace Milease.Core.Animator
         public int CurrentState;
         internal float Time;
         
-        public void Transition(int state)
+        public void Transition<T>(T state) where T : Enum
         {
-            CurrentState = state;
-            CurrentAnimationState = StateList.Find(x => x.StateID == state);
+            CurrentState = Convert.ToInt32(state);
+            CurrentAnimationState = StateList.Find(x => x.StateID == CurrentState);
             foreach (var val in CurrentAnimationState.Values)
             {
                 MilStateAnimation.PrepareState(val);
@@ -32,11 +34,11 @@ namespace Milease.Core.Animator
             Time = 0f;
         }
 
-        public MilStateAnimator AddState(int stateID, float duration, MilStateParameter[] states)
+        public MilStateAnimator AddState<T>(T stateID, float duration, MilStateParameter[] states) where T : Enum
         {
             var state = new MilStateAnimation.AnimationState()
             {
-                StateID = stateID,
+                StateID = Convert.ToInt32(stateID),
                 Duration = duration
             };
             foreach (var val in states)
@@ -53,10 +55,10 @@ namespace Milease.Core.Animator
             return this;
         }
 
-        public MilStateAnimator SetDefaultState(int state)
+        public MilStateAnimator SetDefaultState<T>(T state) where T : Enum
         {
-            CurrentState = state;
-            CurrentAnimationState = StateList.Find(x => x.StateID == state);
+            CurrentState = Convert.ToInt32(state);
+            CurrentAnimationState = StateList.Find(x => x.StateID == CurrentState);
             foreach (var val in CurrentAnimationState.Values)
             {
                 MilStateAnimation.PrepareState(val);

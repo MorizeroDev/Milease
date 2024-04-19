@@ -1,4 +1,4 @@
-﻿namespace Milease
+﻿namespace Milease.Enums
 {
     /// <summary>
     /// Determines how the ease function behaves.

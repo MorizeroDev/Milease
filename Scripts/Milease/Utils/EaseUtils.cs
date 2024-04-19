@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using Milease.Enums;
 using UnityEngine;
 
 namespace Milease.Utils

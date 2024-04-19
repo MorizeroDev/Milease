@@ -1,4 +1,4 @@
-﻿namespace Milease
+﻿namespace Milease.Enums
 {
     public enum ValueTypeEnum
     {

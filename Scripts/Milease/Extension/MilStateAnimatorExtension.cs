@@ -1,5 +1,6 @@
 ﻿using Milease.Core;
 using Milease.Core.Animator;
+using Milease.Enums;
 using UnityEngine;
 
 namespace Milease.Utils
