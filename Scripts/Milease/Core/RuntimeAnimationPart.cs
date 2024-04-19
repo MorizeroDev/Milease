@@ -135,14 +135,20 @@ namespace Milease.Core
             }
             else if (curType!.IsPrimitive)
             {
-                StartValue = double.Parse(animation.StartValue);
+                if (!animation.PendingTo)
+                {
+                    StartValue = double.Parse(animation.StartValue);
+                }
                 ToValue = double.Parse(animation.ToValue);
                 ValueType = ValueTypeEnum.PrimitiveType;
                 return;
             }
             else
             {
-                StartValue = JsonUtility.FromJson(animation.StartValue, curType);
+                if (!animation.PendingTo)
+                {
+                    StartValue = JsonUtility.FromJson(animation.StartValue, curType);
+                }
                 ToValue = JsonUtility.FromJson(animation.ToValue, curType);
             }
             
@@ -191,6 +197,10 @@ namespace Milease.Core
                     if (ani.Source.PendingTo)
                     {
                         ani.StartValue = ani.OriginalValue;
+                        if (ani.ValueType == ValueTypeEnum.PrimitiveType)
+                        {
+                            ani.StartValue = Convert.ChangeType(ani.StartValue, TypeCode.Double);
+                        }
                     }
                 }
             }

@@ -13,11 +13,11 @@ public class AnimateAnythingDemo : MonoBehaviour
 
     public void FadeIn()
     {
-        AudioSource.Milease(nameof(AudioSource.volume),0f, 1f, 1f).Play();
+        AudioSource.MileaseTo(nameof(AudioSource.volume),1f, 1f).Play();
     }
     
     public void FadeOut()
     {
-        AudioSource.Milease(nameof(AudioSource.volume),1f, 0f, 1f, 0f, EaseFunction.Quad, EaseType.Out).Play();
+        AudioSource.MileaseTo(nameof(AudioSource.volume),0f, 1f, 0f, EaseFunction.Quad, EaseType.Out).Play();
     }
 }
