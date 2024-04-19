@@ -34,7 +34,7 @@ namespace Milease.Core.Animator
             Time = 0f;
         }
 
-        public MilStateAnimator AddState<T>(T stateID, float duration, MilStateParameter[] states) where T : Enum
+        public MilStateAnimator AddState<T>(T stateID, float duration, IEnumerable<MilStateParameter> states) where T : Enum
         {
             var state = new MilStateAnimation.AnimationState()
             {
