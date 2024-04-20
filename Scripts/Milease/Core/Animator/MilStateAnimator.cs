@@ -23,6 +23,26 @@ namespace Milease.Core.Animator
         public int CurrentState;
         internal float Time;
         
+        /// <summary>
+        /// Set the state, but without transition, it will be changed immediately.
+        /// </summary>
+        /// <param name="state">target state</param>
+        public void SetState<T>(T state) where T : Enum
+        {
+            CurrentState = Convert.ToInt32(state);
+            CurrentAnimationState = StateList.Find(x => x.StateID == CurrentState);
+            foreach (var val in CurrentAnimationState.Values)
+            {
+                MilStateAnimation.PrepareState(val);
+                MilStateAnimation.ApplyState(val, 1f);
+            }
+            Time = CurrentAnimationState.Duration;
+        }
+        
+        /// <summary>
+        /// Transform to the target state with animations
+        /// </summary>
+        /// <param name="state">target state</param>
         public void Transition<T>(T state) where T : Enum
         {
             CurrentState = Convert.ToInt32(state);
@@ -33,7 +53,7 @@ namespace Milease.Core.Animator
             }
             Time = 0f;
         }
-
+        
         public MilStateAnimator AddState<T>(T stateID, float duration, IEnumerable<MilStateParameter> states) where T : Enum
         {
             var state = new MilStateAnimation.AnimationState()
