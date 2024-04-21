@@ -45,7 +45,8 @@ public class MilListItemDemo : MilListViewItem
 
     protected override void OnSelect(PointerEventData eventData)
     {
-        ParentListView.Remove(Index);
+        animator.ModifyState(UIState.Selected, Background, "color",
+            ColorUtils.RGB(Random.Range(0, 128), Random.Range(0, 128), Random.Range(0, 128)));
     }
 
     protected override MilInstantAnimator ConfigClickAnimation()

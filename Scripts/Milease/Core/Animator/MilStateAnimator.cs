@@ -54,9 +54,27 @@ namespace Milease.Core.Animator
             Time = 0f;
         }
         
+        public MilStateAnimator ModifyState<T>(T stateID, object target, string member, object value) where T : Enum
+        {
+            var id = Convert.ToInt32(stateID);
+            var state = StateList.Find(x => x.StateID == id);
+            var index = state.Values.FindIndex(x => x.Target == target && x.Member == member);
+            if (index == -1)
+            {
+                Debug.LogWarning($"Required member {member} not found.");
+            }
+            else
+            {
+                state.Values[index].ToValue = value;
+            }
+            
+            return this;
+        }
+        
         public MilStateAnimator ModifyState<T>(T stateID, IEnumerable<MilStateParameter> states) where T : Enum
         {
-            var state = StateList.Find(x => x.StateID == CurrentState);
+            var id = Convert.ToInt32(stateID);
+            var state = StateList.Find(x => x.StateID == id);
             foreach (var val in states)
             {
                 var ani = new MilStateAnimation.AnimationValue(val.Target, val.Member)
