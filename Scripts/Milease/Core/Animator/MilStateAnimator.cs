@@ -54,6 +54,31 @@ namespace Milease.Core.Animator
             Time = 0f;
         }
         
+        public MilStateAnimator ModifyState<T>(T stateID, IEnumerable<MilStateParameter> states) where T : Enum
+        {
+            var state = StateList.Find(x => x.StateID == CurrentState);
+            foreach (var val in states)
+            {
+                var ani = new MilStateAnimation.AnimationValue(val.Target, val.Member)
+                {
+                    EaseType = val.EaseType,
+                    EaseFunction = val.EaseFunction,
+                    CustomCurve = val.CustomCurve,
+                    ToValue = val.ToValue
+                };
+                var index = state.Values.FindIndex(x => x.Target == val.Target && x.Member == val.Member);
+                if (index == -1)
+                {
+                    state.Values.Add(ani);
+                }
+                else
+                {
+                    state.Values[index] = ani;
+                }
+            }
+            return this;
+        }
+        
         public MilStateAnimator AddState<T>(T stateID, float duration, IEnumerable<MilStateParameter> states) where T : Enum
         {
             var state = new MilStateAnimation.AnimationState()
