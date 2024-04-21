@@ -18,6 +18,7 @@ namespace Milease.Core.Animation
             public AnimationCurve CustomCurve;
             public object Target;
             public MemberInfo BindMember;
+            public string Member;
             public object ToValue, StartValue;
             public readonly ValueTypeEnum ValueType;
             public readonly Type ValueTypeInfo;
@@ -27,6 +28,7 @@ namespace Milease.Core.Animation
             public AnimationValue(object target, string member)
             {
                 Target = target;
+                Member = member;
                 BindMember = target.GetType().GetMember(member)[0];
                 ValueTypeInfo = BindMember.MemberType switch
                 {

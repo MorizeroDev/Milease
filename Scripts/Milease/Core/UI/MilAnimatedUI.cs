@@ -50,6 +50,10 @@ namespace Milease.Core.UI
 
         public void OnPointerClick(PointerEventData eventData)
         {
+            if (eventData.dragging)
+            {
+                return;
+            }
             clickAnimator?.Play();
             OnClick(eventData);
             OnClickEvent.Invoke();
