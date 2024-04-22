@@ -24,6 +24,8 @@ namespace Milease.Core.UI
         private readonly List<MilListViewItem> bindDisplay = new();
         private readonly List<MilListViewItem> display = new();
         private float ItemSize;
+        private Vector2 ItemPivot;
+        private Vector2 ItemAnchorMin, ItemAnchorMax;
 
         [HideInInspector]
         public float Position;
@@ -35,14 +37,26 @@ namespace Milease.Core.UI
 
         private float targetPos;
         private float originPos;
-        private float transTime = 0.5f;
+        private const float transDuration = 0.5f;
+        private float transTime = transDuration;
         
         private readonly Stopwatch watch = new Stopwatch();
+
+        private float AnchorOffset;
         
         private void Awake()
         {
-            ItemSize = ItemPrefab.GetComponent<RectTransform>().sizeDelta.y;
+            var itemRect = ItemPrefab.GetComponent<RectTransform>();
+            ItemSize = Vertical ? itemRect.sizeDelta.y : itemRect.sizeDelta.x;
             RectTransform = GetComponent<RectTransform>();
+            ItemPivot = itemRect.pivot;
+            ItemAnchorMin = itemRect.anchorMin;
+            ItemAnchorMax = itemRect.anchorMax;
+
+            AnchorOffset = (Vertical ? RectTransform.sizeDelta.y : RectTransform.sizeDelta.x) *
+                           (Vertical ? ItemAnchorMin.y : ItemAnchorMin.x);
+            Position = GetOriginPointPosition();
+            targetPos = Position;
         }
 
         public void Add(object data)
@@ -87,7 +101,7 @@ namespace Milease.Core.UI
                 return false;
             return Remove(index);
         }
-
+        
         public void Clear()
         {
             foreach (var obj in display)
@@ -148,16 +162,19 @@ namespace Milease.Core.UI
         private void UpdateListView()
         {
             // Transform scroll position
-            if (transTime <= 0.5f)
+            if (transTime <= transDuration)
             {
                 transTime += Time.deltaTime;
-                var pro = Mathf.Min(1f, transTime / 0.5f);
+                var pro = Mathf.Min(1f, transTime / transDuration);
                 Position = originPos + (targetPos - originPos) *
                     EaseUtility.GetEasedProgress(pro, EaseType.Out, EaseFunction.Circ);
             }
-            
-            var start = Mathf.FloorToInt((Position) / (ItemSize + Spacing)) + (Position < 0 ? 1 : 0);
-            var cnt = Mathf.CeilToInt(RectTransform.sizeDelta.y / (ItemSize + Spacing) + 2);
+
+            var size = Vertical ? RectTransform.sizeDelta.y : RectTransform.sizeDelta.x;
+
+            var calPos = Vertical ? (Position - AnchorOffset) : (-Position + AnchorOffset);
+            var start = Mathf.FloorToInt(calPos / (ItemSize + Spacing)) + (calPos < 0 ? 1 : 0);
+            var cnt = Mathf.CeilToInt(size / (ItemSize + Spacing) + 2);
 
             CheckObjectPool(cnt);
 
@@ -203,20 +220,24 @@ namespace Milease.Core.UI
             }
 
             // Update item object
-            var pos = Position % (ItemSize + Spacing);
+            var pos = (Position - AnchorOffset) % (ItemSize + Spacing) - AnchorOffset;
             for (var i = start; i < start + cnt; i++)
             {
                 if (i >= 0 && i < Items.Count && bindDisplay[i])
                 {
-                    var p = new Vector2(0, pos);
+                    var p = Vertical switch
+                    {
+                        true => new Vector2(0, pos),
+                        false => new Vector2(pos, 0)
+                    };
                     if (bindDisplay[i].RectTransform.anchoredPosition != p)
                     {
                         bindDisplay[i].RectTransform.anchoredPosition = p;
-                        bindDisplay[i].AdjustAppearance(pos / RectTransform.sizeDelta.y * -1f);
+                        bindDisplay[i].AdjustAppearance((pos - AnchorOffset) / size * -1f);
                     }
                 }
 
-                pos -= (ItemSize + Spacing);
+                pos -= (ItemSize + Spacing) * (Vertical ? 1f : -1f);
             }
             
             // Recycle unused item object
@@ -231,7 +252,9 @@ namespace Milease.Core.UI
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            transTime = 0.5f;
+            // Stop transforming the position
+            transTime = transDuration;  
+            
             startPos = eventData.position;
             orPos = Position;
             watch.Restart();
@@ -239,7 +262,14 @@ namespace Milease.Core.UI
 
         public void OnDrag(PointerEventData eventData)
         {
-            Position = orPos + (eventData.position - startPos).y;
+            if (Vertical)
+            {
+                Position = orPos + (eventData.position - startPos).y;
+            }
+            else
+            {
+                Position = orPos + (eventData.position - startPos).x;
+            }
         }
 
         public void OnEndDrag(PointerEventData eventData)
@@ -248,20 +278,39 @@ namespace Milease.Core.UI
             OnDrag(eventData);
             var time = watch.ElapsedMilliseconds / 1000f;
             var delta = eventData.position - startPos;
-            targetPos = Position + (delta.magnitude * Mathf.Sign(delta.y)) / time * 0.3f;
+            targetPos = Position + (delta.magnitude * Mathf.Sign((Vertical ? delta.y : delta.x))) / time * 0.3f;
             CheckPosition();
         }
 
-        private void CheckPosition()
+        private float GetOriginPointPosition()
+        {
+            return (
+                       -Spacing 
+                       - ItemSize * (Vertical ? ItemPivot.y : ItemPivot.x)
+                       - Mathf.Max(0, AnchorOffset * 2 - ItemSize * (Vertical ? ItemPivot.y : ItemPivot.x))
+                   ) 
+                   * (Vertical ? 1f : -1f);
+        }
+        
+        private void CheckPosition(bool noTrans = false)
         {
             originPos = Position;
-            var minPos = 0f;
-            var maxPos = Mathf.Max(0f, Items.Count * (ItemSize + Spacing) - RectTransform.sizeDelta.y);
+            var minPos = Vertical ?
+                    GetOriginPointPosition():
+                    Mathf.Min(0f, -1f * (Items.Count * (ItemSize + Spacing) - RectTransform.sizeDelta.x - ItemSize * ItemPivot.x));
+            var maxPos = Vertical ?
+                    Mathf.Max(0f, Items.Count * (ItemSize + Spacing) - RectTransform.sizeDelta.y - ItemSize * ItemPivot.y) :
+                    GetOriginPointPosition();
             if (targetPos < minPos || targetPos > maxPos)
             {
                 targetPos = Mathf.Clamp(Position, minPos, maxPos);
             }
             transTime = 0f;
+            if (noTrans)
+            {
+                Position = targetPos;
+                transTime = transDuration;
+            }
         }
         
         private void Update()
@@ -271,7 +320,7 @@ namespace Milease.Core.UI
 
         public void OnScroll(PointerEventData eventData)
         {
-            Position -= eventData.scrollDelta.y * MouseScrollSensitivity;
+            Position -= (Vertical ? eventData.scrollDelta.y : eventData.scrollDelta.x) * MouseScrollSensitivity;
             targetPos = Position;
             CheckPosition();
         }

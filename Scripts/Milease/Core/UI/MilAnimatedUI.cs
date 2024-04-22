@@ -17,8 +17,8 @@ namespace Milease.Core.UI
         private readonly MilStateAnimator animator = new();
         private UIState lastState = UIState.Default;
         
-        public float DefaultTransition = 0.5f;
-        public float HoverTransition = 0.25f;
+        public float DefaultTransition = 0.25f;
+        public float HoverTransition = 0.5f;
         public UnityEvent OnClickEvent;
         
         private void Awake()
@@ -34,6 +34,11 @@ namespace Milease.Core.UI
             animator.AddState(UIState.Selected, HoverTransition, state);
             animator.SetDefaultState(UIState.Default);
             clickAnimator = ConfigClickAnimation();
+        }
+
+        private void OnDestroy()
+        {
+            animator.Stop();
         }
 
         public void OnPointerEnter(PointerEventData eventData)

@@ -22,19 +22,19 @@ public class MilListItemDemo : MilListViewItem
     protected override IEnumerable<MilStateParameter> ConfigDefaultState()
         => new[]
         {
-            Background.MilState("color", Color.white),
+            Background.MilState("color", Color.clear),
             Content.rectTransform.MilState(nameof(Content.rectTransform.anchoredPosition), new Vector2(138f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
             Arrow.MilState("color", Color.clear),
             Arrow.rectTransform.MilState(nameof(Arrow.rectTransform.anchoredPosition), new Vector2(88f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
-            Content.MilState("color", Color.black)
+            Content.MilState("color", new Color(1f, 1f, 1f, 0.7f))
         };
 
     protected override IEnumerable<MilStateParameter> ConfigSelectedState()
         => new[]
         {
-            Background.MilState("color", ColorUtils.RGB(0,153,255)),
+            Background.MilState("color", ColorUtils.RGB(132, 115, 186)),
             Content.rectTransform.MilState(nameof(Content.rectTransform.anchoredPosition), new Vector2(186f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
             Arrow.MilState("color", Color.white),
@@ -45,8 +45,7 @@ public class MilListItemDemo : MilListViewItem
 
     protected override void OnSelect(PointerEventData eventData)
     {
-        animator.ModifyState(UIState.Selected, Background, "color",
-            ColorUtils.RGB(Random.Range(0, 128), Random.Range(0, 128), Random.Range(0, 128)));
+
     }
 
     protected override MilInstantAnimator ConfigClickAnimation()

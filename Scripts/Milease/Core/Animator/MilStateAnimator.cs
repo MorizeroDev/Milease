@@ -132,5 +132,10 @@ namespace Milease.Core.Animator
                 MilStateAnimatorManager.Animators.Add(this);
             return this;
         }
+
+        public void Stop()
+        {
+            MilStateAnimatorManager.Animators.Remove(this);
+        }
     }
 }

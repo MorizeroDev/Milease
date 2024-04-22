@@ -16,8 +16,8 @@ namespace Milease.Core.UI
         private MilInstantAnimator clickAnimator;
         internal readonly MilStateAnimator animator = new();
 
-        public float DefaultTransition = 0.5f;
-        public float SelectTransition = 0.25f;
+        public float DefaultTransition = 0.25f;
+        public float SelectTransition = 0.5f;
         public UnityEvent<int> OnSelectEvent;
 
         [HideInInspector]
@@ -53,6 +53,11 @@ namespace Milease.Core.UI
             animator.SetDefaultState(UIState.Default);
             clickAnimator = ConfigClickAnimation();
             GameObject = gameObject;
+        }
+        
+        private void OnDestroy()
+        {
+            animator.Stop();
         }
         
         protected abstract IEnumerable<MilStateParameter> ConfigDefaultState();
