@@ -54,7 +54,10 @@ namespace Milease.Core.UI
             ItemAnchorMax = itemRect.anchorMax;
 
             AnchorOffset = (Vertical ? RectTransform.sizeDelta.y : RectTransform.sizeDelta.x) *
-                           (Vertical ? ItemAnchorMin.y : ItemAnchorMin.x);
+                           (Vertical ? ItemAnchorMin.y : ItemAnchorMin.x) *
+                           (Vertical ? -1f : 1f) +
+                           (Vertical ? RectTransform.sizeDelta.y : 0f);
+            
             Position = GetOriginPointPosition();
             targetPos = Position;
         }
@@ -286,8 +289,8 @@ namespace Milease.Core.UI
         {
             return (
                        -Spacing 
-                       - ItemSize * (Vertical ? ItemPivot.y : ItemPivot.x)
-                       - Mathf.Max(0, AnchorOffset * 2 - ItemSize * (Vertical ? ItemPivot.y : ItemPivot.x))
+                       - ItemSize * (Vertical ? 1f - ItemPivot.y : ItemPivot.x)
+                       - Mathf.Max(0, AnchorOffset * 2 - ItemSize * (Vertical ? 1f - ItemPivot.y : ItemPivot.x))
                    ) 
                    * (Vertical ? 1f : -1f);
         }
@@ -299,7 +302,7 @@ namespace Milease.Core.UI
                     GetOriginPointPosition():
                     Mathf.Min(0f, -1f * (Items.Count * (ItemSize + Spacing) - RectTransform.sizeDelta.x - ItemSize * ItemPivot.x));
             var maxPos = Vertical ?
-                    Mathf.Max(0f, Items.Count * (ItemSize + Spacing) - RectTransform.sizeDelta.y - ItemSize * ItemPivot.y) :
+                    Mathf.Max(0f, Items.Count * (ItemSize + Spacing) - RectTransform.sizeDelta.y - ItemSize * (1f - ItemPivot.y)) :
                     GetOriginPointPosition();
             if (targetPos < minPos || targetPos > maxPos)
             {

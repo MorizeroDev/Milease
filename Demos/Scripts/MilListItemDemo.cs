@@ -28,13 +28,13 @@ public class MilListItemDemo : MilListViewItem
             Arrow.MilState("color", Color.clear),
             Arrow.rectTransform.MilState(nameof(Arrow.rectTransform.anchoredPosition), new Vector2(88f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
-            Content.MilState("color", new Color(1f, 1f, 1f, 0.7f))
+            Content.MilState("color", Color.black)
         };
 
     protected override IEnumerable<MilStateParameter> ConfigSelectedState()
         => new[]
         {
-            Background.MilState("color", ColorUtils.RGB(132, 115, 186)),
+            Background.MilState("color", ColorUtils.RGB(0,153,255)),
             Content.rectTransform.MilState(nameof(Content.rectTransform.anchoredPosition), new Vector2(186f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
             Arrow.MilState("color", Color.white),
