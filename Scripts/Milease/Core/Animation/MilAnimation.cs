@@ -7,7 +7,6 @@ using UnityEngine;
 namespace Milease.Core.Animation
 {
     public delegate void MileaseHandleFunction(object target, float progress);
-    [CreateAssetMenu(menuName = "Milease/New MilAnimation", fileName = "New MilAnimation")]
     public class MilAnimation : ScriptableObject
     {
         public enum BlendingMode
