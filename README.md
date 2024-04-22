@@ -37,7 +37,7 @@ AudioSource.MileaseTo(nameof(AudioSource.volume), 0f, 1f, 0f, EaseFunction.Quad,
 
 # Create Animations by Organized Code
 
-By using the methods `Milize`, `While`, `Then`, `Delayed`, easily generate complex animations with readable code through nesting:
+By using the methods `Milease`, `While`, `Then`, `Delayed`, easily generate complex animations with readable code through nesting:
 
 ```c#
 var animation =
