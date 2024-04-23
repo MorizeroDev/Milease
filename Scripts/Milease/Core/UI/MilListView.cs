@@ -47,16 +47,16 @@ namespace Milease.Core.UI
         private void Awake()
         {
             var itemRect = ItemPrefab.GetComponent<RectTransform>();
-            ItemSize = Vertical ? itemRect.sizeDelta.y : itemRect.sizeDelta.x;
+            ItemSize = Vertical ? itemRect.rect.height : itemRect.rect.width;
             RectTransform = GetComponent<RectTransform>();
             ItemPivot = itemRect.pivot;
             ItemAnchorMin = itemRect.anchorMin;
             ItemAnchorMax = itemRect.anchorMax;
 
-            AnchorOffset = (Vertical ? RectTransform.sizeDelta.y : RectTransform.sizeDelta.x) *
+            AnchorOffset = (Vertical ? RectTransform.rect.height : RectTransform.rect.width) *
                            (Vertical ? ItemAnchorMin.y : ItemAnchorMin.x) *
                            (Vertical ? -1f : 1f) +
-                           (Vertical ? RectTransform.sizeDelta.y : 0f);
+                           (Vertical ? RectTransform.rect.height : 0f);
             
             Position = GetOriginPointPosition();
             targetPos = Position;
@@ -173,7 +173,7 @@ namespace Milease.Core.UI
                     EaseUtility.GetEasedProgress(pro, EaseType.Out, EaseFunction.Circ);
             }
 
-            var size = Vertical ? RectTransform.sizeDelta.y : RectTransform.sizeDelta.x;
+            var size = Vertical ? RectTransform.rect.height : RectTransform.rect.width;
 
             var calPos = Vertical ? (Position - AnchorOffset) : (-Position + AnchorOffset);
             var start = Mathf.FloorToInt(calPos / (ItemSize + Spacing)) + (calPos < 0 ? 1 : 0);
@@ -300,9 +300,9 @@ namespace Milease.Core.UI
             originPos = Position;
             var minPos = Vertical ?
                     GetOriginPointPosition():
-                    Mathf.Min(0f, -1f * (Items.Count * (ItemSize + Spacing) - RectTransform.sizeDelta.x - ItemSize * ItemPivot.x));
+                    Mathf.Min(0f, -1f * (Items.Count * (ItemSize + Spacing) - RectTransform.rect.width - ItemSize * ItemPivot.x));
             var maxPos = Vertical ?
-                    Mathf.Max(0f, Items.Count * (ItemSize + Spacing) - RectTransform.sizeDelta.y - ItemSize * (1f - ItemPivot.y)) :
+                    Mathf.Max(0f, Items.Count * (ItemSize + Spacing) - RectTransform.rect.height - ItemSize * (1f - ItemPivot.y)) :
                     GetOriginPointPosition();
             if (targetPos < minPos || targetPos > maxPos)
             {
