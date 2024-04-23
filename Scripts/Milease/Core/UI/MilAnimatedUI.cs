@@ -20,7 +20,7 @@ namespace Milease.Core.UI
         public float DefaultTransition = 0.25f;
         public float HoverTransition = 0.5f;
         public UnityEvent OnClickEvent;
-        
+
         private void Awake()
         {
             var state = ConfigDefaultState();
@@ -77,7 +77,9 @@ namespace Milease.Core.UI
         protected abstract IEnumerable<MilStateParameter> ConfigDefaultState();
         protected abstract IEnumerable<MilStateParameter> ConfigHoverState();
         protected abstract IEnumerable<MilStateParameter> ConfigSelectedState();
-        protected abstract void OnClick(PointerEventData eventData);
         protected abstract MilInstantAnimator ConfigClickAnimation();
+        protected abstract void OnClick(PointerEventData eventData);
+        protected abstract void OnInitialize();
+        protected abstract void OnTerminate();
     }
 }
