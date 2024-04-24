@@ -20,6 +20,7 @@ namespace Milease.Core.UI
         public bool Vertical = true;
         public float Spacing;
         public float MouseScrollSensitivity = 300f;
+        public float StartPadding, EndPadding, Indentation;
         
         private readonly List<MilListViewItem> bindDisplay = new();
         private readonly List<MilListViewItem> display = new();
@@ -230,8 +231,8 @@ namespace Milease.Core.UI
                 {
                     var p = Vertical switch
                     {
-                        true => new Vector2(0, pos),
-                        false => new Vector2(pos, 0)
+                        true => new Vector2(Indentation, pos),
+                        false => new Vector2(pos, Indentation)
                     };
                     if (bindDisplay[i].RectTransform.anchoredPosition != p)
                     {
@@ -291,6 +292,7 @@ namespace Milease.Core.UI
                        -Spacing 
                        - ItemSize * (Vertical ? 1f - ItemPivot.y : ItemPivot.x)
                        - Mathf.Max(0, AnchorOffset * 2 - ItemSize * (Vertical ? 1f - ItemPivot.y : ItemPivot.x))
+                       - StartPadding
                    ) 
                    * (Vertical ? 1f : -1f);
         }
@@ -300,9 +302,9 @@ namespace Milease.Core.UI
             originPos = Position;
             var minPos = Vertical ?
                     GetOriginPointPosition():
-                    Mathf.Min(0f, -1f * (Items.Count * (ItemSize + Spacing) - RectTransform.rect.width - ItemSize * ItemPivot.x));
+                    Mathf.Min(0f, -1f * (Items.Count * (ItemSize + Spacing) - RectTransform.rect.width - ItemSize * ItemPivot.x + EndPadding));
             var maxPos = Vertical ?
-                    Mathf.Max(0f, Items.Count * (ItemSize + Spacing) - RectTransform.rect.height - ItemSize * (1f - ItemPivot.y)) :
+                    Mathf.Max(0f, Items.Count * (ItemSize + Spacing) - RectTransform.rect.height - ItemSize * (1f - ItemPivot.y) + EndPadding) :
                     GetOriginPointPosition();
             if (targetPos < minPos || targetPos > maxPos)
             {
