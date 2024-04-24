@@ -9,12 +9,12 @@ namespace Milease.Core.UI
 {
     public abstract class MilListViewItem : MonoBehaviour, IPointerClickHandler
     {
-        internal enum UIState
+        public enum UIState
         {
             Default, Selected
         }
         private MilInstantAnimator clickAnimator;
-        internal readonly MilStateAnimator animator = new();
+        public readonly MilStateAnimator animator = new();
 
         public float DefaultTransition = 0.25f;
         public float SelectTransition = 0.5f;

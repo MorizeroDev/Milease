@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Unity.VisualScripting;
 using UnityEngine;
 using Object = System.Object;
 
@@ -52,7 +51,7 @@ namespace Milease.Utils
 
                 var writable = field.MemberType switch
                 {
-                    MemberTypes.Field => ((FieldInfo)field).CanWrite(),
+                    MemberTypes.Field => !(((FieldInfo)field).IsInitOnly || ((FieldInfo)field).IsLiteral),
                     MemberTypes.Property => ((PropertyInfo)field).CanWrite,
                     _ => false
                 };
