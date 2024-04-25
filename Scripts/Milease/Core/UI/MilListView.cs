@@ -142,6 +142,17 @@ namespace Milease.Core.UI
             }
         }
 
+        public void SlideTo(float position, bool withoutTransition = false)
+        {
+            targetPos = position;
+            transTime = 0f;
+            if (withoutTransition)
+            {
+                Position = targetPos;
+                transTime = transDuration;
+            }
+        }
+
         private void CheckObjectPool(int cnt)
         {
             if (display.Count > cnt)
@@ -312,7 +323,7 @@ namespace Milease.Core.UI
                     GetOriginPointPosition();
             if (targetPos < minPos || targetPos > maxPos)
             {
-                targetPos = Mathf.Clamp(Position, minPos, maxPos);
+                targetPos = Mathf.Clamp(targetPos, minPos, maxPos);
             }
             transTime = 0f;
             if (noTrans)
@@ -329,8 +340,7 @@ namespace Milease.Core.UI
 
         public void OnScroll(PointerEventData eventData)
         {
-            Position -= (Vertical ? eventData.scrollDelta.y : eventData.scrollDelta.x) * MouseScrollSensitivity;
-            targetPos = Position;
+            targetPos = Position - (Vertical ? eventData.scrollDelta.y : eventData.scrollDelta.x) * MouseScrollSensitivity * 2f;
             CheckPosition();
         }
     }
