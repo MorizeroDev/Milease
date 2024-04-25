@@ -301,6 +301,17 @@ namespace Milease.Core.UI
             CheckPosition();
         }
 
+        public void RefreshItemAppearance()
+        {
+            foreach (var item in display)
+            {
+                if (item.GameObject.activeSelf)
+                {
+                    item.UpdateAppearance();
+                }
+            }
+        }
+        
         private float GetOriginPointPosition()
         {
             return (
