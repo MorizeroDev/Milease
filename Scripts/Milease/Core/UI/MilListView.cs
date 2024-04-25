@@ -119,7 +119,7 @@ namespace Milease.Core.UI
             CheckPosition();
         }
 
-        public void Select(int index)
+        public void Select(int index, bool dontCall = false)
         {
             if (SelectedIndex != -1)
             {
@@ -135,6 +135,10 @@ namespace Milease.Core.UI
             if (bindDisplay[SelectedIndex])
             {
                 bindDisplay[SelectedIndex].animator.Transition(MilListViewItem.UIState.Selected);
+                if (!dontCall)
+                {
+                    bindDisplay[SelectedIndex].OnSelect(null);
+                }
             }
         }
 

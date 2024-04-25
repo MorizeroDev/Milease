@@ -62,7 +62,7 @@ namespace Milease.Core.UI
         
         protected abstract IEnumerable<MilStateParameter> ConfigDefaultState();
         protected abstract IEnumerable<MilStateParameter> ConfigSelectedState();
-        protected abstract void OnSelect(PointerEventData eventData);
+        public abstract void OnSelect(PointerEventData eventData);
         protected abstract void OnInitialize();
         protected abstract void OnTerminate();
         protected abstract MilInstantAnimator ConfigClickAnimation();
