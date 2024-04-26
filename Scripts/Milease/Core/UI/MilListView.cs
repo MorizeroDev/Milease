@@ -338,7 +338,12 @@ namespace Milease.Core.UI
                 }
             }
         }
-        
+
+        public List<MilListViewItem> GetDisplayingItems()
+        {
+            return display.FindAll(x => x.Index != -1);
+        }
+
         private float GetOriginPointPosition()
         {
             return (
