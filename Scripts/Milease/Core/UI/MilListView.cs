@@ -44,9 +44,15 @@ namespace Milease.Core.UI
         private readonly Stopwatch watch = new Stopwatch();
 
         private float AnchorOffset;
-        
+
+        private bool initialized = false;
+
         private void Awake()
         {
+            if (initialized)
+            {
+                return;
+            }
             var itemRect = ItemPrefab.GetComponent<RectTransform>();
             ItemSize = Vertical ? itemRect.rect.height : itemRect.rect.width;
             RectTransform = GetComponent<RectTransform>();
@@ -61,16 +67,25 @@ namespace Milease.Core.UI
             
             Position = GetOriginPointPosition();
             targetPos = Position;
+            initialized = true;
         }
 
         public void Add(object data)
         {
+            if (!initialized)
+            {
+                Awake();
+            }
             Items.Add(data);
             bindDisplay.Add(null);
         }
 
         public bool Remove(int index)
         {
+            if (!initialized)
+            {
+                Awake();
+            }
             if (index < 0 || index >= Items.Count)
             {
                 Debug.LogWarning("Index out of range.");
@@ -108,6 +123,10 @@ namespace Milease.Core.UI
         
         public void Clear()
         {
+            if (!initialized)
+            {
+                Awake();
+            }
             foreach (var obj in display)
             {
                 obj.Index = -1;
@@ -121,6 +140,10 @@ namespace Milease.Core.UI
 
         public void Select(int index, bool dontCall = false)
         {
+            if (!initialized)
+            {
+                Awake();
+            }
             if (SelectedIndex != -1)
             {
                 if (bindDisplay[SelectedIndex])
@@ -144,6 +167,10 @@ namespace Milease.Core.UI
 
         public void SlideTo(float position, bool withoutTransition = false)
         {
+            if (!initialized)
+            {
+                Awake();
+            }
             targetPos = position;
             transTime = 0f;
             if (withoutTransition)
