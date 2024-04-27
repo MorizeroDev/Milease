@@ -37,21 +37,17 @@ namespace Milease.Core.Animation
                     _ => null
                 };
 
+                ToValue = toValue;
                 if (ValueTypeInfo == typeof(string))
                 {
                     ValueType = ValueTypeEnum.Other;
-                    ToValue = toValue;
                     return;
                 }
                 else if (ValueTypeInfo!.IsPrimitive)
                 {
                     ValueType = ValueTypeEnum.PrimitiveType;
-                    ToValue = toValue;
-                    return;
-                }
-                else
-                {
                     ToValue = Convert.ChangeType(toValue, TypeCode.Double);
+                    return;
                 }
 
                 var curType = ValueTypeInfo;
