@@ -77,7 +77,7 @@ namespace Milease.Core.UI
             }
             OnSelectEvent.Invoke(Index);
             OnSelect(eventData);
-            ParentListView.Select(Index);
+            ParentListView.Select(Index, true);
             clickAnimator?.Play();
         }
     }
