@@ -21,7 +21,7 @@ namespace Milease.Core.Manager
             Instance = go.GetComponent<MilInstantAnimatorManager>();
         }
 
-        public readonly List<MilInstantAnimator> Animations = new();
+        public static readonly List<MilInstantAnimator> Animations = new();
 
         private void Update()
         {
