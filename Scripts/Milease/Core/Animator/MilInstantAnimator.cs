@@ -91,6 +91,7 @@ namespace Milease.Core.Animator
             {
                 Reset();
             }
+            MilInstantAnimatorManager.EnsureInitialized();
             MilInstantAnimatorManager.Instance.Animations.Add(this);
         }
 

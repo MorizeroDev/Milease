@@ -128,6 +128,10 @@ namespace Milease.Core.Animation
                 MemberTypes.Property => ((PropertyInfo)ani.BindMember).GetValue(ani.Target),
                 _ => null
             };
+            if (ani.ValueType == ValueTypeEnum.PrimitiveType)
+            {
+                ani.StartValue = Convert.ChangeType(ani.StartValue, TypeCode.Double);
+            }
         }
     }
 }

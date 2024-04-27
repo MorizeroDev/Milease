@@ -126,6 +126,7 @@ namespace Milease.Core.Animator
                 MilStateAnimation.ApplyState(val, 1f);
             }
             Time = CurrentAnimationState.Duration;
+            MilStateAnimatorManager.EnsureInitialized();
             if (!MilStateAnimatorManager.Animators.Contains(this))
                 MilStateAnimatorManager.Animators.Add(this);
             return this;

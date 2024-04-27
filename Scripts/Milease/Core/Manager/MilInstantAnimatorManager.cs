@@ -7,10 +7,14 @@ namespace Milease.Core.Manager
 {
     public class MilInstantAnimatorManager : MonoBehaviour
     {
-        public static readonly MilInstantAnimatorManager Instance;
+        public static MilInstantAnimatorManager Instance;
 
-        static MilInstantAnimatorManager()
+        public static void EnsureInitialized()
         {
+            if (Instance)
+            {
+                return;
+            }
             var go = new GameObject("[MilInstantAnimatorManager]", typeof(MilInstantAnimatorManager));
             DontDestroyOnLoad(go);
             go.SetActive(true);
