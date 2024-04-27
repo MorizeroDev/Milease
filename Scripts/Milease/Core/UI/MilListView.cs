@@ -24,6 +24,7 @@ namespace Milease.Core.UI
         
         private readonly List<MilListViewItem> bindDisplay = new();
         private readonly List<MilListViewItem> display = new();
+        private MilListViewItem tempDisplay;
         private float ItemSize;
         private Vector2 ItemPivot;
         private Vector2 ItemAnchorMin, ItemAnchorMax;
@@ -44,7 +45,7 @@ namespace Milease.Core.UI
         private readonly Stopwatch watch = new Stopwatch();
 
         private float AnchorOffset;
-
+        
         private bool initialized = false;
 
         private void Awake()
@@ -67,6 +68,9 @@ namespace Milease.Core.UI
             
             Position = GetOriginPointPosition();
             targetPos = Position;
+            var go = Instantiate(ItemPrefab, transform);
+            tempDisplay = go.GetComponent<MilListViewItem>();
+            go.SetActive(false);
             initialized = true;
         }
 
@@ -155,7 +159,14 @@ namespace Milease.Core.UI
             SelectedIndex = index;
             if (SelectedIndex < 0 || SelectedIndex >= Items.Count)
                 return;
-            if (bindDisplay[SelectedIndex])
+            if (!bindDisplay[SelectedIndex] && !dontCall)
+            {
+                tempDisplay.Binding = Items[SelectedIndex];
+                tempDisplay.Index = SelectedIndex;
+                tempDisplay.ParentListView = this;
+                tempDisplay.OnSelect(null);
+            }
+            else if (bindDisplay[SelectedIndex])
             {
                 bindDisplay[SelectedIndex].animator.Transition(MilListViewItem.UIState.Selected);
                 if (!dontCall)
@@ -163,6 +174,7 @@ namespace Milease.Core.UI
                     bindDisplay[SelectedIndex].OnSelect(null);
                 }
             }
+
         }
 
         public void SlideTo(float position, bool withoutTransition = false)
