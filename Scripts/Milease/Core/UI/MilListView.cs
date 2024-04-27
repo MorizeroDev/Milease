@@ -192,6 +192,15 @@ namespace Milease.Core.UI
             }
         }
 
+        public float GetItemPosition(int index)
+        {
+            if (!initialized)
+            {
+                Awake();
+            }
+            return index * (ItemSize + Spacing) + StartPadding;
+        }
+
         private void CheckObjectPool(int cnt)
         {
             if (display.Count > cnt)
