@@ -77,12 +77,11 @@ namespace Milease.Core.Animator
             var state = StateList.Find(x => x.StateID == id);
             foreach (var val in states)
             {
-                var ani = new MilStateAnimation.AnimationValue(val.Target, val.Member)
+                var ani = new MilStateAnimation.AnimationValue(val.Target, val.Member, val.ToValue)
                 {
                     EaseType = val.EaseType,
                     EaseFunction = val.EaseFunction,
-                    CustomCurve = val.CustomCurve,
-                    ToValue = val.ToValue
+                    CustomCurve = val.CustomCurve
                 };
                 var index = state.Values.FindIndex(x => x.Target == val.Target && x.Member == val.Member);
                 if (index == -1)
@@ -106,12 +105,11 @@ namespace Milease.Core.Animator
             };
             foreach (var val in states)
             {
-                state.Values.Add(new MilStateAnimation.AnimationValue(val.Target, val.Member)
+                state.Values.Add(new MilStateAnimation.AnimationValue(val.Target, val.Member, val.ToValue)
                 {
                     EaseType = val.EaseType,
                     EaseFunction = val.EaseFunction,
-                    CustomCurve = val.CustomCurve,
-                    ToValue = val.ToValue
+                    CustomCurve = val.CustomCurve
                 });
             }
             StateList.Add(state);

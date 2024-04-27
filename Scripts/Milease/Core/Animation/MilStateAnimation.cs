@@ -25,7 +25,7 @@ namespace Milease.Core.Animation
             public readonly MethodInfo AdditionOperator, SubtractionOperator, MultiplyOperator;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public AnimationValue(object target, string member)
+            public AnimationValue(object target, string member, object toValue)
             {
                 Target = target;
                 Member = member;
@@ -40,12 +40,18 @@ namespace Milease.Core.Animation
                 if (ValueTypeInfo == typeof(string))
                 {
                     ValueType = ValueTypeEnum.Other;
+                    ToValue = toValue;
                     return;
                 }
                 else if (ValueTypeInfo!.IsPrimitive)
                 {
                     ValueType = ValueTypeEnum.PrimitiveType;
+                    ToValue = toValue;
                     return;
+                }
+                else
+                {
+                    ToValue = Convert.ChangeType(toValue, TypeCode.Double);
                 }
 
                 var curType = ValueTypeInfo;
