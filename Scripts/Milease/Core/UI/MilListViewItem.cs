@@ -53,11 +53,13 @@ namespace Milease.Core.UI
             animator.SetDefaultState(UIState.Default);
             clickAnimator = ConfigClickAnimation();
             GameObject = gameObject;
+            OnInitialize();
         }
         
         private void OnDestroy()
         {
             animator.Stop();
+            OnTerminate();
         }
         
         protected abstract IEnumerable<MilStateParameter> ConfigDefaultState();
