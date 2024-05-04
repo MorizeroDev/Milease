@@ -116,10 +116,16 @@ namespace Milease.Core
                     {
                         MemberTypes.Field => ((FieldInfo)BindMember).GetValue(target),
                         MemberTypes.Property => ((PropertyInfo)BindMember).GetValue(target),
-                        _ => null
+                        _ => throw new Exception($"Target member isn't a field or property.")
                     };
                 }
-            } 
+            }
+
+            if (BindMember == null)
+            {
+                throw new Exception(
+                    $"Target object doesn't have a field/property of {string.Join('.', animation.Binding)}");
+            }
             
             skip_seek_member:
 

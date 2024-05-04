@@ -29,12 +29,19 @@ namespace Milease.Core.Animation
             {
                 Target = target;
                 Member = member;
-                BindMember = target.GetType().GetMember(member)[0];
+
+                var members = target.GetType().GetMember(member);
+                if (members.Length == 0)
+                {
+                    throw new Exception($"Target object doesn't have a field/property named {member}");
+                }
+                BindMember = members[0];
+                
                 ValueTypeInfo = BindMember.MemberType switch
                 {
                     MemberTypes.Field => ((FieldInfo)BindMember).FieldType,
                     MemberTypes.Property => ((PropertyInfo)BindMember).PropertyType,
-                    _ => null
+                    _ => throw new Exception($"Target member isn't a field or property.")
                 };
 
                 ToValue = toValue;

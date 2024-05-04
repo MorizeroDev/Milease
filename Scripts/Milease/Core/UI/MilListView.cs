@@ -54,6 +54,11 @@ namespace Milease.Core.UI
             {
                 return;
             }
+
+            if (!ItemPrefab.TryGetComponent<MilListViewItem>(out _))
+            {
+                throw new Exception($"Item prefab '{ItemPrefab.name}' doesn't have a MilListViewItem component.");
+            }
             var itemRect = ItemPrefab.GetComponent<RectTransform>();
             ItemSize = Vertical ? itemRect.rect.height : itemRect.rect.width;
             RectTransform = GetComponent<RectTransform>();
