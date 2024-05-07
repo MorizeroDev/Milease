@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Milease.Core.Animation;
 using Milease.Enums;
+using Milease.Milease.Exception;
 using UnityEngine;
 
 namespace Milease.Core
@@ -79,6 +80,11 @@ namespace Milease.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public RuntimeAnimationPart(object target, MilAnimation.AnimationPart animation, Type baseType, MemberInfo memberInfo = null)
         {
+            if (target == null)
+            {
+                throw new MilTargetNotFoundException();
+            }
+            
             Source = animation;
             
             var curType = baseType;
@@ -116,15 +122,14 @@ namespace Milease.Core
                     {
                         MemberTypes.Field => ((FieldInfo)BindMember).GetValue(target),
                         MemberTypes.Property => ((PropertyInfo)BindMember).GetValue(target),
-                        _ => throw new Exception($"Target member isn't a field or property.")
+                        _ => throw new MilUnsupportedMemberTypeException(BindMember.Name)
                     };
                 }
             }
 
             if (BindMember == null)
             {
-                throw new Exception(
-                    $"Target object doesn't have a field/property of {string.Join('.', animation.Binding)}");
+                throw new MilMemberNotFoundException(string.Join('.', animation.Binding));
             }
             
             skip_seek_member:

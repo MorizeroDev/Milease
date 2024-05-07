@@ -7,6 +7,7 @@ using Milease.Core;
 using Milease.Core.Animation;
 using Milease.Core.Animator;
 using Milease.Enums;
+using Milease.Milease.Exception;
 using Milease.Utils;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -40,7 +41,12 @@ namespace Milease.Utils
         {
             var animation = new MilInstantAnimator();
             var type = target.GetType();
-            var info = type.GetMember(memberName)[0];
+            var members = type.GetMember(memberName);
+            if (members.Length == 0)
+            {
+                throw new MilMemberNotFoundException(memberName);
+            }
+            var info = members[0];
             animation.Collection.Add(new List<RuntimeAnimationPart>()
             {
                 new (target, MilAnimation.SimplePartTo(toValue, duration, delay, easeFunction, easeType), info.MemberType switch
@@ -64,7 +70,12 @@ namespace Milease.Utils
         {
             var animation = new MilInstantAnimator();
             var type = target.GetType();
-            var info = type.GetMember(memberName)[0];
+            var members = type.GetMember(memberName);
+            if (members.Length == 0)
+            {
+                throw new MilMemberNotFoundException(memberName);
+            }
+            var info = members[0];
             animation.Collection.Add(new List<RuntimeAnimationPart>()
             {
                 new (target, MilAnimation.SimplePart(startValue, delay, easeFunction, easeType, blendingMode), info.MemberType switch
@@ -89,7 +100,12 @@ namespace Milease.Utils
         {
             var animation = new MilInstantAnimator();
             var type = target.GetType();
-            var info = type.GetMember(memberName)[0];
+            var members = type.GetMember(memberName);
+            if (members.Length == 0)
+            {
+                throw new MilMemberNotFoundException(memberName);
+            }
+            var info = members[0];
             animation.Collection.Add(new List<RuntimeAnimationPart>()
             {
                 new (target, MilAnimation.SimplePart(startValue, toValue, duration, delay, easeFunction, easeType, blendingMode), info.MemberType switch
@@ -106,7 +122,12 @@ namespace Milease.Utils
         {
             var animation = new MilInstantAnimator();
             var type = target.GetType();
-            var info = type.GetMember(memberName)[0];
+            var members = type.GetMember(memberName);
+            if (members.Length == 0)
+            {
+                throw new MilMemberNotFoundException(memberName);
+            }
+            var info = members[0];
             animation.Collection.Add(
                 animations.Select(x => 
                         new RuntimeAnimationPart(target, x, info.MemberType switch

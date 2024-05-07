@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Milease.Enums;
+using Milease.Milease.Exception;
 using UnityEngine;
 
 namespace Milease.Core.Animation
@@ -27,13 +28,13 @@ namespace Milease.Core.Animation
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public AnimationValue(object target, string member, object toValue)
             {
-                Target = target;
+                Target = target ?? throw new MilTargetNotFoundException();
                 Member = member;
 
                 var members = target.GetType().GetMember(member);
                 if (members.Length == 0)
                 {
-                    throw new Exception($"Target object doesn't have a field/property named {member}");
+                    throw new MilMemberNotFoundException(member);
                 }
                 BindMember = members[0];
                 
@@ -41,7 +42,7 @@ namespace Milease.Core.Animation
                 {
                     MemberTypes.Field => ((FieldInfo)BindMember).FieldType,
                     MemberTypes.Property => ((PropertyInfo)BindMember).PropertyType,
-                    _ => throw new Exception($"Target member isn't a field or property.")
+                    _ => throw new MilUnsupportedMemberTypeException(BindMember.Name)
                 };
 
                 ToValue = toValue;
