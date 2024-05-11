@@ -160,26 +160,30 @@ namespace Milease.Core.UI
                     bindDisplay[SelectedIndex].animator.Transition(MilListViewItem.UIState.Default);
                 }
             }
-
-            SelectedIndex = index;
-            if (SelectedIndex < 0 || SelectedIndex >= Items.Count)
-                return;
-            if (!bindDisplay[SelectedIndex] && !dontCall)
+            
+            if (index < 0 || index >= Items.Count)
             {
-                tempDisplay.Binding = Items[SelectedIndex];
-                tempDisplay.Index = SelectedIndex;
+                SelectedIndex = index;
+                return;
+            }
+            
+            if (!bindDisplay[index] && !dontCall)
+            {
+                tempDisplay.Binding = Items[index];
+                tempDisplay.Index = index;
                 tempDisplay.ParentListView = this;
                 tempDisplay.OnSelect(null);
             }
-            else if (bindDisplay[SelectedIndex])
+            else if (bindDisplay[index])
             {
-                bindDisplay[SelectedIndex].animator.Transition(MilListViewItem.UIState.Selected);
+                bindDisplay[index].animator.Transition(MilListViewItem.UIState.Selected);
                 if (!dontCall)
                 {
-                    bindDisplay[SelectedIndex].OnSelect(null);
+                    bindDisplay[index].OnSelect(null);
                 }
             }
 
+            SelectedIndex = index;
         }
 
         public void SlideTo(float position, bool withoutTransition = false)
