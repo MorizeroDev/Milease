@@ -16,6 +16,12 @@ namespace Milease.Utils
 {
     public static class MilInstantAnimatorExtension
     {
+        public static MilInstantAnimator AsMileaseKeyEvent(this Action action, float delay = 0f)
+            => Milease(action, (_, _) => action.Invoke(), null, 0f, delay);
+        
+        public static MilInstantAnimator AsMileaseHandleFunction(this MileaseHandleFunction func, float delay = 0f)
+            => Milease(func, func, null, 0f, delay);
+        
         public static MilInstantAnimator MileaseAdditive(this object target, MileaseHandleFunction handleFunction,
             MileaseHandleFunction resetFunction, float duration, float delay = 0f,
             EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In)
