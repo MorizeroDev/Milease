@@ -38,6 +38,13 @@ namespace Milease.Core.Manager
                 for (var j = 0; j < cCnt; j++)
                 {
                     var ani = collection[j];
+
+                    latestTime = Mathf.Max(latestTime, ani.Source.StartTime + ani.Source.Duration);
+                    if (set.Time < ani.Source.StartTime)
+                    {
+                        continue;
+                    }
+                    
                     var pro = 1f;
                     if (ani.Source.Duration > 0f)
                     {
@@ -46,7 +53,6 @@ namespace Milease.Core.Manager
 
                     var easedPro = ani.Source.CustomCurve?.Evaluate(pro) ?? EaseUtility.GetEasedProgress(pro, ani.Source.EaseType, ani.Source.EaseFunction);
                     RuntimeAnimationPart.SetValue(ani, easedPro);
-                    latestTime = Mathf.Max(latestTime, ani.Source.StartTime + ani.Source.Duration);
                 }
 
                 if (set.Time >= latestTime)
