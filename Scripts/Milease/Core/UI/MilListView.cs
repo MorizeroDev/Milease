@@ -76,6 +76,11 @@ namespace Milease.Core.UI
             var go = Instantiate(ItemPrefab, transform);
             tempDisplay = go.GetComponent<MilListViewItem>();
             go.SetActive(false);
+            
+            var size = Vertical ? RectTransform.rect.height : RectTransform.rect.width;
+            var cnt = Mathf.CeilToInt(size / (ItemSize + Spacing) + 2);
+            CheckObjectPool(cnt);
+            
             initialized = true;
         }
 
@@ -229,8 +234,10 @@ namespace Milease.Core.UI
                 for (var i = 0; i < cnt2; i++)
                 {
                     var go = Instantiate(ItemPrefab, transform);
-                    display.Add(go.GetComponent<MilListViewItem>());
-                    go.SetActive(true);
+                    var item = go.GetComponent<MilListViewItem>();
+                    item.Initialize();
+                    display.Add(item);
+                    go.SetActive(false);
                 }
             }
         }
@@ -371,7 +378,7 @@ namespace Milease.Core.UI
 
         public List<MilListViewItem> GetDisplayingItems()
         {
-            return display.FindAll(x => x.Index != -1);
+            return display.FindAll(_ => true);
         }
 
         private float GetOriginPointPosition()

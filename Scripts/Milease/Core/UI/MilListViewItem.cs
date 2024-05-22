@@ -41,7 +41,7 @@ namespace Milease.Core.UI
         public RectTransform RectTransform { get; private set; }
         public GameObject GameObject { get; private set; }
         
-        private void Awake()
+        public void Initialize()
         {
             RectTransform = GetComponent<RectTransform>();
             var state = ConfigDefaultState();
