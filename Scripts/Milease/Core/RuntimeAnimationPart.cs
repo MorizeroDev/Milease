@@ -92,33 +92,28 @@ namespace Milease.Core
                     return true;
                 }
             }
-            
-            switch (resetMode)
-            {
-                case AnimationResetMode.ResetToOriginalState:
-                    if (BindMember.MemberType == MemberTypes.Field)
-                    {
-                        ((FieldInfo)BindMember).SetValue(Target, OriginalValue);
-                    }
-                    else
-                    {
-                        ((PropertyInfo)BindMember).SetValue(Target, OriginalValue);
-                    }
-                    break;
-                case AnimationResetMode.ResetToInitialState:
-                    if (BindMember.MemberType == MemberTypes.Field)
-                    {
-                        ((FieldInfo)BindMember).SetValue(Target, StartValue);
-                    }
-                    else
-                    {
-                        ((PropertyInfo)BindMember).SetValue(Target, StartValue);
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(resetMode), resetMode, null);
-            }
 
+            var targetValue = resetMode switch
+            {
+                AnimationResetMode.ResetToOriginalState => OriginalValue,
+                AnimationResetMode.ResetToInitialState =>
+                    ValueType switch
+                    {
+                        ValueTypeEnum.PrimitiveType => Convert.ChangeType(StartValue, ValueTypeInfo),
+                        _ => StartValue
+                    },
+                _ => throw new ArgumentOutOfRangeException(nameof(resetMode), resetMode, null)
+            };
+            
+            if (BindMember.MemberType == MemberTypes.Field)
+            {
+                ((FieldInfo)BindMember).SetValue(Target, targetValue);
+            }
+            else
+            {
+                ((PropertyInfo)BindMember).SetValue(Target, targetValue);
+            }
+            
             return true;
         }
         
