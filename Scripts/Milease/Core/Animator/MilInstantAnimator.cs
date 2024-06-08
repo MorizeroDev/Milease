@@ -34,6 +34,16 @@ namespace Milease.Core.Animator
             return this;
         }
         
+        public MilInstantAnimator While(params MilInstantAnimator[] animations)
+        {
+            foreach (var ani in animations)
+            {
+                While(ani);
+            }
+            
+            return this;
+        }
+        
         public MilInstantAnimator While(MilInstantAnimator animation)
         {
             foreach (var part in animation.Collection)
@@ -42,6 +52,28 @@ namespace Milease.Core.Animator
                 {
                     Collection[^1].Add(ani);
                 }
+            }
+            
+            return this;
+        }
+        
+        public MilInstantAnimator ThenOneByOne(params MilInstantAnimator[] animations)
+        {
+            foreach (var ani in animations)
+            {
+                Then(ani);
+            }
+            
+            return this;
+        }
+        
+        public MilInstantAnimator Then(params MilInstantAnimator[] animations)
+        {
+            Then(animations[0]);
+            var cnt = animations.Length;
+            for (var i = 1; i < cnt; i++)
+            {
+                While(animations[i]);
             }
             
             return this;
