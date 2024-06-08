@@ -62,7 +62,14 @@ namespace Milease.Core.Animator
             Time = 0f;
             var paths = new List<string>();
             var cnt = Collection.Count;
-            for (var i = 0; i <= Math.Min(PlayIndex, cnt - 1); i++)
+            var resetCount = mode switch
+            {
+                RuntimeAnimationPart.AnimationResetMode.ResetToOriginalState => Math.Min(PlayIndex + 1, cnt),
+                RuntimeAnimationPart.AnimationResetMode.ResetToInitialState => cnt,
+                _ => 0
+            };
+            
+            for (var i = 0; i < resetCount; i++)
             {
                 foreach (var ani in Collection[i])
                 {

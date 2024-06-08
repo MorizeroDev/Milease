@@ -65,6 +65,7 @@ namespace Milease.Core
         {
             if (!IsPrepared && resetMode == AnimationResetMode.ResetToOriginalState)
             {
+                // If the original state hasn't been calculated yet
                 return false;
             }
             
@@ -86,7 +87,7 @@ namespace Milease.Core
                 resetMode = AnimationResetMode.ResetToOriginalState;
                 if (!IsPrepared)
                 {
-                    // If the original state hasn't calculated yet, skip resetting,
+                    // If the original state hasn't been calculated yet, skip resetting,
                     // but prevent resetting by subsequent animations.
                     return true;
                 }
@@ -114,6 +115,8 @@ namespace Milease.Core
                         ((PropertyInfo)BindMember).SetValue(Target, StartValue);
                     }
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(resetMode), resetMode, null);
             }
 
             return true;
