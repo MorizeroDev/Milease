@@ -7,12 +7,22 @@ namespace Milease.Core.Animator
     public class MilInstantAnimator
     {
         public readonly List<List<RuntimeAnimationPart>> Collection = new();
+
+        public RuntimeAnimationPart.AnimationResetMode DefaultResetMode =
+            RuntimeAnimationPart.AnimationResetMode.ResetToOriginalState;
+        
         internal int PlayIndex = 0;
         internal float Time = 0f;
 
         public static MilInstantAnimator Empty()
         {
             return new MilInstantAnimator();
+        }
+        
+        public MilInstantAnimator UsingResetMode(RuntimeAnimationPart.AnimationResetMode mode)
+        {
+            DefaultResetMode = mode;
+            return this;
         }
         
         public MilInstantAnimator Delayed(float time)
@@ -46,8 +56,8 @@ namespace Milease.Core.Animator
             
             return this;
         }
-
-        public void Reset()
+        
+        public void Reset(RuntimeAnimationPart.AnimationResetMode mode = RuntimeAnimationPart.AnimationResetMode.ResetToOriginalState)
         {
             Time = 0f;
             var paths = new List<string>();
@@ -58,7 +68,7 @@ namespace Milease.Core.Animator
                 {
                     if (paths.Contains(ani.MemberPath))
                         continue;
-                    if (ani.Reset())
+                    if (ani.Reset(mode))
                     {
                         paths.Add(ani.MemberPath);
                     }
@@ -83,13 +93,13 @@ namespace Milease.Core.Animator
         {
             if (MilInstantAnimatorManager.Animations.Contains(this))
             {
-                Reset();
+                Reset(DefaultResetMode);
                 return;
             }
 
-            if (PlayIndex >= Collection.Count)
+            if (PlayIndex >= Collection.Count || DefaultResetMode == RuntimeAnimationPart.AnimationResetMode.ResetToInitialState)
             {
-                Reset();
+                Reset(DefaultResetMode);
             }
             MilInstantAnimatorManager.EnsureInitialized();
             MilInstantAnimatorManager.Animations.Add(this);
@@ -97,7 +107,7 @@ namespace Milease.Core.Animator
 
         public void Stop()
         {
-            Reset();
+            Reset(DefaultResetMode);
             Pause();
         }
     }

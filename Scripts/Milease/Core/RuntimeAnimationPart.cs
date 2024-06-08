@@ -11,6 +11,19 @@ namespace Milease.Core
 {
     public class RuntimeAnimationPart
     {
+        public enum AnimationResetMode
+        {
+            /// <summary>
+            /// Resets to the state of the target object before it was affected by the animator (undo animator changes)
+            /// </summary>
+            ResetToOriginalState,
+
+            /// <summary>
+            /// Resets the target's state to the initial state as defined by the animation settings (ready to start playing)
+            /// </summary>
+            ResetToInitialState
+        }
+        
         public readonly MileaseHandleFunction HandleFunction;
         public readonly MileaseHandleFunction ResetFunction;
         public readonly MemberInfo BindMember;
@@ -48,9 +61,9 @@ namespace Milease.Core
             lastProgress = -1f;
         }
         
-        public bool Reset()
+        public bool Reset(AnimationResetMode resetMode)
         {
-            if (!IsPrepared)
+            if (!IsPrepared && resetMode == AnimationResetMode.ResetToOriginalState)
             {
                 return false;
             }
@@ -60,18 +73,47 @@ namespace Milease.Core
                 ResetFunction(Target, 0f);
                 return true;
             }
+            
             if (ValueType == ValueTypeEnum.SelfHandle)
             {
                 return true;
             }
-            
-            if (BindMember.MemberType == MemberTypes.Field)
+
+            if (Source.PendingTo || Source.BlendingMode == MilAnimation.BlendingMode.Additive)
             {
-                ((FieldInfo)BindMember).SetValue(Target, OriginalValue);
+                // MileaseTo or additive blending animation doesn't have a initial state,
+                // force to reset to original state instead.
+                resetMode = AnimationResetMode.ResetToOriginalState;
+                if (!IsPrepared)
+                {
+                    // If the original state hasn't calculated yet, skip resetting,
+                    // but prevent resetting by subsequent animations.
+                    return true;
+                }
             }
-            else
+            
+            switch (resetMode)
             {
-                ((PropertyInfo)BindMember).SetValue(Target, OriginalValue);
+                case AnimationResetMode.ResetToOriginalState:
+                    if (BindMember.MemberType == MemberTypes.Field)
+                    {
+                        ((FieldInfo)BindMember).SetValue(Target, OriginalValue);
+                    }
+                    else
+                    {
+                        ((PropertyInfo)BindMember).SetValue(Target, OriginalValue);
+                    }
+                    break;
+                case AnimationResetMode.ResetToInitialState:
+                    if (BindMember.MemberType == MemberTypes.Field)
+                    {
+                        ((FieldInfo)BindMember).SetValue(Target, StartValue);
+                    }
+                    else
+                    {
+                        ((PropertyInfo)BindMember).SetValue(Target, StartValue);
+                    }
+                    break;
             }
 
             return true;
