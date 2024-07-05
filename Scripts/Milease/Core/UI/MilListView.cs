@@ -11,6 +11,11 @@ namespace Milease.Core.UI
 {
     public class MilListView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IScrollHandler
     {
+        public enum AlignMode
+        {
+            Normal, Center
+        }
+        
         public int SelectedIndex { get; internal set; } = -1;
 
         [HideInInspector]
@@ -21,6 +26,7 @@ namespace Milease.Core.UI
         public float Spacing;
         public float MouseScrollSensitivity = 300f;
         public float StartPadding, EndPadding, Indentation;
+        public AlignMode Align = AlignMode.Normal;
         
         private readonly List<MilListViewItem> bindDisplay = new();
         private readonly List<MilListViewItem> display = new();
@@ -59,7 +65,29 @@ namespace Milease.Core.UI
             {
                 throw new Exception($"Item prefab '{ItemPrefab.name}' doesn't have a MilListViewItem component.");
             }
+            
             var itemRect = ItemPrefab.GetComponent<RectTransform>();
+            if (Vertical)
+            {
+                itemRect.pivot = new Vector2(itemRect.pivot.x, 1f);
+                if (Align == AlignMode.Center)
+                {
+                    Debug.LogWarning($"Vertical mode hasn't supported center align mode yet.");
+                }
+            }
+            else
+            {
+                switch (Align)
+                {
+                    case AlignMode.Normal:
+                        itemRect.pivot = new Vector2(0f, itemRect.pivot.y);
+                        break;
+                    case AlignMode.Center:
+                        itemRect.pivot = new Vector2(0.5f, itemRect.pivot.y);
+                        break;
+                }
+            }
+            
             ItemSize = Vertical ? itemRect.rect.height : itemRect.rect.width;
             RectTransform = GetComponent<RectTransform>();
             ItemPivot = itemRect.pivot;
