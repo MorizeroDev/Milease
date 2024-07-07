@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Milease.Enums;
 using Milease.Utils;
 using UnityEngine;
@@ -54,7 +55,13 @@ namespace Milease.Core.UI
         
         private bool initialized = false;
 
-        private Dictionary<object, int> itemTracker = new();
+        private class ItemTracker
+        {
+            public object ItemData;
+            public string UUID = Guid.NewGuid().ToString();
+        }
+        
+        private readonly Dictionary<ItemTracker, int> itemTracker = new();
 
         private void Awake()
         {
@@ -146,11 +153,14 @@ namespace Milease.Core.UI
                     obj.Index--;
                 }
             }
-
-            if (itemTracker.ContainsKey(Items[index]))
+            
+            foreach (var tracker in itemTracker.Keys.Where(x => x.ItemData == Items[index]))
             {
-                Select(-1);
-                itemTracker.Remove(Items[index]);
+                if (SelectedIndex != -1)
+                {
+                    Select(-1);
+                }
+                itemTracker.Remove(tracker);
             }
             
             foreach (var pair in itemTracker)
@@ -213,8 +223,11 @@ namespace Milease.Core.UI
                 return;
             }
 
-            var item = Items[index];
-            itemTracker.Add(item, index);
+            var tracker = new ItemTracker()
+            {
+                ItemData = Items[index]
+            };
+            itemTracker.Add(tracker, index);
             
             if (!bindDisplay[index] && !dontCall)
             {
@@ -232,10 +245,10 @@ namespace Milease.Core.UI
                 }
             }
 
-            if (itemTracker.ContainsKey(item))
+            if (itemTracker.ContainsKey(tracker))
             {
-                SelectedIndex = itemTracker[item];
-                itemTracker.Remove(item);
+                SelectedIndex = itemTracker[tracker];
+                itemTracker.Remove(tracker);
             }
         }
 
