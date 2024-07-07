@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace Milease.Utils.Colors
+namespace Milease.Colors
 {
     public struct Oklab
     {
