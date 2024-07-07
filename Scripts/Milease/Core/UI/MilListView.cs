@@ -54,6 +54,8 @@ namespace Milease.Core.UI
         
         private bool initialized = false;
 
+        private Dictionary<object, int> itemTracker = new();
+
         private void Awake()
         {
             if (initialized)
@@ -133,10 +135,6 @@ namespace Milease.Core.UI
                 Debug.LogWarning("Index out of range.");
                 return false;
             }
-            if (SelectedIndex == index)
-            {
-                Select(-1);
-            }
             if (bindDisplay[index])
             {
                 bindDisplay[index].Index = -1;
@@ -146,6 +144,20 @@ namespace Milease.Core.UI
                 if (obj.Index > index)
                 {
                     obj.Index--;
+                }
+            }
+
+            if (itemTracker.ContainsKey(Items[index]))
+            {
+                Select(-1);
+                itemTracker.Remove(Items[index]);
+            }
+            
+            foreach (var pair in itemTracker)
+            {
+                if (pair.Value > index)
+                {
+                    itemTracker[pair.Key]--;
                 }
             }
             Items.RemoveAt(index);
@@ -165,6 +177,7 @@ namespace Milease.Core.UI
         
         public void Clear()
         {
+            itemTracker.Clear();
             if (!initialized)
             {
                 Awake();
@@ -199,6 +212,9 @@ namespace Milease.Core.UI
                 SelectedIndex = index;
                 return;
             }
+
+            var item = Items[index];
+            itemTracker.Add(item, index);
             
             if (!bindDisplay[index] && !dontCall)
             {
@@ -216,7 +232,11 @@ namespace Milease.Core.UI
                 }
             }
 
-            SelectedIndex = index;
+            if (itemTracker.ContainsKey(item))
+            {
+                SelectedIndex = itemTracker[item];
+                itemTracker.Remove(item);
+            }
         }
 
         public void SlideTo(float position, bool withoutTransition = false)
