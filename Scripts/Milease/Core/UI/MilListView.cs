@@ -268,9 +268,20 @@ namespace Milease.Core.UI
                 var len = (ItemSize + Spacing) * Items.Count;
                 var minLength = Mathf.Abs(position - Position);
                 var tmp = position;
-                while (tmp < len * 3f)
+                bool isInBoundary()
                 {
-                    tmp += len;
+                    if (Vertical)
+                    {
+                        return tmp < len * 3f;
+                    }
+                    else
+                    {
+                        return tmp > len * -3f;
+                    }
+                }
+                while (isInBoundary())
+                {
+                    tmp += len * (Vertical ? 1f : -1f);
                     var dis = Mathf.Abs(tmp - Position);
                     if (dis < minLength)
                     {
@@ -531,11 +542,11 @@ namespace Milease.Core.UI
                 // secretly decrease the position number
                 var tmp = Position;
                 var len = (ItemSize + Spacing) * Items.Count;
-                while (tmp < len)
+                while (tmp < len * (Vertical ? 1f : -3f))
                 {
                     tmp += len;
                 }
-                while (tmp > len * 3f)
+                while (tmp > len * (Vertical ? 3f : -1f))
                 {
                     tmp -= len;
                 }
