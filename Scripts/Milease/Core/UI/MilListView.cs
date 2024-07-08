@@ -5,6 +5,7 @@ using System.Linq;
 using Milease.Enums;
 using Milease.Utils;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using Debug = UnityEngine.Debug;
 
@@ -30,6 +31,8 @@ namespace Milease.Core.UI
         public AlignMode Align = AlignMode.Normal;
 
         public bool LoopList = false;
+
+        public UnityEvent OnScrollDone;
         
         private readonly List<MilListViewItem> bindDisplay = new();
         private readonly List<MilListViewItem> display = new();
@@ -350,7 +353,7 @@ namespace Milease.Core.UI
 
             var calPos = Vertical ? (Position - AnchorOffset) : (-Position + AnchorOffset);
             var start = Mathf.FloorToInt(calPos / (ItemSize + Spacing)) + (calPos < 0 ? 1 : 0);
-            var cnt = Mathf.CeilToInt(size / (ItemSize + Spacing) + 2);
+            var cnt = Mathf.CeilToInt(size / (ItemSize + Spacing) + 1);
 
             CheckObjectPool(cnt);
 
@@ -496,6 +499,7 @@ namespace Milease.Core.UI
             CheckLoopListPosition();
             targetPos = Position + (delta.magnitude * Mathf.Sign((Vertical ? delta.y : delta.x))) / time * 0.3f;
             CheckPosition();
+            OnScrollDone?.Invoke();
         }
 
         public void RefreshItemAppearance()
