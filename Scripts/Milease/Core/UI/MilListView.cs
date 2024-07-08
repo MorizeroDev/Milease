@@ -357,7 +357,7 @@ namespace Milease.Core.UI
 
             CheckObjectPool(cnt);
 
-            if (LoopList && Items.Count < cnt)
+            if (LoopList && Items.Count < cnt - 1)
             {
                 Debug.LogWarning($"Your item count({Items.Count}) is smaller than the list can display({cnt}), this may cause abnormal appearance.");
             }
