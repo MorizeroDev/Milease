@@ -262,6 +262,23 @@ namespace Milease.Core.UI
             {
                 Awake();
             }
+            if (LoopList)
+            {
+                // ensure that the slide progress is smooth in loop list
+                var len = (ItemSize + Spacing) * Items.Count;
+                var minLength = Mathf.Abs(position - Position);
+                var tmp = position;
+                while (tmp < len * 3f)
+                {
+                    tmp += len;
+                    var dis = Mathf.Abs(tmp - Position);
+                    if (dis < minLength)
+                    {
+                        minLength = dis;
+                        position = tmp;
+                    }
+                }
+            }
             targetPos = position;
             transTime = 0f;
             if (withoutTransition)
@@ -511,7 +528,6 @@ namespace Milease.Core.UI
         {
             if (LoopList)
             {
-                GetPositionBoundary(out var minPos, out var maxPos);
                 // secretly decrease the position number
                 var tmp = Position;
                 var len = (ItemSize + Spacing) * Items.Count;
