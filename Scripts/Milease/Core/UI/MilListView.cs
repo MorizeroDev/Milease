@@ -28,6 +28,8 @@ namespace Milease.Core.UI
         public float MouseScrollSensitivity = 300f;
         public float StartPadding, EndPadding, Indentation;
         public AlignMode Align = AlignMode.Normal;
+
+        public bool LoopList = false;
         
         private readonly List<MilListViewItem> bindDisplay = new();
         private readonly List<MilListViewItem> display = new();
@@ -172,6 +174,7 @@ namespace Milease.Core.UI
             }
             Items.RemoveAt(index);
             bindDisplay.RemoveAt(index);
+            CheckLoopListPosition();
             targetPos = Position;
             CheckPosition();
             return true;
@@ -199,6 +202,7 @@ namespace Milease.Core.UI
             Select(-1);
             bindDisplay.Clear();
             Items.Clear();
+            CheckLoopListPosition();
             targetPos = Position;
             CheckPosition();
         }
@@ -322,11 +326,40 @@ namespace Milease.Core.UI
 
             CheckObjectPool(cnt);
 
+            if (LoopList && Items.Count < cnt)
+            {
+                Debug.LogWarning($"Your item count({Items.Count}) is smaller than the list can display({cnt}), this may cause abnormal appearance.");
+            }
+
+            if (LoopList && start < 0)
+            {
+                start += Items.Count;
+            }
+
             // Check avaliable item object
             var avaliable = new List<MilListViewItem>();
             for (var i = 0; i < display.Count; i++)
             {
-                if (display[i].Index != -1 && (display[i].Index < start || display[i].Index >= start + cnt))
+                var canRecycle = false;
+                if (!LoopList)
+                {
+                    canRecycle = (display[i].Index != -1) && (display[i].Index < start || display[i].Index >= start + cnt);
+                }
+                else
+                {
+                    var b1 = start % Items.Count;
+                    var b2 = b1 + cnt;
+                    if (b2 >= Items.Count)
+                    {
+                        canRecycle = (display[i].Index != -1) && (display[i].Index < b1 && display[i].Index >= b2 % Items.Count);
+                    }
+                    else
+                    {
+                        canRecycle = (display[i].Index != -1) && (display[i].Index < b1 || display[i].Index >= b2);
+                    }
+                }
+                
+                if (canRecycle)
                 {
                     bindDisplay[display[i].Index] = null;
                     display[i].Index = -1;
@@ -342,18 +375,23 @@ namespace Milease.Core.UI
             var j = 0;
             for (var i = start; i < start + cnt; i++)
             {
-                if (i >= 0 && i < Items.Count && !bindDisplay[i])
+                var k = i;
+                if (LoopList)
+                {
+                    k %= Items.Count;
+                }
+                if (k >= 0 && k < Items.Count && !bindDisplay[k])
                 {
                     if (j >= avaliable.Count)
                     {
                         Debug.LogWarning("Lack of item object.");
                         continue;
                     }
-                    avaliable[j].Binding = Items[i];
-                    bindDisplay[i] = avaliable[j];
-                    avaliable[j].Index = i;
+                    avaliable[j].Binding = Items[k];
+                    bindDisplay[k] = avaliable[j];
+                    avaliable[j].Index = k;
                     avaliable[j].ParentListView = this;
-                    avaliable[j].animator.SetState(SelectedIndex == i ? MilListViewItem.UIState.Selected : MilListViewItem.UIState.Default);
+                    avaliable[j].animator.SetState(SelectedIndex == k ? MilListViewItem.UIState.Selected : MilListViewItem.UIState.Default);
                     avaliable[j].UpdateAppearance();
                     if (!avaliable[j].GameObject.activeSelf)
                     {
@@ -367,17 +405,22 @@ namespace Milease.Core.UI
             var pos = (Position - AnchorOffset) % (ItemSize + Spacing) - AnchorOffset;
             for (var i = start; i < start + cnt; i++)
             {
-                if (i >= 0 && i < Items.Count && bindDisplay[i])
+                var k = i;
+                if (LoopList)
+                {
+                    k %= Items.Count;
+                }
+                if (k >= 0 && k < Items.Count && bindDisplay[k])
                 {
                     var p = Vertical switch
                     {
                         true => new Vector2(Indentation, pos),
                         false => new Vector2(pos, Indentation)
                     };
-                    if (bindDisplay[i].RectTransform.anchoredPosition != p)
+                    if (bindDisplay[k].RectTransform.anchoredPosition != p)
                     {
-                        bindDisplay[i].RectTransform.anchoredPosition = p;
-                        bindDisplay[i].AdjustAppearance((pos - AnchorOffset) / size * -1f);
+                        bindDisplay[k].RectTransform.anchoredPosition = p;
+                        bindDisplay[k].AdjustAppearance((pos - AnchorOffset) / size * -1f);
                     }
                 }
 
@@ -422,6 +465,7 @@ namespace Milease.Core.UI
             OnDrag(eventData);
             var time = watch.ElapsedMilliseconds / 1000f;
             var delta = eventData.position - startPos;
+            CheckLoopListPosition();
             targetPos = Position + (delta.magnitude * Mathf.Sign((Vertical ? delta.y : delta.x))) / time * 0.3f;
             CheckPosition();
         }
@@ -452,20 +496,48 @@ namespace Milease.Core.UI
                    ) 
                    * (Vertical ? 1f : -1f);
         }
+
+        private void GetPositionBoundary(out float minPos, out float maxPos)
+        {
+            minPos = Vertical ?
+                GetOriginPointPosition():
+                Mathf.Min(0f, -1f * (Items.Count * (ItemSize + Spacing) - RectTransform.rect.width - ItemSize * ItemPivot.x + EndPadding));
+            maxPos = Vertical ?
+                Mathf.Max(0f, Items.Count * (ItemSize + Spacing) - RectTransform.rect.height - ItemSize * (1f - ItemPivot.y) + EndPadding) :
+                GetOriginPointPosition();
+        }
+        
+        private void CheckLoopListPosition()
+        {
+            if (LoopList)
+            {
+                GetPositionBoundary(out var minPos, out var maxPos);
+                // secretly decrease the position number
+                var tmp = Position;
+                var len = (ItemSize + Spacing) * Items.Count;
+                while (tmp < len)
+                {
+                    tmp += len;
+                }
+                while (tmp > len * 3f)
+                {
+                    tmp -= len;
+                }
+                Position = tmp;
+            }
+        }
         
         private void CheckPosition(bool noTrans = false)
         {
             originPos = Position;
-            var minPos = Vertical ?
-                    GetOriginPointPosition():
-                    Mathf.Min(0f, -1f * (Items.Count * (ItemSize + Spacing) - RectTransform.rect.width - ItemSize * ItemPivot.x + EndPadding));
-            var maxPos = Vertical ?
-                    Mathf.Max(0f, Items.Count * (ItemSize + Spacing) - RectTransform.rect.height - ItemSize * (1f - ItemPivot.y) + EndPadding) :
-                    GetOriginPointPosition();
-            if (targetPos < minPos || targetPos > maxPos)
+            
+            GetPositionBoundary(out var minPos, out var maxPos);
+            
+            if (!LoopList && (targetPos < minPos || targetPos > maxPos))
             {
                 targetPos = Mathf.Clamp(targetPos, minPos, maxPos);
             }
+            
             transTime = 0f;
             if (noTrans)
             {
@@ -481,6 +553,7 @@ namespace Milease.Core.UI
 
         public void OnScroll(PointerEventData eventData)
         {
+            CheckLoopListPosition();
             targetPos = Position - (Vertical ? eventData.scrollDelta.y : eventData.scrollDelta.x) * MouseScrollSensitivity * 2f;
             CheckPosition();
         }
