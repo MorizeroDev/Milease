@@ -58,6 +58,11 @@ namespace Milease.Core.Animator
         {
             var id = Convert.ToInt32(stateID);
             var state = StateList.Find(x => x.StateID == id);
+            if (state == null)
+            {
+                Debug.LogWarning($"Required state {stateID} not found.");
+                return this;
+            }
             var index = state.Values.FindIndex(x => x.Target == target && x.Member == member);
             if (index == -1)
             {
@@ -75,6 +80,11 @@ namespace Milease.Core.Animator
         {
             var id = Convert.ToInt32(stateID);
             var state = StateList.Find(x => x.StateID == id);
+            if (state == null)
+            {
+                Debug.LogWarning($"Required state {stateID} not found.");
+                return this;
+            }
             foreach (var val in states)
             {
                 var ani = new MilStateAnimation.AnimationValue(val.Target, val.Member, val.ToValue)
