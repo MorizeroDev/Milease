@@ -212,6 +212,11 @@ namespace Milease.Core.UI
 
         public void Select(int index, bool dontCall = false)
         {
+            Select(index, dontCall, null);
+        }
+        
+        internal void Select(int index, bool dontCall, PointerEventData args)
+        {
             if (!initialized)
             {
                 Awake();
@@ -241,14 +246,14 @@ namespace Milease.Core.UI
                 tempDisplay.Binding = Items[index];
                 tempDisplay.Index = index;
                 tempDisplay.ParentListView = this;
-                tempDisplay.OnSelect(null);
+                tempDisplay.OnSelect(args);
             }
             else if (bindDisplay[index])
             {
                 bindDisplay[index].animator.Transition(MilListViewItem.UIState.Selected);
                 if (!dontCall)
                 {
-                    bindDisplay[index].OnSelect(null);
+                    bindDisplay[index].OnSelect(args);
                 }
             }
 
