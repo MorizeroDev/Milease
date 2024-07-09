@@ -275,6 +275,20 @@ namespace Milease.Core.UI
                 // ensure that the slide progress is smooth in loop list
                 CheckLoopListPosition();
                 var len = (ItemSize + Spacing) * Items.Count;
+                if (Vertical)
+                {
+                    while (position > len)
+                    {
+                        position -= len;
+                    }
+                }
+                else
+                {
+                    while (position < len * -1f)
+                    {
+                        position += len;
+                    }
+                }
                 var minLength = Mathf.Abs(position - Position);
                 var tmp = position;
                 bool isInBoundary()
@@ -299,6 +313,8 @@ namespace Milease.Core.UI
                     }
                 }
             }
+
+            originPos = Position;
             targetPos = position;
             transTime = 0f;
             if (withoutTransition)
