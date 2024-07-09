@@ -352,6 +352,10 @@ namespace Milease.Core.UI
                 var pro = Mathf.Min(1f, transTime / transDuration);
                 Position = originPos + (targetPos - originPos) *
                     EaseUtility.GetEasedProgress(pro, EaseType.Out, EaseFunction.Circ);
+                if (transTime > transDuration && LoopList)
+                {
+                    CheckLoopListPosition();
+                }
             }
 
             var size = Vertical ? RectTransform.rect.height : RectTransform.rect.width;
