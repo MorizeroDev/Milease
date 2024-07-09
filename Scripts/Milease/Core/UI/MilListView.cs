@@ -273,6 +273,7 @@ namespace Milease.Core.UI
             if (LoopList)
             {
                 // ensure that the slide progress is smooth in loop list
+                CheckLoopListPosition();
                 var len = (ItemSize + Spacing) * Items.Count;
                 var minLength = Mathf.Abs(position - Position);
                 var tmp = position;
