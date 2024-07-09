@@ -22,6 +22,11 @@ namespace Milease.Core.Animator
         public MilStateAnimation.AnimationState CurrentAnimationState;
         public int CurrentState;
         internal float Time;
+
+        public bool IsWorking()
+        {
+            return Time < CurrentAnimationState.Duration;
+        }
         
         /// <summary>
         /// Set the state, but without transition, it will be changed immediately.

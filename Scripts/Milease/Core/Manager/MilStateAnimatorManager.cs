@@ -29,7 +29,7 @@ namespace Milease.Core.Manager
             for (var i = 0; i < cnt; i++)
             {
                 var animator = Animators[i];
-                if (animator.Time >= animator.CurrentAnimationState.Duration)
+                if (!animator.IsWorking())
                     continue;
                 animator.Time += Time.deltaTime;
                 var pro = Mathf.Min(1f, animator.Time / animator.CurrentAnimationState.Duration);
