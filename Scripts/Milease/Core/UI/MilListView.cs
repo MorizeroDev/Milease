@@ -521,9 +521,10 @@ namespace Milease.Core.UI
             watch.Stop();
             OnDrag(eventData);
             var time = watch.ElapsedMilliseconds / 1000f;
+            var factor = Vertical ? 1080f / Screen.height : 1920f / Screen.width;
             var delta = eventData.position - startPos;
             CheckLoopListPosition();
-            targetPos = Position + (delta.magnitude * Mathf.Sign((Vertical ? delta.y : delta.x))) / time * 0.3f;
+            targetPos = Position + (delta.magnitude * factor * Mathf.Sign((Vertical ? delta.y : delta.x))) / time * 0.3f;
             CheckPosition();
             OnScrollDone?.Invoke();
         }
