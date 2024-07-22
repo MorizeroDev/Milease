@@ -2,12 +2,14 @@
 using Milease.Core.Animator;
 using Milease.Utils;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Milease.Core.Manager
 {
     public class MilInstantAnimatorManager : MonoBehaviour
     {
         public static MilInstantAnimatorManager Instance;
+        internal static string CurrentScene;
 
         public static void EnsureInitialized()
         {
@@ -19,6 +21,10 @@ namespace Milease.Core.Manager
             DontDestroyOnLoad(go);
             go.SetActive(true);
             Instance = go.GetComponent<MilInstantAnimatorManager>();
+            SceneManager.sceneUnloaded += (scene) =>
+            {
+                Animations.RemoveAll(x => !x.dontStopOnLoad && x.ActiveScene == scene.name);
+            };
         }
 
         public static readonly List<MilInstantAnimator> Animations = new();

@@ -3,6 +3,7 @@ using Milease.Core.Animation;
 using Milease.Core.Animator;
 using Milease.Utils;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Milease.Core.Manager
 {
@@ -21,6 +22,10 @@ namespace Milease.Core.Manager
             DontDestroyOnLoad(go);
             go.SetActive(true);
             Instance = go.GetComponent<MilStateAnimatorManager>();
+            SceneManager.sceneUnloaded += (scene) =>
+            {
+                Animators.RemoveAll(x => !x.dontStopOnLoad && x.ActiveScene == scene.name);
+            };
         }
         
         private void Update()

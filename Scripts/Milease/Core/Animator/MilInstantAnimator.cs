@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Milease.Core.Manager;
+using UnityEngine.SceneManagement;
 
 namespace Milease.Core.Animator
 {
@@ -13,10 +14,18 @@ namespace Milease.Core.Animator
         
         internal int PlayIndex = 0;
         internal float Time = 0f;
+        internal string ActiveScene;
+        internal bool dontStopOnLoad = false;
 
         public static MilInstantAnimator Empty()
         {
             return new MilInstantAnimator();
+        }
+        
+        public MilInstantAnimator DontStopOnLoad()
+        {
+            dontStopOnLoad = true;
+            return this;
         }
         
         public MilInstantAnimator UsingResetMode(RuntimeAnimationPart.AnimationResetMode mode)
@@ -142,6 +151,7 @@ namespace Milease.Core.Animator
             }
             MilInstantAnimatorManager.EnsureInitialized();
             MilInstantAnimatorManager.Animations.Add(this);
+            ActiveScene = SceneManager.GetActiveScene().name;
         }
 
         public void Stop()

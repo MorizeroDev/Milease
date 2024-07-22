@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Milease.Core.Animation;
 using Milease.Core.Manager;
 using Milease.Enums;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Milease.Core.Animator
 {
@@ -22,10 +24,18 @@ namespace Milease.Core.Animator
         public MilStateAnimation.AnimationState CurrentAnimationState;
         public int CurrentState;
         internal float Time;
-
+        internal string ActiveScene;
+        internal bool dontStopOnLoad = false;
+        
         public bool IsWorking()
         {
             return Time < CurrentAnimationState.Duration;
+        }
+        
+        public MilStateAnimator DontStopOnLoad()
+        {
+            dontStopOnLoad = true;
+            return this;
         }
         
         /// <summary>
@@ -143,7 +153,10 @@ namespace Milease.Core.Animator
             Time = CurrentAnimationState.Duration;
             MilStateAnimatorManager.EnsureInitialized();
             if (!MilStateAnimatorManager.Animators.Contains(this))
+            {
                 MilStateAnimatorManager.Animators.Add(this);
+                ActiveScene = SceneManager.GetActiveScene().name;
+            }
             return this;
         }
 
