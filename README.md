@@ -1,8 +1,14 @@
 # Milease
 
-An advanced UI animation tool with a wide range of easing options to choose from. 
+<img src="logo.svg" align="center" width="420">
 
-🎥 Perfect for adding dynamic and polished animations to your user interface! 
+<p align="center"><b>UI Development · Animation · Productivity</b></p>
+
+> ⚠ The current project is still under development and is subject to significant changes at any time. The documentation is also not yet complete, so please use it with caution.
+
+🎥 Milease is a toolkit aimed at enhancing the Unity UI development experience. It includes more convenient UI animation tools, such as using the Milease Animator to create UI transition animations or using the State Animator for a CSS-like UI design experience. Additionally, Milease contains other UI tools, such as infinite lists and a modified ContentSizeFitter.
+
+Milease is developed by the Morizero team for creating UI tools for their non-commercial rhythm music game, Milthm. At the same time, it maximizes the provision of more general functionalities to benefit the wider community of Unity frontend developers.
 
 **Special Thanks**: 
 
@@ -10,7 +16,7 @@ An advanced UI animation tool with a wide range of easing options to choose from
 
 # Introduction
 
-The animation system in Unity is often not well-suited for creating UI animations, and its ease of use in terms of tween editing is relatively limited. Milease integrates tween functions from https://easings.net, allowing you to visually design and edit them, as well as quickly generate and control them through code. Additionally, Milease automatically handles tween calculations under vertical sync toggles to ensure smooth animation effects.
+The animation system in Unity is often not well-suited for creating UI animations, and its ease of use in terms of tween editing is relatively limited. Milease integrates tween functions from https://easings.net, allowing you to quickly generate and control them through code. 
 
 # Setup
 
