@@ -1,6 +1,6 @@
 # Milease
 
-<img src="logo.svg" align="center" width="420">
+<p align="center"><img src="logo.svg" width="420"></p>
 
 <p align="center"><b>UI Development · Animation · Productivity</b></p>
 
