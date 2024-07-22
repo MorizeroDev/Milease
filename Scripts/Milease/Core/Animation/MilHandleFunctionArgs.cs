@@ -13,6 +13,12 @@ namespace Milease.Core.Animation
         {
             return (T)target;
         }
+
+        public object GetTarget()
+        {
+            return target;
+        }
     }
+
     public delegate void MileaseHandleFunction(MilHandleFunctionArgs e);
 }

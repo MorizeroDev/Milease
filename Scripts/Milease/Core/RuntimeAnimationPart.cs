@@ -53,87 +53,14 @@ namespace Milease.Core
             MemberPath = handleFunction.GetHashCode().ToString();
         }
 
-        internal void ResetAnimation()
-        {
-            if (!IsPrepared)
-            {
-                return;
-            }
-            
-            IsPrepared = false;
-            lastProgress = -1f;
-        }
-        
-        public bool Reset(AnimationResetMode resetMode)
-        {
-            if (!IsPrepared && resetMode == AnimationResetMode.ResetToOriginalState)
-            {
-                // If the original state hasn't been calculated yet
-                return false;
-            }
-            
-            if (ResetFunction != null)
-            {
-                ResetFunction(new MilHandleFunctionArgs()
-                {
-                    Animation = this,
-                    target = Target,
-                    Progress = 0f,
-                    Animator = ParentAnimator
-                });
-                return true;
-            }
-            
-            if (ValueType == ValueTypeEnum.SelfHandle)
-            {
-                return true;
-            }
-
-            if (Source.PendingTo || Source.BlendingMode == MilAnimation.BlendingMode.Additive)
-            {
-                // MileaseTo or additive blending animation doesn't have a initial state,
-                // force to reset to original state instead.
-                resetMode = AnimationResetMode.ResetToOriginalState;
-                if (!IsPrepared)
-                {
-                    // If the original state hasn't been calculated yet, skip resetting,
-                    // but prevent resetting by subsequent animations.
-                    return true;
-                }
-            }
-
-            var targetValue = resetMode switch
-            {
-                AnimationResetMode.ResetToOriginalState => OriginalValue,
-                AnimationResetMode.ResetToInitialState =>
-                    ValueType switch
-                    {
-                        ValueTypeEnum.PrimitiveType => Convert.ChangeType(StartValue, ValueTypeInfo),
-                        _ => StartValue
-                    },
-                _ => throw new ArgumentOutOfRangeException(nameof(resetMode), resetMode, null)
-            };
-            
-            if (BindMember.MemberType == MemberTypes.Field)
-            {
-                ((FieldInfo)BindMember).SetValue(Target, targetValue);
-            }
-            else
-            {
-                ((PropertyInfo)BindMember).SetValue(Target, targetValue);
-            }
-            
-            return true;
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public RuntimeAnimationPart(object target, MilInstantAnimator animator, MilAnimation.AnimationPart animation, Type baseType, MemberInfo memberInfo = null)
+        public RuntimeAnimationPart(object target, MilInstantAnimator animator, MilAnimation.AnimationPart animation, Type baseType, MemberInfo memberInfo = null, MileaseHandleFunction handleFunction = null)
         {
             if (target == null)
             {
                 throw new MilTargetNotFoundException();
             }
             
+            HandleFunction = handleFunction;
             Source = animation;
             ParentAnimator = animator;
             
@@ -236,6 +163,79 @@ namespace Milease.Core
             ValueType = AdditionOperator != null && SubtractionOperator != null && MultiplyOperator != null ? ValueTypeEnum.CustomType : ValueTypeEnum.Other;
         }
 
+        internal void ResetAnimation()
+        {
+            if (!IsPrepared)
+            {
+                return;
+            }
+            
+            IsPrepared = false;
+            lastProgress = -1f;
+        }
+        
+        public bool Reset(AnimationResetMode resetMode)
+        {
+            if (!IsPrepared && resetMode == AnimationResetMode.ResetToOriginalState)
+            {
+                // If the original state hasn't been calculated yet
+                return false;
+            }
+            
+            if (ResetFunction != null)
+            {
+                ResetFunction(new MilHandleFunctionArgs()
+                {
+                    Animation = this,
+                    target = Target,
+                    Progress = 0f,
+                    Animator = ParentAnimator
+                });
+                return true;
+            }
+            
+            if (ValueType == ValueTypeEnum.SelfHandle)
+            {
+                return true;
+            }
+
+            if (Source.PendingTo || Source.BlendingMode == MilAnimation.BlendingMode.Additive)
+            {
+                // MileaseTo or additive blending animation doesn't have a initial state,
+                // force to reset to original state instead.
+                resetMode = AnimationResetMode.ResetToOriginalState;
+                if (!IsPrepared)
+                {
+                    // If the original state hasn't been calculated yet, skip resetting,
+                    // but prevent resetting by subsequent animations.
+                    return true;
+                }
+            }
+
+            var targetValue = resetMode switch
+            {
+                AnimationResetMode.ResetToOriginalState => OriginalValue,
+                AnimationResetMode.ResetToInitialState =>
+                    ValueType switch
+                    {
+                        ValueTypeEnum.PrimitiveType => Convert.ChangeType(StartValue, ValueTypeInfo),
+                        _ => StartValue
+                    },
+                _ => throw new ArgumentOutOfRangeException(nameof(resetMode), resetMode, null)
+            };
+            
+            if (BindMember.MemberType == MemberTypes.Field)
+            {
+                ((FieldInfo)BindMember).SetValue(Target, targetValue);
+            }
+            else
+            {
+                ((PropertyInfo)BindMember).SetValue(Target, targetValue);
+            }
+            
+            return true;
+        }
+
         public static void SetValue(RuntimeAnimationPart ani, float pro)
         {
             if (pro == ani.lastProgress)
@@ -267,7 +267,7 @@ namespace Milease.Core
                 }
             }
             
-            if (ani.ValueType == ValueTypeEnum.SelfHandle)
+            if (ani.ValueType == ValueTypeEnum.SelfHandle || ani.HandleFunction != null)
             {
                 ani.HandleFunction(new MilHandleFunctionArgs()
                 {
@@ -320,13 +320,17 @@ namespace Milease.Core
                 }
             }
             
-            if (ani.BindMember.MemberType == MemberTypes.Field)
+            switch (ani.BindMember.MemberType)
             {
-                ((FieldInfo)ani.BindMember).SetValue(ani.Target, result);
-            }
-            else
-            {
-                ((PropertyInfo)ani.BindMember).SetValue(ani.Target,result);
+                case MemberTypes.Field:
+                    ((FieldInfo)ani.BindMember).SetValue(ani.Target, result);
+                    break;
+                case MemberTypes.Property:
+                    ((PropertyInfo)ani.BindMember).SetValue(ani.Target,result);
+                    break;
+                default:
+                    Debug.LogWarning($"BindMember.MemberType {ani.BindMember.MemberType} unexpected.");
+                    break;
             }
         }
     }

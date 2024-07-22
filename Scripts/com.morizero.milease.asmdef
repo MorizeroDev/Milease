@@ -1,7 +1,9 @@
 {
     "name": "com.morizero.milease",
     "rootNamespace": "Milease",
-    "references": [],
+    "references": [
+        "party.para.util.colors"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
