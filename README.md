@@ -23,7 +23,11 @@ The animation system in Unity is often not well-suited for creating UI animation
 Unity Editor -> Package Manger -> Add package from git URL...
 
 ```
+# Milease Core
 https://github.com/MorizeroDev/Milease.git
+
+# Color Tools
+https://github.com/ParaParty/ParaPartyUtil.git?path=Colors
 ```
 
 # Animate Anything

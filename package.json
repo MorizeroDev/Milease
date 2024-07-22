@@ -4,8 +4,5 @@
     "displayName": "Milease",
     "version": "0.6.5",
     "unity": "2022.3",
-    "description": "An advanced UI animation tool with a wide range of easing options to choose from. Perfect for adding dynamic and polished animations to your user interface!",
-    "dependencies": {
-        "party.para.util.colors": "https://github.com/ParaParty/ParaPartyUtil.git?path=Colors"
-    }
+    "description": "An advanced UI animation tool with a wide range of easing options to choose from. Perfect for adding dynamic and polished animations to your user interface!"
 }
