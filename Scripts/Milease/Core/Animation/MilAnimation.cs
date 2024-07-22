@@ -6,7 +6,6 @@ using UnityEngine;
 
 namespace Milease.Core.Animation
 {
-    public delegate void MileaseHandleFunction(object target, float progress);
     public class MilAnimation : ScriptableObject
     {
         public enum BlendingMode
@@ -107,7 +106,7 @@ namespace Milease.Core.Animation
             };
         }
 
-        internal static AnimationPart SimplePart(MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction, float duration, float delay = 0f,
+        internal static AnimationPart SimplePart(float duration, float delay = 0f,
             EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In, BlendingMode blendingMode = BlendingMode.Default)
         {
             return new AnimationPart()

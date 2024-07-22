@@ -64,11 +64,11 @@ var animation =
                 Text.Milease(nameof(Text.text), "Start!", "Finish!", 1f)
             )
             .Then(
-                Text.Milease((o, p) =>
+                Text.Milease((e) =>
                 {
-                    var text = o as TMP_Text;
-                    text.text = $"Hide after {((1f - p) * 2f):F1}s...";
-                }, null,2f, 0f, EaseFunction.Linear)
+                    var text = e.GetTarget<TMP_Text>();
+                    text.text = $"Hide after {((1f - e.Progress) * 2f):F1}s...";
+                }, null, 2f, 0f, EaseFunction.Linear)
             )
             .Then(
                 Text.gameObject.Milease(HandleFunction.Hide, HandleFunction.AutoActiveReset(Text.gameObject), 0f)

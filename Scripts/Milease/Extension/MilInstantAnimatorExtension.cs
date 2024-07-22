@@ -17,7 +17,7 @@ namespace Milease.Utils
     public static class MilInstantAnimatorExtension
     {
         public static MilInstantAnimator AsMileaseKeyEvent(this Action action, float delay = 0f)
-            => Milease(action, (_, _) => action.Invoke(), null, 0f, delay);
+            => Milease(action, (_) => action.Invoke(), null, 0f, delay);
         
         public static MilInstantAnimator AsMileaseHandleFunction(this MileaseHandleFunction func, float duration, float delay = 0f)
             => Milease(func, func, null, duration, delay);
@@ -32,20 +32,20 @@ namespace Milease.Utils
             EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In, 
             MilAnimation.BlendingMode blendingMode = MilAnimation.BlendingMode.Default)
         {
-            var animation = new MilInstantAnimator();
-            var ani = MilAnimation.SimplePart(handleFunction, resetFunction, duration, delay, easeFunction, easeType, blendingMode);
-            animation.Collection.Add(new List<RuntimeAnimationPart>()
+            var animator = new MilInstantAnimator();
+            var ani = MilAnimation.SimplePart(duration, delay, easeFunction, easeType, blendingMode);
+            animator.Collection.Add(new List<RuntimeAnimationPart>()
             {
-                new (target, ani, handleFunction, resetFunction)
+                new (target, animator, ani, handleFunction, resetFunction)
             });
-            return animation;
+            return animator;
         }
         
         public static MilInstantAnimator MileaseTo(this object target, string memberName, object toValue, 
             float duration, float delay = 0f, EaseFunction easeFunction = EaseFunction.Quad, 
             EaseType easeType = EaseType.In)
         {
-            var animation = new MilInstantAnimator();
+            var animator = new MilInstantAnimator();
             var type = target.GetType();
             var members = type.GetMember(memberName);
             if (members.Length == 0)
@@ -53,16 +53,16 @@ namespace Milease.Utils
                 throw new MilMemberNotFoundException(memberName);
             }
             var info = members[0];
-            animation.Collection.Add(new List<RuntimeAnimationPart>()
+            animator.Collection.Add(new List<RuntimeAnimationPart>()
             {
-                new (target, MilAnimation.SimplePartTo(toValue, duration, delay, easeFunction, easeType), info.MemberType switch
+                new (target, animator, MilAnimation.SimplePartTo(toValue, duration, delay, easeFunction, easeType), info.MemberType switch
                 {
                     MemberTypes.Field => ((FieldInfo)info).FieldType,
                     MemberTypes.Property => ((PropertyInfo)info).PropertyType,
                     _ => null
                 }, info)
             });
-            return animation;
+            return animator;
         }
         
         public static MilInstantAnimator MileaseAdditive(this object target, string memberName, object startValue, 
@@ -74,7 +74,7 @@ namespace Milease.Utils
             float delay = 0f, EaseFunction easeFunction = EaseFunction.Quad, EaseType easeType = EaseType.In, 
             MilAnimation.BlendingMode blendingMode = MilAnimation.BlendingMode.Default)
         {
-            var animation = new MilInstantAnimator();
+            var animator = new MilInstantAnimator();
             var type = target.GetType();
             var members = type.GetMember(memberName);
             if (members.Length == 0)
@@ -82,16 +82,16 @@ namespace Milease.Utils
                 throw new MilMemberNotFoundException(memberName);
             }
             var info = members[0];
-            animation.Collection.Add(new List<RuntimeAnimationPart>()
+            animator.Collection.Add(new List<RuntimeAnimationPart>()
             {
-                new (target, MilAnimation.SimplePart(startValue, delay, easeFunction, easeType, blendingMode), info.MemberType switch
+                new (target, animator, MilAnimation.SimplePart(startValue, delay, easeFunction, easeType, blendingMode), info.MemberType switch
                 {
                     MemberTypes.Field => ((FieldInfo)info).FieldType,
                     MemberTypes.Property => ((PropertyInfo)info).PropertyType,
                     _ => null
                 }, info)
             });
-            return animation;
+            return animator;
         }
         
         public static MilInstantAnimator MileaseAdditive(this object target, string memberName, object startValue, 
@@ -104,7 +104,7 @@ namespace Milease.Utils
             object toValue, float duration, float delay = 0f, EaseFunction easeFunction = EaseFunction.Quad, 
             EaseType easeType = EaseType.In, MilAnimation.BlendingMode blendingMode = MilAnimation.BlendingMode.Default)
         {
-            var animation = new MilInstantAnimator();
+            var animator = new MilInstantAnimator();
             var type = target.GetType();
             var members = type.GetMember(memberName);
             if (members.Length == 0)
@@ -112,21 +112,21 @@ namespace Milease.Utils
                 throw new MilMemberNotFoundException(memberName);
             }
             var info = members[0];
-            animation.Collection.Add(new List<RuntimeAnimationPart>()
+            animator.Collection.Add(new List<RuntimeAnimationPart>()
             {
-                new (target, MilAnimation.SimplePart(startValue, toValue, duration, delay, easeFunction, easeType, blendingMode), info.MemberType switch
+                new (target, animator, MilAnimation.SimplePart(startValue, toValue, duration, delay, easeFunction, easeType, blendingMode), info.MemberType switch
                 {
                     MemberTypes.Field => ((FieldInfo)info).FieldType,
                     MemberTypes.Property => ((PropertyInfo)info).PropertyType,
                     _ => null
                 }, info)
             });
-            return animation;
+            return animator;
         }
         
         public static MilInstantAnimator Milease(this object target, string memberName, params MilAnimation.AnimationPart[] animations)
         {
-            var animation = new MilInstantAnimator();
+            var animator = new MilInstantAnimator();
             var type = target.GetType();
             var members = type.GetMember(memberName);
             if (members.Length == 0)
@@ -134,9 +134,9 @@ namespace Milease.Utils
                 throw new MilMemberNotFoundException(memberName);
             }
             var info = members[0];
-            animation.Collection.Add(
+            animator.Collection.Add(
                 animations.Select(x => 
-                        new RuntimeAnimationPart(target, x, info.MemberType switch
+                        new RuntimeAnimationPart(target, animator, x, info.MemberType switch
                         {
                             MemberTypes.Field => ((FieldInfo)info).FieldType,
                             MemberTypes.Property => ((PropertyInfo)info).PropertyType,
@@ -144,7 +144,7 @@ namespace Milease.Utils
                         }, info)
                     ).ToList()
                 );
-            return animation;
+            return animator;
         }
     }
 }

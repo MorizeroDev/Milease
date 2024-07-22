@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Milease.Core.Animation;
+using Milease.Core.Animator;
 using Milease.Enums;
 using Milease.Milease.Exception;
 using UnityEngine;
@@ -34,12 +35,13 @@ namespace Milease.Core
         public object StartValue, ToValue, OriginalValue;
         public readonly object Target;
         public readonly MilAnimation.AnimationPart Source;
+        public readonly MilInstantAnimator ParentAnimator;
         public bool IsPrepared { get; private set; }
         public string MemberPath { get; private set; }
 
         private float lastProgress = -1f;
 
-        public RuntimeAnimationPart(object target, MilAnimation.AnimationPart animation, MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction = null)
+        public RuntimeAnimationPart(object target, MilInstantAnimator animator, MilAnimation.AnimationPart animation, MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction = null)
         {
             HandleFunction = handleFunction;
             Source = animation;
@@ -47,6 +49,7 @@ namespace Milease.Core
             Valid = true;
             ResetFunction = resetFunction;
             ValueType = ValueTypeEnum.SelfHandle;
+            ParentAnimator = animator;
             MemberPath = handleFunction.GetHashCode().ToString();
         }
 
@@ -71,7 +74,13 @@ namespace Milease.Core
             
             if (ResetFunction != null)
             {
-                ResetFunction(Target, 0f);
+                ResetFunction(new MilHandleFunctionArgs()
+                {
+                    Animation = this,
+                    target = Target,
+                    Progress = 0f,
+                    Animator = ParentAnimator
+                });
                 return true;
             }
             
@@ -118,7 +127,7 @@ namespace Milease.Core
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public RuntimeAnimationPart(object target, MilAnimation.AnimationPart animation, Type baseType, MemberInfo memberInfo = null)
+        public RuntimeAnimationPart(object target, MilInstantAnimator animator, MilAnimation.AnimationPart animation, Type baseType, MemberInfo memberInfo = null)
         {
             if (target == null)
             {
@@ -126,6 +135,7 @@ namespace Milease.Core
             }
             
             Source = animation;
+            ParentAnimator = animator;
             
             var curType = baseType;
             if (memberInfo != null)
@@ -259,7 +269,13 @@ namespace Milease.Core
             
             if (ani.ValueType == ValueTypeEnum.SelfHandle)
             {
-                ani.HandleFunction(ani.Target, pro);
+                ani.HandleFunction(new MilHandleFunctionArgs()
+                {
+                    Animation = ani,
+                    target = ani.Target,
+                    Progress = pro,
+                    Animator = ani.ParentAnimator
+                });
                 return;
             }
             

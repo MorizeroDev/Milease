@@ -6,21 +6,21 @@ namespace Milease.Utils
 {
     public static class HandleFunction
     {
-        public static void Hide(object o, float t)
+        public static void Hide(MilHandleFunctionArgs e)
         {
-            (o as GameObject)!.SetActive(t < 1f);
+            e.GetTarget<GameObject>().SetActive(e.Progress < 1f);
         }
-        public static void Show(object o, float t)
+        public static void Show(MilHandleFunctionArgs e)
         {
-            (o as GameObject)!.SetActive(t >= 1f);
+            e.GetTarget<GameObject>().SetActive(e.Progress >= 1f);
         }
-        public static void DeativeWhenReset(object o, float t)
+        public static void DeativeWhenReset(MilHandleFunctionArgs e)
         {
-            (o as GameObject)!.SetActive(false);
+            e.GetTarget<GameObject>().SetActive(false);
         }
-        public static void ActiveWhenReset(object o, float t)
+        public static void ActiveWhenReset(MilHandleFunctionArgs e)
         {
-            (o as GameObject)!.SetActive(true);
+            e.GetTarget<GameObject>().SetActive(true);
         }
 
         public static MileaseHandleFunction AutoActiveReset(GameObject go)
