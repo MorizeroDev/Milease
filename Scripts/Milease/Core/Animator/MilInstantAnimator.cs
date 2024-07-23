@@ -11,6 +11,8 @@ namespace Milease.Core.Animator
 
         public RuntimeAnimationPart.AnimationResetMode DefaultResetMode =
             RuntimeAnimationPart.AnimationResetMode.ResetToOriginalState;
+
+        internal Action PlayCallback;
         
         internal int PlayIndex = 0;
         internal float Time = 0f;
@@ -137,8 +139,16 @@ namespace Milease.Core.Animator
             MilInstantAnimatorManager.Animations.Remove(this);
         }
 
-        public void Play()
+        /// <summary>
+        /// Play the animation
+        /// </summary>
+        /// <param name="callback">Callback for when the animation finishes playing. Please <b>NOTE</b>, if you call
+        /// this function again and pass a new callback before the animation has finished,
+        /// the original callback will be overwritten.</param>
+        public void Play(Action callback = null)
         {
+            PlayCallback = callback;
+            
             if (MilInstantAnimatorManager.Animations.Contains(this))
             {
                 Reset(DefaultResetMode);

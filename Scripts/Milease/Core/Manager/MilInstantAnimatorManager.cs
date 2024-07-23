@@ -67,6 +67,7 @@ namespace Milease.Core.Manager
                     set.PlayIndex++;
                     if (set.PlayIndex >= set.Collection.Count)
                     {
+                        set.PlayCallback?.Invoke();
                         Animations.RemoveAt(i);
                         i--;
                         cnt--;
