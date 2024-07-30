@@ -146,6 +146,19 @@ namespace Milease.Core.Animator
         /// this function again and pass a new callback before the animation has finished,
         /// the original callback will be overwritten.</param>
         public void Play(Action callback = null)
+            => Play(false, callback);
+        
+        /// <summary>
+        /// Play the animation right now
+        /// Comparing to Play(), it will start animation right away, instead of waiting for the next frame.
+        /// </summary>
+        /// <param name="callback">Callback for when the animation finishes playing. Please <b>NOTE</b>, if you call
+        /// this function again and pass a new callback before the animation has finished,
+        /// the original callback will be overwritten.</param>
+        public void PlayImmediately(Action callback = null)
+            => Play(true, callback);
+        
+        private void Play(bool immediate, Action callback = null)
         {
             PlayCallback = callback;
             
@@ -160,7 +173,7 @@ namespace Milease.Core.Animator
                 Reset(DefaultResetMode);
             }
             MilInstantAnimatorManager.EnsureInitialized();
-            if (Collection.Count > 0)
+            if (immediate && Collection.Count > 0)
             {
                 foreach (var ani in Collection[0])
                 {
