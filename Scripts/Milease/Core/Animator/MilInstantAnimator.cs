@@ -160,6 +160,13 @@ namespace Milease.Core.Animator
                 Reset(DefaultResetMode);
             }
             MilInstantAnimatorManager.EnsureInitialized();
+            if (Collection.Count > 0)
+            {
+                foreach (var ani in Collection[0])
+                {
+                    RuntimeAnimationPart.SetValue(ani, 0f);
+                }
+            }
             MilInstantAnimatorManager.Animations.Add(this);
             ActiveScene = SceneManager.GetActiveScene().name;
         }
