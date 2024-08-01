@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 
 namespace Milease.Core.UI
 {
-    public abstract class MilAnimatedUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, ISelectHandler, IDeselectHandler
+    public abstract class MilAnimatedUI : UIBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, ISelectHandler, IDeselectHandler
     {
         private enum UIState
         {
@@ -20,8 +20,8 @@ namespace Milease.Core.UI
         public float DefaultTransition = 0.25f;
         public float HoverTransition = 0.5f;
         public UnityEvent OnClickEvent;
-
-        private void Awake()
+        
+        protected override void Awake()
         {
             var state = ConfigDefaultState();
             state ??= Array.Empty<MilStateParameter>();
@@ -34,22 +34,32 @@ namespace Milease.Core.UI
             animator.AddState(UIState.Selected, HoverTransition, state);
             animator.SetDefaultState(UIState.Default);
             clickAnimator = ConfigClickAnimation();
+            OnInitialize();
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             animator.Stop();
+            OnTerminate();
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
             lastState = UIState.Hover;
+            if (animator.CurrentState == (int)UIState.Selected && !animator.IsStateEmpty(UIState.Selected))
+            {
+                return;
+            }
             animator.Transition(UIState.Hover);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             lastState = UIState.Default;
+            if (animator.CurrentState == (int)UIState.Selected && !animator.IsStateEmpty(UIState.Selected))
+            {
+                return;
+            }
             animator.Transition(UIState.Default);
         }
 
@@ -62,6 +72,10 @@ namespace Milease.Core.UI
             clickAnimator?.Play();
             OnClick(eventData);
             OnClickEvent.Invoke();
+            if (EventSystem.current)
+            {
+                EventSystem.current.SetSelectedGameObject(gameObject, eventData);
+            }
         }
         
         public void OnSelect(BaseEventData eventData)

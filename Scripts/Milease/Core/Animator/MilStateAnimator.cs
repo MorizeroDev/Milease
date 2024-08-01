@@ -68,6 +68,11 @@ namespace Milease.Core.Animator
             }
             Time = 0f;
         }
+
+        public bool IsStateEmpty<T>(T state) where T : Enum
+        {
+            return StateList.Find(x => x.StateID == Convert.ToInt32(state)).Values.Count == 0;
+        }
         
         public MilStateAnimator ModifyState<T>(T stateID, object target, string member, object value) where T : Enum
         {
