@@ -51,16 +51,16 @@ By using the methods `Milease`, `While`, `Then`, `Delayed`, easily generate comp
 
 ```c#
 var animation =
-        transform.Milease(nameof(transform.position),
+        transform.Milease(UMN.Position,
                 new Vector3(0f, 0f, 0f), new Vector3(1f, 1f, 0f),
                 1f)
             .While(
-                GetComponent<SpriteRenderer>().Milease("color",
+                GetComponent<SpriteRenderer>().Milease(UMN.Color,
                     new Color(1f, 1f, 1f, 1f), new Color(1f, 0f, 0f, 1f),
                     1f, 0.5f)
             )
             .Then(
-                transform.Milease(nameof(transform.localScale),
+                transform.Milease(UMN.LScale,
                     new Vector3(1f, 1f, 1f), new Vector3(2f, 2f, 2f),
                     1f, 0f, EaseFunction.Bounce)
             ).Delayed(1f)
@@ -78,7 +78,7 @@ var animation =
                 Text.gameObject.Milease(HandleFunction.Hide, HandleFunction.AutoActiveReset(Text.gameObject), 0f)
             )
             .Then(
-                transform.MileaseTo(nameof(transform.position), new Vector3(0f, 0f, 0f), 1f)
+                transform.MileaseTo(UMN.Position, new Vector3(0f, 0f, 0f), 1f)
             );
 ```
 
@@ -106,22 +106,22 @@ Meanwhile, you can implement the abstract class `MilAnimatedUI` to implement UI 
 protected override IEnumerable<MilStateParameter> ConfigDefaultState()
     => new[]
 {
-    Content.GetComponent<TMP_Text>().MilState("color", Color.white),
-    Content.MilState(nameof(Content.anchoredPosition), new Vector2(0, 4f), EaseFunction.Back, EaseType.Out),
-    Arrow.GetComponent<TMP_Text>().MilState("color", new Color(0f, 0f, 0f, 0f)),
-    GetComponent<Image>().MilState("color", ColorUtils.RGBA(94, 11, 255, 0.5f)),
-    Arrow.MilState(nameof(Content.anchoredPosition), new Vector2(110, 0), EaseFunction.Back, EaseType.Out)
+    Content.GetComponent<TMP_Text>().MilState(UMN.Color, Color.white),
+    Content.MilState(UMN.AnchoredPosition, new Vector2(0, 4f), EaseFunction.Back, EaseType.Out),
+    Arrow.GetComponent<TMP_Text>().MilState(UMN.Color, new Color(0f, 0f, 0f, 0f)),
+    GetComponent<Image>().MilState(UMN.Color, ColorUtils.RGBA(94, 11, 255, 0.5f)),
+    Arrow.MilState(UMN.AnchoredPosition, new Vector2(110, 0), EaseFunction.Back, EaseType.Out)
 };
 
 protected override IEnumerable<MilStateParameter> ConfigHoverState()
     => new[]
 {
-    Content.GetComponent<TMP_Text>().MilState("color", Color.black),
-    Content.MilState(nameof(Content.anchoredPosition), new Vector2(-25, 4f), EaseFunction.Back,
+    Content.GetComponent<TMP_Text>().MilState(UMN.Color, Color.black),
+    Content.MilState(UMN.AnchoredPosition, new Vector2(-25, 4f), EaseFunction.Back,
                      EaseType.Out),
-    Arrow.GetComponent<TMP_Text>().MilState("color", new Color(0f, 0f, 0f, 1f)),
-    GetComponent<Image>().MilState("color", HoverColor),
-    Arrow.MilState(nameof(Content.anchoredPosition), new Vector2(50, 0), EaseFunction.Back, EaseType.Out)
+    Arrow.GetComponent<TMP_Text>().MilState(UMN.Color, new Color(0f, 0f, 0f, 1f)),
+    GetComponent<Image>().MilState(UMN.Color, HoverColor),
+    Arrow.MilState(UMN.AnchoredPosition, new Vector2(50, 0), EaseFunction.Back, EaseType.Out)
 };
 
 protected override IEnumerable<MilStateParameter> ConfigSelectedState()
@@ -152,25 +152,25 @@ public class MilListItemDemo : MilListViewItem
     protected override IEnumerable<MilStateParameter> ConfigDefaultState()
         => new[]
         {
-            Background.MilState("color", Color.clear),
-            Content.rectTransform.MilState(nameof(Content.rectTransform.anchoredPosition), new Vector2(138f, 2.3f),
+            Background.MilState(UMN.Color, Color.clear),
+            Content.rectTransform.MilState(UMN.AnchoredPosition, new Vector2(138f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
-            Arrow.MilState("color", Color.clear),
-            Arrow.rectTransform.MilState(nameof(Arrow.rectTransform.anchoredPosition), new Vector2(88f, 2.3f),
+            Arrow.MilState(UMN.Color, Color.clear),
+            Arrow.rectTransform.MilState(UMN.AnchoredPosition, new Vector2(88f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
-            Content.MilState("color", Color.black)
+            Content.MilState(UMN.Color, Color.black)
         };
 
     protected override IEnumerable<MilStateParameter> ConfigSelectedState()
         => new[]
         {
-            Background.MilState("color", ColorUtils.RGB(0,153,255)),
-            Content.rectTransform.MilState(nameof(Content.rectTransform.anchoredPosition), new Vector2(186f, 2.3f),
+            Background.MilState(UMN.Color, ColorUtils.RGB(0,153,255)),
+            Content.rectTransform.MilState(UMN.AnchoredPosition, new Vector2(186f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
-            Arrow.MilState("color", Color.white),
-            Arrow.rectTransform.MilState(nameof(Arrow.rectTransform.anchoredPosition), new Vector2(138f, 2.3f),
+            Arrow.MilState(UMN.Color, Color.white),
+            Arrow.rectTransform.MilState(UMN.AnchoredPosition, new Vector2(138f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
-            Content.MilState("color", Color.white)
+            Content.MilState(UMN.Color, Color.white)
         };
 
     protected override void OnSelect(PointerEventData eventData)
