@@ -23,6 +23,8 @@ namespace Milease.Core.UI
         [HideInInspector]
         public readonly List<object> Items = new();
 
+        public bool Interactable = true;
+        
         public GameObject ItemPrefab;
         public bool Vertical = true;
         public float Spacing;
@@ -220,6 +222,11 @@ namespace Milease.Core.UI
             if (!initialized)
             {
                 Awake();
+            }
+
+            if (!Interactable)
+            {
+                return;
             }
             if (SelectedIndex != -1)
             {
