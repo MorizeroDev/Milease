@@ -71,6 +71,10 @@ namespace Milease.Core.Manager
                         Animations.RemoveAt(i);
                         i--;
                         cnt--;
+                        if (set.Loop)
+                        {
+                            set.Play(set.PlayCallback);
+                        }
                     }
                     else
                     {

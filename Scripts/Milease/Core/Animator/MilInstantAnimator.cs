@@ -12,6 +12,8 @@ namespace Milease.Core.Animator
         public RuntimeAnimationPart.AnimationResetMode DefaultResetMode =
             RuntimeAnimationPart.AnimationResetMode.ResetToOriginalState;
 
+        public bool Loop { get; set; } = false;
+
         internal Action PlayCallback;
         
         internal int PlayIndex = 0;
@@ -33,6 +35,12 @@ namespace Milease.Core.Animator
         public MilInstantAnimator UsingResetMode(RuntimeAnimationPart.AnimationResetMode mode)
         {
             DefaultResetMode = mode;
+            return this;
+        }
+        
+        public MilInstantAnimator EnableLooping()
+        {
+            Loop = true;
             return this;
         }
         
