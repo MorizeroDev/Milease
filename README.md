@@ -4,7 +4,7 @@
 
 <p align="center"><b>UI Development · Animation · Productivity</b></p>
 
-> ⚠ The current project is still under development and is subject to significant changes at any time. The documentation is also not yet complete, so please use it with caution.
+> ⚠ The documentation is not yet complete.
 
 🎥 Milease is a toolkit aimed at enhancing the Unity UI development experience. It includes more convenient UI animation tools, such as using the Milease Animator to create UI transition animations or using the State Animator for a CSS-like UI design experience. Additionally, Milease contains other UI tools, such as infinite lists and a modified ContentSizeFitter.
 
