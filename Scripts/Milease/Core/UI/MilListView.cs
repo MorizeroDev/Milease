@@ -24,6 +24,7 @@ namespace Milease.Core.UI
         public readonly List<object> Items = new();
 
         public bool Interactable = true;
+        public bool Scrollable = true;
         
         public GameObject ItemPrefab;
         public bool Vertical = true;
@@ -503,6 +504,11 @@ namespace Milease.Core.UI
 
         public void OnBeginDrag(PointerEventData eventData)
         {
+            if (!Scrollable)
+            {
+                return;
+            }
+            
             // Stop transforming the position
             transTime = transDuration;  
             
@@ -513,6 +519,11 @@ namespace Milease.Core.UI
 
         public void OnDrag(PointerEventData eventData)
         {
+            if (!Scrollable)
+            {
+                return;
+            }
+            
             if (Vertical)
             {
                 Position = orPos + (eventData.position - startPos).y;
@@ -525,6 +536,11 @@ namespace Milease.Core.UI
 
         public void OnEndDrag(PointerEventData eventData)
         {
+            if (!Scrollable)
+            {
+                return;
+            }
+            
             watch.Stop();
             OnDrag(eventData);
             var time = watch.ElapsedMilliseconds / 1000f;
@@ -618,6 +634,10 @@ namespace Milease.Core.UI
 
         public void OnScroll(PointerEventData eventData)
         {
+            if (!Scrollable)
+            {
+                return;
+            }
             CheckLoopListPosition();
             targetPos = Position - (Vertical ? eventData.scrollDelta.y : eventData.scrollDelta.x) * MouseScrollSensitivity * 2f;
             CheckPosition();
