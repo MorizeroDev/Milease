@@ -248,7 +248,7 @@ namespace Milease.Core
             if (!ani.IsPrepared)
             {
                 ani.IsPrepared = true;
-                if (ani.ValueType != ValueTypeEnum.SelfHandle)
+                if (ani.Source.PendingTo)
                 {
                     ani.OriginalValue = ani.BindMember.MemberType switch
                     {
@@ -256,13 +256,10 @@ namespace Milease.Core
                         MemberTypes.Property => ((PropertyInfo)ani.BindMember).GetValue(ani.Target),
                         _ => null
                     };
-                    if (ani.Source.PendingTo)
+                    ani.StartValue = ani.OriginalValue;
+                    if (ani.ValueType == ValueTypeEnum.PrimitiveType)
                     {
-                        ani.StartValue = ani.OriginalValue;
-                        if (ani.ValueType == ValueTypeEnum.PrimitiveType)
-                        {
-                            ani.StartValue = Convert.ChangeType(ani.StartValue, TypeCode.Double);
-                        }
+                        ani.StartValue = Convert.ChangeType(ani.StartValue, TypeCode.Double);
                     }
                 }
             }
