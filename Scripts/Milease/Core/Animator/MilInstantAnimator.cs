@@ -108,7 +108,14 @@ namespace Milease.Core.Animator
             return this;
         }
         
-        public void Reset(RuntimeAnimationPart.AnimationResetMode mode = RuntimeAnimationPart.AnimationResetMode.ResetToOriginalState)
+        /// <summary>
+        /// Revert changes by the animator
+        /// </summary>
+        /// <param name="mode">Reset mode</param>
+        /// <param name="revertToChanges">Also revert MileaseTo changes</param>
+        public void Reset(
+            RuntimeAnimationPart.AnimationResetMode mode = RuntimeAnimationPart.AnimationResetMode.ResetToOriginalState,
+            bool revertToChanges = true)
         {
             Time = 0f;
             var paths = new List<string>();
@@ -126,7 +133,7 @@ namespace Milease.Core.Animator
                 {
                     if (paths.Contains(ani.MemberPath))
                         continue;
-                    if (ani.Reset(mode))
+                    if (ani.Reset(mode, revertToChanges))
                     {
                         paths.Add(ani.MemberPath);
                     }
@@ -172,13 +179,13 @@ namespace Milease.Core.Animator
             
             if (MilInstantAnimatorManager.Animations.Contains(this))
             {
-                Reset(DefaultResetMode);
+                Reset(DefaultResetMode, false);
                 return;
             }
 
             if (PlayIndex >= Collection.Count || DefaultResetMode == RuntimeAnimationPart.AnimationResetMode.ResetToInitialState)
             {
-                Reset(DefaultResetMode);
+                Reset(DefaultResetMode, false);
             }
             MilInstantAnimatorManager.EnsureInitialized();
             if (immediate && Collection.Count > 0)

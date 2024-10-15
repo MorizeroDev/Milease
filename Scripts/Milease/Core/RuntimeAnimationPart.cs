@@ -174,8 +174,13 @@ namespace Milease.Core
             lastProgress = -1f;
         }
         
-        public bool Reset(AnimationResetMode resetMode)
+        public bool Reset(AnimationResetMode resetMode, bool revertToChanges = true)
         {
+            if (!revertToChanges && Source.PendingTo)
+            {
+                return false;
+            }
+            
             if (!IsPrepared && resetMode == AnimationResetMode.ResetToOriginalState)
             {
                 // If the original state hasn't been calculated yet
