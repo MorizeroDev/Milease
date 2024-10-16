@@ -43,7 +43,9 @@ namespace Milease.Utils
         /// <param name="type">The easing type</param>
         /// <param name="function">The easing function</param>
         /// <returns>The eased progress value within the range [0, 1]</returns>
+#if MILEASE_AGGRESSIVE_INLINING_EASING_FUNCTION
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static float GetEasedProgress(float currentTime, float startTime, float duration, EaseType type, EaseFunction function)
             => GetEasedProgress(currentTime - startTime, duration, type, function);
         
@@ -55,7 +57,9 @@ namespace Milease.Utils
         /// <param name="type">The easing type</param>
         /// <param name="function">The easing function</param>
         /// <returns>The eased progress value within the range [0, 1]</returns>
+#if MILEASE_AGGRESSIVE_INLINING_EASING_FUNCTION
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static float GetEasedProgress(float elapsedTime, float duration, EaseType type, EaseFunction function)
             => GetEasedProgress(Mathf.Clamp(elapsedTime / duration, 0f, 1f), type, function);
         
@@ -67,7 +71,9 @@ namespace Milease.Utils
         /// <param name="function">The easing function</param>
         /// <returns>The eased progress value within the range [0, 1]</returns>
         /// <exception cref="ArgumentOutOfRangeException">Unsupported ease function</exception>
+#if MILEASE_AGGRESSIVE_INLINING_EASING_FUNCTION
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static float GetEasedProgress(float progress, EaseType type, EaseFunction function)
         {
             var index = (int)function * 3 + (int)type;
