@@ -160,8 +160,8 @@ namespace Milease.Core.Animator
         /// <param name="callback">Callback for when the animation finishes playing. Please <b>NOTE</b>, if you call
         /// this function again and pass a new callback before the animation has finished,
         /// the original callback will be overwritten.</param>
-        public void Play(Action callback = null)
-            => Play(false, callback);
+        public void Play(Action callback = null, bool revertToChanges = true)
+            => Play(false, callback, revertToChanges);
         
         /// <summary>
         /// Play the animation right now
@@ -170,22 +170,22 @@ namespace Milease.Core.Animator
         /// <param name="callback">Callback for when the animation finishes playing. Please <b>NOTE</b>, if you call
         /// this function again and pass a new callback before the animation has finished,
         /// the original callback will be overwritten.</param>
-        public void PlayImmediately(Action callback = null)
-            => Play(true, callback);
+        public void PlayImmediately(Action callback = null, bool revertToChanges = true)
+            => Play(true, callback, revertToChanges);
         
-        private void Play(bool immediate, Action callback = null)
+        private void Play(bool immediate, Action callback = null, bool revertToChanges = true)
         {
             PlayCallback = callback;
             
             if (MilInstantAnimatorManager.Animations.Contains(this))
             {
-                Reset(DefaultResetMode, false);
+                Reset(DefaultResetMode, revertToChanges);
                 return;
             }
 
             if (PlayIndex >= Collection.Count || DefaultResetMode == RuntimeAnimationPart.AnimationResetMode.ResetToInitialState)
             {
-                Reset(DefaultResetMode, false);
+                Reset(DefaultResetMode, revertToChanges);
             }
             MilInstantAnimatorManager.EnsureInitialized();
             if (immediate && Collection.Count > 0)
