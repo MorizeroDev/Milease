@@ -253,7 +253,7 @@ namespace Milease.Core
             if (!ani.IsPrepared)
             {
                 ani.IsPrepared = true;
-                if (ani.Source.PendingTo)
+                if (ani.BindMember != null)
                 {
                     ani.OriginalValue = ani.BindMember.MemberType switch
                     {
@@ -261,6 +261,9 @@ namespace Milease.Core
                         MemberTypes.Property => ((PropertyInfo)ani.BindMember).GetValue(ani.Target),
                         _ => null
                     };
+                }
+                if (ani.Source.PendingTo)
+                {
                     ani.StartValue = ani.OriginalValue;
                     if (ani.ValueType == ValueTypeEnum.PrimitiveType)
                     {
