@@ -32,7 +32,7 @@ namespace Milease.Core.Manager
         private void Update()
         {
             var cnt = Animations.Count;
-            var deltaTime = Time.deltaTime;
+            var deltaTime = Time.unscaledDeltaTime;
             
             for (var i = 0; i < cnt; i++)
             {
