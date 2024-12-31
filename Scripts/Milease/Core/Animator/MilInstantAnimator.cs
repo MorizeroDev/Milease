@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Milease.Core.Animation;
 using Milease.Core.Manager;
 using UnityEngine.SceneManagement;
 
@@ -24,6 +25,16 @@ namespace Milease.Core.Animator
         public static MilInstantAnimator Empty()
         {
             return new MilInstantAnimator();
+        }
+        
+        public static MilInstantAnimator Start(MilInstantAnimator animator)
+        {
+            return new MilInstantAnimator().While(animator);
+        }
+        
+        public static MilInstantAnimator Start(params MilInstantAnimator[] animators)
+        {
+            return new MilInstantAnimator().While(animators);
         }
         
         public MilInstantAnimator DontStopOnLoad()
@@ -204,5 +215,50 @@ namespace Milease.Core.Animator
             Reset(DefaultResetMode);
             Pause();
         }
+
+        #region DSL Support
+
+        /// <summary>
+        /// To set the duration of an animation set
+        /// </summary>
+        public static MilInstantAnimator operator /(float duration, MilInstantAnimator animator)
+        {
+            if (animator.Collection.Count == 0)
+            {
+                return animator;
+            }
+            
+            foreach (var ani in animator.Collection[0])
+            {
+                ani.Source.Duration = duration;
+            }
+
+            return animator;
+        }
+        
+        /// <summary>
+        /// To delay an animation set
+        /// </summary>
+        public static MilInstantAnimator operator +(float delay, MilInstantAnimator animator)
+        {
+            return animator.Delayed(delay);
+        }
+
+        public static MilInstantAnimator operator -(MilInstantAnimator animator, MilAnimation.BlendingMode blendingMode)
+        {
+            if (animator.Collection.Count == 0)
+            {
+                return animator;
+            }
+            
+            foreach (var ani in animator.Collection[0])
+            {
+                ani.Source.BlendingMode = blendingMode;
+            }
+
+            return animator;
+        }
+        
+        #endregion
     }
 }
