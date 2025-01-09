@@ -31,12 +31,14 @@ namespace Milease.Core.Manager
         private void Update()
         {
             var cnt = Animators.Count;
+            var deltaTime = Mathf.Min(Time.unscaledDeltaTime, Time.maximumDeltaTime);
+            
             for (var i = 0; i < cnt; i++)
             {
                 var animator = Animators[i];
                 if (!animator.IsWorking())
                     continue;
-                animator.Time += Time.unscaledDeltaTime;
+                animator.Time += deltaTime;
                 var pro = Mathf.Min(1f, animator.Time / animator.CurrentAnimationState.Duration);
                 foreach (var val in animator.CurrentAnimationState.Values)
                 {
