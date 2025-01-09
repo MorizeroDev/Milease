@@ -23,6 +23,9 @@ namespace Milease.Core.Animator
         public readonly List<MilStateAnimation.AnimationState> StateList = new();
         public MilStateAnimation.AnimationState CurrentAnimationState;
         public int CurrentState;
+        
+        public TimeSource TimeSource { get; set; } = TimeSource.UnScaledTime;
+        
         internal float Time;
         internal string ActiveScene;
         internal bool dontStopOnLoad = false;
@@ -35,6 +38,12 @@ namespace Milease.Core.Animator
         public MilStateAnimator DontStopOnLoad()
         {
             dontStopOnLoad = true;
+            return this;
+        }
+        
+        public MilStateAnimator SetTimeSource(TimeSource timeSource)
+        {
+            TimeSource = timeSource;
             return this;
         }
         

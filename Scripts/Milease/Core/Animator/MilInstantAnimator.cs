@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Milease.Core.Animation;
 using Milease.Core.Manager;
+using Milease.Enums;
 using UnityEngine.SceneManagement;
 
 namespace Milease.Core.Animator
@@ -14,6 +15,8 @@ namespace Milease.Core.Animator
             RuntimeAnimationPart.AnimationResetMode.ResetToOriginalState;
 
         public bool Loop { get; set; } = false;
+
+        public TimeSource TimeSource { get; set; } = TimeSource.UnScaledTime;
 
         internal Action PlayCallback;
         
@@ -40,6 +43,12 @@ namespace Milease.Core.Animator
         public MilInstantAnimator DontStopOnLoad()
         {
             dontStopOnLoad = true;
+            return this;
+        }
+        
+        public MilInstantAnimator SetTimeSource(TimeSource timeSource)
+        {
+            TimeSource = timeSource;
             return this;
         }
         

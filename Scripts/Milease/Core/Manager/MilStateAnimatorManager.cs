@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Milease.Core.Animation;
 using Milease.Core.Animator;
+using Milease.Enums;
 using Milease.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -31,14 +32,15 @@ namespace Milease.Core.Manager
         private void Update()
         {
             var cnt = Animators.Count;
-            var deltaTime = Mathf.Min(Time.unscaledDeltaTime, Time.maximumDeltaTime);
+            var scaledDeltaTime = Time.deltaTime;
+            var unscaledDeltaTime = Mathf.Min(Time.unscaledDeltaTime, Time.maximumDeltaTime);
             
             for (var i = 0; i < cnt; i++)
             {
                 var animator = Animators[i];
                 if (!animator.IsWorking())
                     continue;
-                animator.Time += deltaTime;
+                animator.Time += (animator.TimeSource == TimeSource.UnScaledTime ? unscaledDeltaTime : scaledDeltaTime);
                 var pro = Mathf.Min(1f, animator.Time / animator.CurrentAnimationState.Duration);
                 foreach (var val in animator.CurrentAnimationState.Values)
                 {
