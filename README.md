@@ -42,7 +42,7 @@ Milease supports animation operations for most types such as `Vector3`, `Vector2
 For example, use Milease to fade out music:
 
 ```c#
-AudioSource.MileaseTo(nameof(AudioSource.volume), 0f, 1f, 0f, EaseFunction.Quad, EaseType.Out).Play();
+AudioSource.QuadOut(x => x.volume, 1f / 0f.ToThis()).Play();
 ```
 
 # Create Animations by Organized Code
@@ -50,36 +50,34 @@ AudioSource.MileaseTo(nameof(AudioSource.volume), 0f, 1f, 0f, EaseFunction.Quad,
 By using the methods `Milease`, `While`, `Then`, `Delayed`, easily generate complex animations with readable code through nesting:
 
 ```c#
-var animation =
-        transform.Milease(UMN.Position,
-                new Vector3(0f, 0f, 0f), new Vector3(1f, 1f, 0f),
-                1f)
-            .While(
-                GetComponent<SpriteRenderer>().Milease(UMN.Color,
-                    new Color(1f, 1f, 1f, 1f), new Color(1f, 0f, 0f, 1f),
-                    1f, 0.5f)
-            )
-            .Then(
-                transform.Milease(UMN.LScale,
-                    new Vector3(1f, 1f, 1f), new Vector3(2f, 2f, 2f),
-                    1f, 0f, EaseFunction.Bounce)
-            ).Delayed(1f)
-            .Then(
-                Text.Milease(nameof(Text.text), "Start!", "Finish!", 1f)
-            )
-            .Then(
-                Text.Milease((e) =>
-                {
-                    var text = e.GetTarget<TMP_Text>();
-                    text.text = $"Hide after {((1f - e.Progress) * 2f):F1}s...";
-                }, null, 2f, 0f, EaseFunction.Linear)
-            )
-            .Then(
-                Text.gameObject.Milease(HandleFunction.Hide, HandleFunction.AutoActiveReset(Text.gameObject), 0f)
-            )
-            .Then(
-                transform.MileaseTo(UMN.Position, new Vector3(0f, 0f, 0f), 1f)
-            );
+var spriteRenderer = GetComponent<SpriteRenderer>();
+
+Animation =
+    MilInstantAnimator.Start(
+        1f / transform.Milease(x => x.position,new Vector3(0f, 0f, 0f), new Vector3(1f, 1f, 0f))
+    )
+    .While(
+        0.5f + 1f / spriteRenderer.Milease(x => x.color, Color.white, Color.red)
+    )
+    .Then(
+        1f / transform.MBounce(x => transform.localScale, new Vector3(1f, 1f, 1f), new Vector3(2f, 2f, 2f))
+    ).Delayed(1f)
+    .Then(
+        1f / Text.MLinear(x => x.text, "Start!", "Finish!")
+    )
+    .Then(
+        Text.Milease((e) =>
+        {
+            var text = e.GetTarget<TMP_Text>();
+            text.text = $"Hide after {((1f - e.Progress) * 2f):F1}s...";
+        }, null,2f, 0f, EaseFunction.Linear)
+    )
+    .Then(
+        Text.gameObject.Milease(HandleFunction.Hide, HandleFunction.AutoActiveReset(Text.gameObject), 0f)
+    )
+    .Then(
+        1f / transform.Milease(x => x.position, Vector3.zero.ToThis())
+    );
 ```
 
 # Lightweight Design
