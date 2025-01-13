@@ -72,18 +72,33 @@ namespace Milease.Core.Animator
             }
             return this;
         }
-        
+
+        [Obsolete]
         public MilInstantAnimator While(params MilInstantAnimator[] animations)
         {
             foreach (var ani in animations)
             {
-                While(ani);
+                And(ani);
             }
             
             return this;
         }
         
+        [Obsolete]
         public MilInstantAnimator While(MilInstantAnimator animation)
+            => And(animation);
+        
+        public MilInstantAnimator And(params MilInstantAnimator[] animations)
+        {
+            foreach (var ani in animations)
+            {
+                And(ani);
+            }
+            
+            return this;
+        }
+        
+        public MilInstantAnimator And(MilInstantAnimator animation)
         {
             foreach (var part in animation.Collection)
             {

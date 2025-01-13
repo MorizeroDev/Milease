@@ -56,7 +56,7 @@ Animation =
     MilInstantAnimator.Start(
         1f / transform.Milease(x => x.position,new Vector3(0f, 0f, 0f), new Vector3(1f, 1f, 0f))
     )
-    .While(
+    .And(
         0.5f + 1f / spriteRenderer.Milease(x => x.color, Color.white, Color.red)
     )
     .Then(
