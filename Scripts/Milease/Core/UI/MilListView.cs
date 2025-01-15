@@ -83,6 +83,8 @@ namespace Milease.Core.UI
                 throw new Exception($"Item prefab '{ItemPrefab.name}' doesn't have a MilListViewItem component.");
             }
             
+            ItemPrefab.SetActive(false);
+            
             var itemRect = ItemPrefab.GetComponent<RectTransform>();
             if (Vertical)
             {
