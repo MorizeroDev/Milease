@@ -24,19 +24,13 @@ namespace Milease.Core.Animation
             public readonly ValueTypeEnum ValueType;
             public readonly Type ValueTypeInfo;
             public readonly MethodInfo AdditionOperator, SubtractionOperator, MultiplyOperator;
-
+            
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public AnimationValue(object target, string member, object toValue)
+            public AnimationValue(object target, MemberInfo member, object toValue)
             {
                 Target = target ?? throw new MilTargetNotFoundException();
-                Member = member;
-
-                var members = target.GetType().GetMember(member);
-                if (members.Length == 0)
-                {
-                    throw new MilMemberNotFoundException(member);
-                }
-                BindMember = members[0];
+                Member = member.Name;
+                BindMember = member;
                 
                 ValueTypeInfo = BindMember.MemberType switch
                 {

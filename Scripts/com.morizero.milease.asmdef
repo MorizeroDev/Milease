@@ -2,7 +2,8 @@
     "name": "com.morizero.milease",
     "rootNamespace": "Milease",
     "references": [
-        "party.para.util.colors"
+        "party.para.util.colors",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

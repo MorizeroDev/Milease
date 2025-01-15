@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Milease.Core.Animation;
 using Milease.Core.Manager;
@@ -12,7 +13,7 @@ namespace Milease.Core.Animator
     public class MilStateParameter
     {
         public object Target;
-        public string Member;
+        public MemberInfo Member;
         public EaseFunction EaseFunction;
         public EaseType EaseType;
         public AnimationCurve CustomCurve;
@@ -122,7 +123,7 @@ namespace Milease.Core.Animator
                     EaseFunction = val.EaseFunction,
                     CustomCurve = val.CustomCurve
                 };
-                var index = state.Values.FindIndex(x => x.Target == val.Target && x.Member == val.Member);
+                var index = state.Values.FindIndex(x => x.Target == val.Target && x.Member == val.Member.Name);
                 if (index == -1)
                 {
                     state.Values.Add(ani);
