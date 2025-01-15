@@ -27,17 +27,20 @@ namespace Milease.Core.Animator
 
         public static MilInstantAnimator Empty()
         {
-            return new MilInstantAnimator();
+            return new MilInstantAnimator()
+            {
+                Collection = { new List<RuntimeAnimationPart>() }
+            };
         }
         
         public static MilInstantAnimator Start(MilInstantAnimator animator)
         {
-            return new MilInstantAnimator().While(animator);
+            return Empty().And(animator);
         }
         
         public static MilInstantAnimator Start(params MilInstantAnimator[] animators)
         {
-            return new MilInstantAnimator().While(animators);
+            return Empty().And(animators);
         }
         
         public MilInstantAnimator DontStopOnLoad()
