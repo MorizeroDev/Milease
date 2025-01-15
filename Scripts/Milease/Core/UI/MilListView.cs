@@ -7,6 +7,7 @@ using Milease.Utils;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
 
 namespace Milease.Core.UI
@@ -23,18 +24,27 @@ namespace Milease.Core.UI
         [HideInInspector]
         public readonly List<object> Items = new();
 
+        [Header("Basic")]
+        public GameObject ItemPrefab;
+        
+        [Header("Interaction")]
         public bool Interactable = true;
         public bool Scrollable = true;
         
-        public GameObject ItemPrefab;
+        [Header("Style")]
         public bool Vertical = true;
         public float Spacing;
-        public float MouseScrollSensitivity = 300f;
         public float StartPadding, EndPadding, Indentation;
         public AlignMode Align = AlignMode.Normal;
 
+        [Header("Behaviour")]
+        public float MouseScrollSensitivity = 300f;
+        
+        [Header("Extension")]
         public bool LoopList = false;
-
+        public Scrollbar Scrollbar;
+        
+        [Header("Events")]
         public UnityEvent OnScrollDone;
         
         private readonly List<MilListViewItem> bindDisplay = new();
@@ -44,8 +54,16 @@ namespace Milease.Core.UI
         private Vector2 ItemPivot;
         private Vector2 ItemAnchorMin, ItemAnchorMax;
 
-        [HideInInspector]
-        public float Position;
+        private float _position;
+        public float Position
+        {
+            get => _position;
+            set
+            {
+                _position = value;
+                UpdateScrollBar();
+            }
+        }
         
         private RectTransform RectTransform;
 
@@ -62,6 +80,8 @@ namespace Milease.Core.UI
         private float AnchorOffset;
         
         private bool initialized = false;
+        private bool _numbScrollBarChanges = false;
+        private bool _numbScrollBarUpdate = false;
 
         private class ItemTracker
         {
@@ -113,6 +133,11 @@ namespace Milease.Core.UI
             ItemAnchorMin = itemRect.anchorMin;
             ItemAnchorMax = itemRect.anchorMax;
 
+            if (Scrollbar)
+            {
+                Scrollbar.onValueChanged.AddListener(UpdatePositionByScrollBar);
+            }
+
             AnchorOffset = (Vertical ? RectTransform.rect.height : RectTransform.rect.width) *
                            (Vertical ? ItemAnchorMin.y : ItemAnchorMin.x) *
                            (Vertical ? -1f : 1f) +
@@ -129,6 +154,48 @@ namespace Milease.Core.UI
             CheckObjectPool(cnt);
             
             initialized = true;
+        }
+        
+        private void UpdatePositionByScrollBar(float delta)
+        {
+            if (_numbScrollBarChanges)
+            {
+                return;
+            }
+            
+            _numbScrollBarUpdate = true;
+            var position = Scrollbar.value;
+            CheckLoopListPosition();
+            GetPositionBoundary(out var minPos, out var maxPos);
+            targetPos = minPos + (maxPos - minPos) * position;
+            Position = targetPos;
+            CheckPosition();
+            _numbScrollBarUpdate = false;
+        }
+
+        private void UpdateScrollBar()
+        {
+            if (!Scrollbar || _numbScrollBarUpdate)
+            {
+                return;
+            }
+            
+            GetPositionBoundary(out var minPos, out var maxPos);
+            
+            _numbScrollBarChanges = true;
+            var length = (maxPos - minPos);
+            if (length == 0f || LoopList)
+            {
+                Scrollbar.value = 0f;
+                Scrollbar.size = 1f;
+            }
+            else
+            {
+                var size = Vertical ? RectTransform.rect.height : RectTransform.rect.width;
+                Scrollbar.value = (Position - minPos) / length;
+                Scrollbar.size = 1f - Mathf.Min(length / (size * 5f), 1f);
+            }
+            _numbScrollBarChanges = false;
         }
 
         public void Add(object data)
@@ -631,9 +698,14 @@ namespace Milease.Core.UI
         
         private void Update()
         {
+            if (Scrollbar && Scrollbar.interactable != (Interactable && Scrollable && !LoopList))
+            {
+                Scrollbar.interactable = (Interactable && Scrollable && !LoopList);
+            }
+            
             UpdateListView();
         }
-
+        
         public void OnScroll(PointerEventData eventData)
         {
             if (!Scrollable)
