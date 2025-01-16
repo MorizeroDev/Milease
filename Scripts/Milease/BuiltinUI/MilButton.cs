@@ -29,11 +29,13 @@ namespace Milease.BuiltinUI
         [Header("Events")] 
         public UnityEvent OnButtonClicked;
 
+#if UNITY_EDITOR
         protected override void OnValidate()
         {
             Content.GetComponent<TMP_Text>().color = DefaultTextColor;
             GetComponent<Image>().color = DefaultBgColor;
         }
+#endif
 
         protected override IEnumerable<MilStateParameter> ConfigDefaultState()
             => new[]
