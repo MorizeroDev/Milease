@@ -717,6 +717,7 @@ namespace Milease.Core.UI
             CheckLoopListPosition();
             targetPos = Position - (Vertical ? eventData.scrollDelta.y : eventData.scrollDelta.x) * MouseScrollSensitivity * 2f;
             CheckPosition();
+            OnScrollDone?.Invoke();
         }
     }
 }
