@@ -70,6 +70,8 @@ namespace Milease.Core.UI
         private Vector2 startPos;
         private float orPos;
 
+        public float IntendingPosition => targetPos;
+        
         private float targetPos;
         private float originPos;
         private const float transDuration = 0.5f;
