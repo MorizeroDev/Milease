@@ -175,6 +175,18 @@ namespace Milease.Core.UI
             _numbScrollBarUpdate = false;
         }
 
+        public void SlideToTop(bool withoutTransition = false)
+        {
+            GetPositionBoundary(out var minPos, out _);
+            SlideTo(minPos, withoutTransition);
+        }
+        
+        public void SlideToBottom(bool withoutTransition = false)
+        {
+            GetPositionBoundary(out _, out var maxPos);
+            SlideTo(maxPos, withoutTransition);
+        }
+        
         private void UpdateScrollBar()
         {
             if (!Scrollbar || _numbScrollBarUpdate)
