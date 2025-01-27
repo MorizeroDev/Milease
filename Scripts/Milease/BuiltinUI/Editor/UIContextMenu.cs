@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+using TMPro;
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.UI;
@@ -32,6 +33,13 @@ namespace Milease.BuiltinUI.Editor
             if (instance != null)
             {
                 instance.name = prefab.name;
+                PrefabUtility.UnpackPrefabInstance(instance, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+
+                foreach (var text in instance.GetComponentsInChildren<TMP_Text>(true))
+                {
+                    text.font = TMP_Settings.defaultFontAsset;
+                }
+                
                 Undo.RegisterCreatedObjectUndo(instance, "Create Milease Builtin UI Element");
                 Selection.activeGameObject = instance;
             }

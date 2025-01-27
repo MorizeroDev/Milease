@@ -42,7 +42,7 @@ Milease supports animation operations for most types such as `Vector3`, `Vector2
 For example, use Milease to fade out music:
 
 ```c#
-AudioSource.QuadOut(x => x.volume, 1f / 0f.ToThis()).Play();
+AudioSource.MQuadOut(x => x.volume, 1f / 0f.ToThis()).Play();
 ```
 
 # Create Animations by Organized Code
@@ -104,22 +104,22 @@ Meanwhile, you can implement the abstract class `MilAnimatedUI` to implement UI 
 protected override IEnumerable<MilStateParameter> ConfigDefaultState()
     => new[]
 {
-    Content.GetComponent<TMP_Text>().MilState(UMN.Color, Color.white),
-    Content.MilState(UMN.AnchoredPosition, new Vector2(0, 4f), EaseFunction.Back, EaseType.Out),
-    Arrow.GetComponent<TMP_Text>().MilState(UMN.Color, new Color(0f, 0f, 0f, 0f)),
-    GetComponent<Image>().MilState(UMN.Color, ColorUtils.RGBA(94, 11, 255, 0.5f)),
-    Arrow.MilState(UMN.AnchoredPosition, new Vector2(110, 0), EaseFunction.Back, EaseType.Out)
+    Content.GetComponent<TMP_Text>().MilState(x => x.color, Color.white),
+    Content.MilState(x => x.anchoredPosition, new Vector2(0, 4f), EaseFunction.Back, EaseType.Out),
+    Arrow.GetComponent<TMP_Text>().MilState(x => x.color, new Color(0f, 0f, 0f, 0f)),
+    GetComponent<Image>().MilState(x => x.color, ColorUtils.RGBA(94, 11, 255, 0.5f)),
+    Arrow.MilState(x => x.anchoredPosition, new Vector2(110, 0), EaseFunction.Back, EaseType.Out)
 };
 
 protected override IEnumerable<MilStateParameter> ConfigHoverState()
     => new[]
 {
-    Content.GetComponent<TMP_Text>().MilState(UMN.Color, Color.black),
-    Content.MilState(UMN.AnchoredPosition, new Vector2(-25, 4f), EaseFunction.Back,
+    Content.GetComponent<TMP_Text>().MilState(x => x.color, Color.black),
+    Content.MilState(x => x.anchoredPosition, new Vector2(-25, 4f), EaseFunction.Back,
                      EaseType.Out),
-    Arrow.GetComponent<TMP_Text>().MilState(UMN.Color, new Color(0f, 0f, 0f, 1f)),
-    GetComponent<Image>().MilState(UMN.Color, HoverColor),
-    Arrow.MilState(UMN.AnchoredPosition, new Vector2(50, 0), EaseFunction.Back, EaseType.Out)
+    Arrow.GetComponent<TMP_Text>().MilState(x => x.color, new Color(0f, 0f, 0f, 1f)),
+    GetComponent<Image>().MilState(x => x.color, HoverColor),
+    Arrow.MilState(x => x.anchoredPosition, new Vector2(50, 0), EaseFunction.Back, EaseType.Out)
 };
 
 protected override IEnumerable<MilStateParameter> ConfigSelectedState()
