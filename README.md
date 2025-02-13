@@ -30,6 +30,14 @@ https://github.com/MorizeroDev/Milease.git
 https://github.com/ParaParty/ParaPartyUtil.git?path=Colors
 ```
 
+# Expression-Driven Animation Updater
+
+Milease compiling animation control code via `Expressions` reduces execution time by approximately **90%** compared to using pure reflection.
+
+However, compilation itself can be time-consuming. Fortunately, you can generate a preload script for animation control code by clicking **"Milease -> Generate Milease warming up script"** in the menu. This will compile the control code in advance, ensuring smoother gameplay.
+
+> Due to technical compatibility issues, animation generation statements from v1 (including most **Milease** and **MileaseTo** extension methods) are no longer supported.
+
 # Animate Anything
 
 By `object.Milease` and `object.MileaseTo`, use Milease anywhere to create and play animations for any field/property! 
