@@ -45,7 +45,7 @@ namespace Milease.Core.Manager
                 set.Time += (set.TimeSource == TimeSource.UnScaledTime ? unscaledDeltaTime : scaledDeltaTime);
                 for (var j = 0; j < cCnt; j++)
                 {
-                    var ani = collection[j];
+                    var ani = (RuntimeAnimationBase)collection[j];
 
                     latestTime = Mathf.Max(latestTime, ani.Source.StartTime + ani.Source.Duration);
                     if (set.Time < ani.Source.StartTime)
@@ -60,7 +60,7 @@ namespace Milease.Core.Manager
                     }
 
                     var easedPro = ani.Source.CustomCurve?.Evaluate(pro) ?? EaseUtility.GetEasedProgress(pro, ani.Source.EaseType, ani.Source.EaseFunction);
-                    RuntimeAnimationPart.SetValue(ani, easedPro);
+                    MilInstantAnimator.ApplyAnimation(collection[j], easedPro);
                 }
 
                 if (set.Time >= latestTime)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using Milease.Core;
 using Milease.Core.Animation;
@@ -18,28 +19,35 @@ namespace Milease.Utils
     public static class MilInstantAnimatorExtension
     {
         public static MilInstantAnimator AsMileaseKeyEvent(this Action action, float delay = 0f)
-            => Milease(action, (_) => action.Invoke(), null, 0f, delay);
+        {
+            var animator = new MilInstantAnimator();
+            var animationPart = MilAnimation.SimplePart(action, delay);
+            animator.Collection.Add(new List<IAnimationController>()
+            {
+                new RuntimeAnimationPart<Action, Action>(default, animator, animationPart, (MemberExpression)null, null)
+            });
 
-        public static MilInstantAnimator AsMileaseHandleFunction(
-            this MileaseHandleFunction func,
+            return animator;
+        }
+
+        public static MilInstantAnimator AsMileaseHandleFunction<E>(
+            this MileaseHandleFunction<E, E> func,
             float duration,
-            float delay = 0f) => Milease(func, func, null, duration, delay);
+            float delay = 0f)        
+        {
+            var animator = new MilInstantAnimator();
+            var animationPart = MilAnimation.SimplePart<E>(duration, delay);
+            animator.Collection.Add(new List<IAnimationController>()
+            {
+                new RuntimeAnimationPart<E, E>(default, animator, animationPart, (MemberExpression)null, null)
+            });
+            return animator;
+        }
 
-        public static MilInstantAnimator MileaseAdditive(
-            this object target,
-            MileaseHandleFunction handleFunction,
-            MileaseHandleFunction resetFunction,
-            float duration, float delay = 0f,
-            ////////
-            EaseFunction easeFunction = EaseFunction.Quad,
-            EaseType easeType = EaseType.In
-        ) => Milease(target, handleFunction, resetFunction, duration, delay, easeFunction, easeType,
-            MilAnimation.BlendingMode.Additive);
-
-        public static MilInstantAnimator Milease(
-            this object target,
-            MileaseHandleFunction handleFunction,
-            MileaseHandleFunction resetFunction,
+        public static MilInstantAnimator Milease<T>(
+            this T target,
+            MileaseHandleFunction<T, T> handleFunction,
+            MileaseHandleFunction<T, T> resetFunction,
             float duration, float delay = 0f,
             ////////
             EaseFunction easeFunction = EaseFunction.Quad,
@@ -48,171 +56,11 @@ namespace Milease.Utils
         )
         {
             var animator = new MilInstantAnimator();
-            var ani = MilAnimation.SimplePart(duration, delay, easeFunction, easeType, blendingMode);
-            animator.Collection.Add(new List<RuntimeAnimationPart>()
+            var ani = MilAnimation.SimplePart<T>(duration, delay, easeFunction, easeType, blendingMode);
+            animator.Collection.Add(new List<IAnimationController>()
             {
-                new(target, animator, ani, handleFunction, resetFunction)
+                new RuntimeAnimationPart<T, T>(target, animator, ani, handleFunction, resetFunction)
             });
-            return animator;
-        }
-
-        public static MilInstantAnimator MileaseTo(
-            this object target, string memberName,
-            object toValue,
-            float duration, float delay = 0f,
-            ////////
-            EaseFunction easeFunction = EaseFunction.Quad,
-            EaseType easeType = EaseType.In)
-        {
-            var animator = new MilInstantAnimator();
-            var type = target.GetType();
-            var members = type.GetMember(memberName);
-            if (members.Length == 0)
-            {
-                throw new MilMemberNotFoundException(memberName);
-            }
-
-            var info = members[0];
-            MileaseHandleFunction handleFunction = null;
-            // TODO complex transformation provider manager
-            if (ColorTransformation.CanTranslate(info))
-            {
-                handleFunction = ColorTransformation.MakeTransformation(MilAnimation.BlendingMode.Default);
-            }
-
-            animator.Collection.Add(new List<RuntimeAnimationPart>()
-            {
-                new(target, animator, MilAnimation.SimplePartTo(toValue, duration, delay, easeFunction, easeType),
-                    info.MemberType switch
-                    {
-                        MemberTypes.Field => ((FieldInfo)info).FieldType,
-                        MemberTypes.Property => ((PropertyInfo)info).PropertyType,
-                        _ => null
-                    }, info, handleFunction)
-            });
-            return animator;
-        }
-
-        public static MilInstantAnimator MileaseAdditive(
-            this object target, string memberName,
-            object startValue,
-            float delay = 0f,
-            ////////
-            EaseFunction easeFunction = EaseFunction.Quad,
-            EaseType easeType = EaseType.In) =>
-            Milease(target, memberName, startValue, delay, easeFunction, easeType, MilAnimation.BlendingMode.Additive);
-
-        public static MilInstantAnimator Milease(
-            this object target, string memberName,
-            object startValue,
-            float delay = 0f,
-            ////////
-            EaseFunction easeFunction = EaseFunction.Quad,
-            EaseType easeType = EaseType.In,
-            MilAnimation.BlendingMode blendingMode = MilAnimation.BlendingMode.Default)
-        {
-            var animator = new MilInstantAnimator();
-            var type = target.GetType();
-            var members = type.GetMember(memberName);
-            if (members.Length == 0)
-            {
-                throw new MilMemberNotFoundException(memberName);
-            }
-
-            var info = members[0];
-            MileaseHandleFunction handleFunction = null;
-            // TODO complex transformation provider manager
-            if (ColorTransformation.CanTranslate(info))
-            {
-                handleFunction = ColorTransformation.MakeTransformation(blendingMode);
-            }
-
-            animator.Collection.Add(new List<RuntimeAnimationPart>()
-            {
-                new(target, animator, MilAnimation.SimplePart(startValue, delay, easeFunction, easeType, blendingMode),
-                    info.MemberType switch
-                    {
-                        MemberTypes.Field => ((FieldInfo)info).FieldType,
-                        MemberTypes.Property => ((PropertyInfo)info).PropertyType,
-                        _ => null
-                    }, info, handleFunction)
-            });
-            return animator;
-        }
-
-        public static MilInstantAnimator MileaseAdditive(
-            this object target, string memberName,
-            object startValue, object toValue,
-            float duration, float delay = 0f,
-            ////////
-            EaseFunction easeFunction = EaseFunction.Quad,
-            EaseType easeType = EaseType.In) =>
-            Milease(target, memberName, startValue, toValue,
-                duration, delay,
-                easeFunction, easeType, MilAnimation.BlendingMode.Additive);
-
-        public static MilInstantAnimator Milease(
-            this object target, string memberName,
-            object startValue, object toValue,
-            float duration, float delay = 0f,
-            ////////
-            EaseFunction easeFunction = EaseFunction.Quad,
-            EaseType easeType = EaseType.In,
-            MilAnimation.BlendingMode blendingMode = MilAnimation.BlendingMode.Default)
-        {
-            var animator = new MilInstantAnimator();
-            var type = target.GetType();
-            var members = type.GetMember(memberName);
-            if (members.Length == 0)
-            {
-                throw new MilMemberNotFoundException(memberName);
-            }
-
-            var info = members[0];
-            MileaseHandleFunction handleFunction = null;
-            // TODO complex transformation provider manager
-            if (ColorTransformation.CanTranslate(info))
-            {
-                handleFunction = ColorTransformation.MakeTransformation(blendingMode);
-            }
-
-            animator.Collection.Add(new List<RuntimeAnimationPart>()
-            {
-                new(target, animator,
-                    MilAnimation.SimplePart(startValue, toValue, duration, delay, easeFunction, easeType, blendingMode),
-                    info.MemberType switch
-                    {
-                        MemberTypes.Field => ((FieldInfo)info).FieldType,
-                        MemberTypes.Property => ((PropertyInfo)info).PropertyType,
-                        _ => null
-                    }, info, handleFunction)
-            });
-            return animator;
-        }
-
-        public static MilInstantAnimator Milease(
-            this object target, string memberName,
-            params MilAnimation.AnimationPart[] animations)
-        {
-            var animator = new MilInstantAnimator();
-            var type = target.GetType();
-            var members = type.GetMember(memberName);
-            if (members.Length == 0)
-            {
-                throw new MilMemberNotFoundException(memberName);
-            }
-
-            var info = members[0];
-            animator.Collection.Add(
-                animations.Select(x =>
-                    new RuntimeAnimationPart(target, animator, x, info.MemberType switch
-                    {
-                        MemberTypes.Field => ((FieldInfo)info).FieldType,
-                        MemberTypes.Property => ((PropertyInfo)info).PropertyType,
-                        _ => null
-                    }, info)
-                ).ToList()
-            );
             return animator;
         }
     }

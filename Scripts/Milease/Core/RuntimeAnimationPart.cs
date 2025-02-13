@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Milease.Core.Animation;
@@ -10,50 +11,50 @@ using UnityEngine;
 
 namespace Milease.Core
 {
-    public class RuntimeAnimationPart
+    public abstract class RuntimeAnimationBase
     {
-        public enum AnimationResetMode
-        {
-            /// <summary>
-            /// Resets to the state of the target object before it was affected by the animator (undo animator changes)
-            /// </summary>
-            ResetToOriginalState,
+        internal MilAnimation.AnimationPartBase Source;
+    }
+    
+    public class RuntimeAnimationPart<T, E> : RuntimeAnimationBase, IAnimationController
+    {
+        public readonly MileaseHandleFunction<T, E> HandleFunction;
+        public readonly MileaseHandleFunction<T, E> ResetFunction;
 
-            /// <summary>
-            /// Resets the target's state to the initial state as defined by the animation settings (ready to start playing)
-            /// </summary>
-            ResetToInitialState
-        }
+        private readonly OffsetAnimatorExpression<T, E> offsetExpression;
+        private readonly AnimatorExpression<T, E> expression;
         
-        public readonly MileaseHandleFunction HandleFunction;
-        public readonly MileaseHandleFunction ResetFunction;
-        public readonly MemberInfo BindMember;
-        public readonly MethodInfo AdditionOperator, SubtractionOperator, MultiplyOperator;
+        public readonly Action<T, E> ValueSetter;
+        public readonly Func<T, E> ValueGetter;
+        
+        public string MemberPath { get; }
         public readonly ValueTypeEnum ValueType;
-        public readonly Type ValueTypeInfo;
-        public readonly bool Valid;
-        public object StartValue, ToValue, OriginalValue;
-        public readonly object Target;
-        public readonly MilAnimation.AnimationPart Source;
+        
+        public E StartValue, ToValue, OriginalValue;
+        public readonly T Target;
+        
         public readonly MilInstantAnimator ParentAnimator;
-        public bool IsPrepared { get; private set; }
-        public string MemberPath { get; private set; }
+        
+        public bool IsPrepared { get; internal set; }
 
         private float lastProgress = -1f;
-
-        public RuntimeAnimationPart(object target, MilInstantAnimator animator, MilAnimation.AnimationPart animation, MileaseHandleFunction handleFunction, MileaseHandleFunction resetFunction = null)
+        
+        public RuntimeAnimationPart(T target, MilInstantAnimator animator, 
+            MilAnimation.AnimationPart<E> animation, 
+            MileaseHandleFunction<T, E> handleFunction, MileaseHandleFunction<T, E> resetFunction = null)
         {
             HandleFunction = handleFunction;
             Source = animation;
             Target = target;
-            Valid = true;
             ResetFunction = resetFunction;
             ValueType = ValueTypeEnum.SelfHandle;
             ParentAnimator = animator;
             MemberPath = handleFunction.GetHashCode().ToString();
         }
 
-        public RuntimeAnimationPart(object target, MilInstantAnimator animator, MilAnimation.AnimationPart animation, Type baseType, MemberInfo memberInfo = null, MileaseHandleFunction handleFunction = null)
+        public RuntimeAnimationPart(T target, MilInstantAnimator animator, 
+            MilAnimation.AnimationPart<E> animation, MemberExpression memberExpr, 
+            MileaseHandleFunction<T, E> handleFunction = null)
         {
             if (target == null)
             {
@@ -64,106 +65,31 @@ namespace Milease.Core
             Source = animation;
             ParentAnimator = animator;
             
-            var curType = baseType;
-            if (memberInfo != null)
+            if (memberExpr != null)
             {
-                BindMember = memberInfo;
-                MemberPath = memberInfo.Name + target.GetHashCode();
-                goto skip_seek_member;
+                MemberPath = memberExpr.Member.Name + target.GetHashCode();
+                
+                ValueGetter = AnimatorExprManager.GetValGetter<T, E>(memberExpr);
+                ValueSetter = AnimatorExprManager.GetValSetter<T, E>(memberExpr);
+            
+                expression = AnimatorExprManager.GetExpr<T, E>(memberExpr);
+                offsetExpression = AnimatorExprManager.GetExprWithOffset<T, E>(memberExpr);
             }
             else
             {
-                MemberPath = string.Join('.', animation.Binding);
+                MemberPath = target.GetHashCode().ToString();
             }
             
-            for (var i = 0; i < animation.Binding.Count; i++)
-            {
-                var list = curType!.GetMember(animation.Binding[i]);
-                if (list.Length == 0)
-                {
-                    Valid = false;
-                    return;
-                }
-
-                BindMember = list[0];
-                curType = BindMember.MemberType switch
-                {
-                    MemberTypes.Field => ((FieldInfo)BindMember).FieldType,
-                    MemberTypes.Property => ((PropertyInfo)BindMember).PropertyType,
-                    _ => null
-                };
-                
-                if (i != animation.Binding.Count - 1)
-                {
-                    target = BindMember.MemberType switch
-                    {
-                        MemberTypes.Field => ((FieldInfo)BindMember).GetValue(target),
-                        MemberTypes.Property => ((PropertyInfo)BindMember).GetValue(target),
-                        _ => throw new MilUnsupportedMemberTypeException(BindMember.Name)
-                    };
-                }
-            }
-
-            if (BindMember == null)
-            {
-                throw new MilMemberNotFoundException(string.Join('.', animation.Binding));
-            }
-            
-            skip_seek_member:
-
             Target = target;
-            Valid = true;
-            ValueTypeInfo = curType;
-
-            if (curType == typeof(string))
+            
+            if (!animation.PendingTo)
             {
                 StartValue = animation.StartValue;
-                ToValue = animation.ToValue;
-                ValueType = ValueTypeEnum.Other;
-                return;
             }
-            else if (curType!.IsPrimitive)
-            {
-                if (!animation.PendingTo)
-                {
-                    StartValue = double.Parse(animation.StartValue);
-                }
-                ToValue = double.Parse(animation.ToValue);
-                ValueType = ValueTypeEnum.PrimitiveType;
-                return;
-            }
-            else
-            {
-                if (!animation.PendingTo)
-                {
-                    StartValue = JsonUtility.FromJson(animation.StartValue, curType);
-                }
-                ToValue = JsonUtility.FromJson(animation.ToValue, curType);
-            }
-            
-            var methods = curType!.GetMethods(BindingFlags.Public | BindingFlags.Static).ToList();
-            AdditionOperator = methods.Find(x =>
-            {
-                var param = x.GetParameters();
-                return x.Name == "op_Addition" && param[0].ParameterType == curType &&
-                       param[1].ParameterType == curType && x.ReturnType == curType;
-            });
-            SubtractionOperator = methods.Find(x =>
-            {
-                var param = x.GetParameters();
-                return x.Name == "op_Subtraction" && param[0].ParameterType == curType &&
-                       param[1].ParameterType == curType && x.ReturnType == curType;
-            });
-            MultiplyOperator = methods.Find(x =>
-            {
-                var param = x.GetParameters();
-                return x.Name == "op_Multiply" && param[0].ParameterType == curType &&
-                       (param[1].ParameterType == typeof(Single) || param[1].ParameterType == typeof(Double)) && x.ReturnType == curType;
-            });
-            ValueType = AdditionOperator != null && SubtractionOperator != null && MultiplyOperator != null ? ValueTypeEnum.CustomType : ValueTypeEnum.Other;
+            ToValue = animation.ToValue;
         }
 
-        internal void ResetAnimation()
+        void IAnimationController.ResetAnimation()
         {
             if (!IsPrepared)
             {
@@ -189,10 +115,10 @@ namespace Milease.Core
             
             if (ResetFunction != null)
             {
-                ResetFunction(new MilHandleFunctionArgs()
+                ResetFunction(new MilHandleFunctionArgs<T, E>()
                 {
                     Animation = this,
-                    target = Target,
+                    Target = Target,
                     Progress = 0f,
                     Animator = ParentAnimator
                 });
@@ -220,123 +146,104 @@ namespace Milease.Core
             var targetValue = resetMode switch
             {
                 AnimationResetMode.ResetToOriginalState => OriginalValue,
-                AnimationResetMode.ResetToInitialState =>
-                    ValueType switch
-                    {
-                        ValueTypeEnum.PrimitiveType => Convert.ChangeType(StartValue, ValueTypeInfo),
-                        _ => StartValue
-                    },
+                AnimationResetMode.ResetToInitialState => StartValue,
                 _ => throw new ArgumentOutOfRangeException(nameof(resetMode), resetMode, null)
             };
             
-            if (BindMember.MemberType == MemberTypes.Field)
-            {
-                ((FieldInfo)BindMember).SetValue(Target, targetValue);
-            }
-            else
-            {
-                ((PropertyInfo)BindMember).SetValue(Target, targetValue);
-            }
+            ValueSetter.Invoke(Target, targetValue);
             
             return true;
         }
 
-        public static void SetValue(RuntimeAnimationPart ani, float pro)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void IAnimationController.Apply(float progress)
         {
-            if (pro == ani.lastProgress)
+            if (expression == null)
             {
                 return;
             }
-
-            ani.lastProgress = pro;
-            
-            if (!ani.IsPrepared)
+            if (Source.BlendingMode == MilAnimation.BlendingMode.Additive)
             {
-                ani.IsPrepared = true;
-                if (ani.BindMember != null)
+#if UNITY_EDITOR
+                if (offsetExpression == null)
                 {
-                    ani.OriginalValue = ani.BindMember.MemberType switch
-                    {
-                        MemberTypes.Field => ((FieldInfo)ani.BindMember).GetValue(ani.Target),
-                        MemberTypes.Property => ((PropertyInfo)ani.BindMember).GetValue(ani.Target),
-                        _ => null
-                    };
-                }
-                if (ani.Source.PendingTo)
-                {
-                    ani.StartValue = ani.OriginalValue;
-                    if (ani.ValueType == ValueTypeEnum.PrimitiveType)
-                    {
-                        ani.StartValue = Convert.ChangeType(ani.StartValue, TypeCode.Double);
-                    }
-                }
+                    throw new Exception(
+                        $"The type {typeof(E).Name} doesn't meet the requirements for additive animation mode.");
+                }                
+#endif
+                offsetExpression.Invoke(Target, StartValue, ToValue, progress, OriginalValue);
             }
-            
-            if (ani.ValueType == ValueTypeEnum.SelfHandle || ani.HandleFunction != null)
+            else
             {
-                ani.HandleFunction(new MilHandleFunctionArgs()
+                expression.Invoke(Target, StartValue, ToValue, progress);
+            }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void IAnimationController.SetOriginalValue()
+        {
+            if (IsPrepared)
+            {
+                return;
+            }
+            IsPrepared = true;
+            if (ValueGetter == null)
+            {
+                return;
+            }
+            OriginalValue = ValueGetter.Invoke(Target);
+            if (Source.PendingTo)
+            {
+                StartValue = OriginalValue;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        bool IAnimationController.InvokeSelfHandling(float progress)
+        {
+            if (ValueType == ValueTypeEnum.SelfHandle || HandleFunction != null)
+            {
+                HandleFunction(new MilHandleFunctionArgs<T, E>()
                 {
-                    Animation = ani,
-                    target = ani.Target,
-                    Progress = pro,
-                    Animator = ani.ParentAnimator
+                    Animation = this,
+                    Target = Target,
+                    Progress = progress,
+                    Animator = ParentAnimator
                 });
-                return;
+                return true;
             }
-            
-            var result = ani.ValueType switch
-            {
-                ValueTypeEnum.PrimitiveType => Convert.ChangeType((double)ani.StartValue + ((double)ani.ToValue - (double)ani.StartValue) * pro, ani.ValueTypeInfo),
-                ValueTypeEnum.CustomType => 
-                    ani.AdditionOperator.Invoke(null, new object[] 
-                    {
-                        ani.StartValue, 
-                        ani.MultiplyOperator.Invoke(null, new object[]
-                        {
-                            ani.SubtractionOperator.Invoke(null, new object[]
-                            {
-                                ani.ToValue, 
-                                ani.StartValue
-                            }), 
-                            pro
-                        })
-                    }),
-                ValueTypeEnum.Other => pro >= 1f ? ani.ToValue : ani.StartValue,
-                _ => default
-            };
 
-            if (ani.Source.BlendingMode == MilAnimation.BlendingMode.Additive)
+            return false;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        bool IAnimationController.ShouldUpdate(float progress)
+        {
+            if (progress == lastProgress)
             {
-                switch (ani.ValueType)
-                {
-                    case ValueTypeEnum.PrimitiveType:
-                        result = Convert.ChangeType((double)result + (double)ani.OriginalValue, ani.ValueTypeInfo);
-                        break;
-                    case ValueTypeEnum.CustomType:
-                        result = ani.AdditionOperator.Invoke(null, new object[]
-                        {
-                            result,
-                            ani.OriginalValue
-                        });
-                        break;
-                    default:
-                        Debug.LogWarning($"ValueType {ani.ValueType} doesn't support additive blending mode.");
-                        break;
-                }
+                return false;
             }
-            
-            switch (ani.BindMember.MemberType)
-            {
-                case MemberTypes.Field:
-                    ((FieldInfo)ani.BindMember).SetValue(ani.Target, result);
-                    break;
-                case MemberTypes.Property:
-                    ((PropertyInfo)ani.BindMember).SetValue(ani.Target,result);
-                    break;
-                default:
-                    Debug.LogWarning($"BindMember.MemberType {ani.BindMember.MemberType} unexpected.");
-                    break;
-            }
+
+            lastProgress = progress;
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void IAnimationController.Delay(float time)
+        {
+            Source.StartTime += time;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void IAnimationController.SetDuration(float duration)
+        {
+            Source.Duration = duration;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void IAnimationController.SetBlendingMode(MilAnimation.BlendingMode mode)
+        {
+            Source.BlendingMode = mode;
         }
     }
 }

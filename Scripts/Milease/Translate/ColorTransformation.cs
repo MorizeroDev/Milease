@@ -9,14 +9,9 @@ namespace Milease.Translate
 {
     public class ColorTransformation
     {
-        public static bool CanTranslate(MemberInfo info)
+        public static bool CanTranslate<E>()
         {
-            var type = info.MemberType switch
-            {
-                MemberTypes.Field => ((FieldInfo)info).FieldType,
-                MemberTypes.Property => ((PropertyInfo)info).PropertyType,
-                _ => null
-            };
+            var type = typeof(E);
             if (type == typeof(Color))
             {
                 return true;
@@ -35,53 +30,41 @@ namespace Milease.Translate
             return false;
         }
 
-        public static MileaseHandleFunction MakeTransformation(MilAnimation.BlendingMode blendingMode)
+        public static MileaseHandleFunction<T, E> MakeTransformation<T, E>(MilAnimation.BlendingMode blendingMode)
         {
-            return MakeTransformation(MileaseConfiguration.Configuration.DefaultColorTransformationType, blendingMode);
+            return MakeTransformation<T, E>(MileaseConfiguration.Configuration.DefaultColorTransformationType, blendingMode);
         }
 
-        public static MileaseHandleFunction MakeTransformation(ColorTransformationType colorTransformation,
+        public static MileaseHandleFunction<T, E> MakeTransformation<T, E>(ColorTransformationType colorTransformation,
             MilAnimation.BlendingMode blendingMode)
         {
             return blendingMode switch
             {
                 MilAnimation.BlendingMode.Default => colorTransformation switch
                 {
-                    ColorTransformationType.RGB => MakeTransformation(RgbNormalTransformation),
-                    ColorTransformationType.OKLAB => MakeTransformation(OklabNormalTransformation),
-                    ColorTransformationType.OKLCH => MakeTransformation(OklchNormalTransformation),
+                    ColorTransformationType.RGB => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)RgbNormalTransformation),
+                    ColorTransformationType.OKLAB => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)OklabNormalTransformation),
+                    ColorTransformationType.OKLCH => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)OklchNormalTransformation),
                     _ => throw new ArgumentOutOfRangeException(nameof(colorTransformation), colorTransformation, null)
                 },
                 MilAnimation.BlendingMode.Additive => colorTransformation switch
                 {
-                    ColorTransformationType.RGB => MakeTransformation(RgbAdditiveTransformation),
-                    ColorTransformationType.OKLAB => MakeTransformation(OklabAdditiveTransformation),
-                    ColorTransformationType.OKLCH => MakeTransformation(OklchAdditiveTransformation),
+                    ColorTransformationType.RGB => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)RgbAdditiveTransformation),
+                    ColorTransformationType.OKLAB => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)OklabAdditiveTransformation),
+                    ColorTransformationType.OKLCH => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)OklchAdditiveTransformation),
                     _ => throw new ArgumentOutOfRangeException(nameof(colorTransformation), colorTransformation, null)
                 },
                 _ => throw new ArgumentException("unsupported color transformation mode")
             };
         }
 
-        private static MileaseHandleFunction MakeTransformation(
-            Func<MilHandleFunctionArgs, Color> colorTransformation)
+        private static MileaseHandleFunction<T, E> MakeTransformation<T, E>(
+            Func<MilHandleFunctionArgs<T, E>, Color> colorTransformation)
         {
             return e =>
             {
-                var ani = e.Animation;
                 var result = colorTransformation(e);
-                switch (ani.BindMember.MemberType)
-                {
-                    case MemberTypes.Field:
-                        ((FieldInfo)ani.BindMember).SetValue(ani.Target, result);
-                        break;
-                    case MemberTypes.Property:
-                        ((PropertyInfo)ani.BindMember).SetValue(ani.Target, result);
-                        break;
-                    default:
-                        Debug.LogWarning($"BindMember.MemberType {ani.BindMember.MemberType} unexpected.");
-                        break;
-                }
+                e.Animation.ValueSetter.Invoke(e.Target, (E)(object)result);
             };
         }
 
@@ -118,7 +101,7 @@ namespace Milease.Translate
             };
         }
 
-        private static Color RgbNormalTransformation(MilHandleFunctionArgs e)
+        private static Color RgbNormalTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
         {
             var ani = e.Animation;
             var pro = e.Progress;
@@ -128,7 +111,7 @@ namespace Milease.Translate
             return fromColor + (toColor - fromColor) * pro;
         }
 
-        private static Color RgbAdditiveTransformation(MilHandleFunctionArgs e)
+        private static Color RgbAdditiveTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
         {
             var ani = e.Animation;
             var pro = e.Progress;
@@ -139,7 +122,7 @@ namespace Milease.Translate
             return originalColor + fromColor + (toColor - fromColor) * pro;
         }
 
-        private static Color OklabNormalTransformation(MilHandleFunctionArgs e)
+        private static Color OklabNormalTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
         {
             var ani = e.Animation;
             var pro = e.Progress;
@@ -154,7 +137,7 @@ namespace Milease.Translate
             return new Oklab(l, a, b, opacity).ToColor();
         }
 
-        private static Color OklabAdditiveTransformation(MilHandleFunctionArgs e)
+        private static Color OklabAdditiveTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
         {
             var ani = e.Animation;
             var pro = e.Progress;
@@ -173,7 +156,7 @@ namespace Milease.Translate
             return new Oklab(l, a, b, opacity).ToColor();
         }
 
-        private static Color OklchNormalTransformation(MilHandleFunctionArgs e)
+        private static Color OklchNormalTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
         {
             var ani = e.Animation;
             var pro = e.Progress;
@@ -197,7 +180,7 @@ namespace Milease.Translate
             return new Oklch(l, c, h, opacity).ToColor();
         }
 
-        private static Color OklchAdditiveTransformation(MilHandleFunctionArgs e)
+        private static Color OklchAdditiveTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
         {
             var ani = e.Animation;
             var pro = e.Progress;

@@ -2,23 +2,13 @@
 
 namespace Milease.Core.Animation
 {
-    public struct MilHandleFunctionArgs
+    public struct MilHandleFunctionArgs<T, E>
     {
-        internal object target;
+        public T Target { get; internal set; }
         public float Progress { get; internal set; }
-        public RuntimeAnimationPart Animation { get; internal set; }
+        public RuntimeAnimationPart<T, E> Animation { get; internal set; }
         public MilInstantAnimator Animator { get; internal set; }
-
-        public T GetTarget<T>()
-        {
-            return (T)target;
-        }
-
-        public object GetTarget()
-        {
-            return target;
-        }
     }
 
-    public delegate void MileaseHandleFunction(MilHandleFunctionArgs e);
+    public delegate void MileaseHandleFunction<T, E>(MilHandleFunctionArgs<T, E> e);
 }

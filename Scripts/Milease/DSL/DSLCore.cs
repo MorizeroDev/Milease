@@ -48,7 +48,7 @@ namespace Milease.DSL
             => generate(target, mbExpr, aniExpr, EaseType.In, EaseFunction.Quad);
         
         private static MilInstantAnimator generate<T, E>(
-            T target, System.Linq.Expressions.Expression<Func<T, E>> mbExpr, 
+            T target, Expression<Func<T, E>> mbExpr, 
             AniExpression<E> aniExpr,
             EaseType easeType, EaseFunction easeFunction
         )
@@ -59,13 +59,12 @@ namespace Milease.DSL
             }
             
             var animator = new MilInstantAnimator();
-            var info = memberExpr.Member;
             
-            MileaseHandleFunction handleFunction = null;
+            MileaseHandleFunction<T, E> handleFunction = null;
             // TODO complex transformation provider manager
-            if (ColorTransformation.CanTranslate(info))
+            if (ColorTransformation.CanTranslate<E>())
             {
-                handleFunction = ColorTransformation.MakeTransformation(aniExpr.BlendingMode);
+                handleFunction = ColorTransformation.MakeTransformation<T, E>(aniExpr.BlendingMode);
             }
 
             var animationPart = aniExpr.ToOnly
@@ -73,16 +72,9 @@ namespace Milease.DSL
                 : MilAnimation.SimplePart(aniExpr.From, aniExpr.To, aniExpr.Duration,
                     aniExpr.StartTime, easeFunction, easeType, aniExpr.BlendingMode);
             
-            animator.Collection.Add(new List<RuntimeAnimationPart>()
+            animator.Collection.Add(new List<IAnimationController>()
             {
-                new(target, animator,
-                    animationPart,
-                    info.MemberType switch
-                    {
-                        MemberTypes.Field => ((FieldInfo)info).FieldType,
-                        MemberTypes.Property => ((PropertyInfo)info).PropertyType,
-                        _ => null
-                    }, info, handleFunction)
+                new RuntimeAnimationPart<T,E>(target, animator, animationPart, memberExpr, handleFunction)
             });
 
             return animator;

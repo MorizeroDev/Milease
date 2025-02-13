@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Milease.Core.Animation;
 using Milease.Core.Manager;
 using Milease.Enums;
@@ -9,10 +10,9 @@ namespace Milease.Core.Animator
 {
     public class MilInstantAnimator
     {
-        public readonly List<List<RuntimeAnimationPart>> Collection = new();
+        public readonly List<List<IAnimationController>> Collection = new();
 
-        public RuntimeAnimationPart.AnimationResetMode DefaultResetMode =
-            RuntimeAnimationPart.AnimationResetMode.ResetToOriginalState;
+        public AnimationResetMode DefaultResetMode = AnimationResetMode.ResetToOriginalState;
 
         public bool Loop { get; set; } = false;
 
@@ -29,7 +29,7 @@ namespace Milease.Core.Animator
         {
             return new MilInstantAnimator()
             {
-                Collection = { new List<RuntimeAnimationPart>() }
+                Collection = { new List<IAnimationController>() }
             };
         }
         
@@ -55,7 +55,7 @@ namespace Milease.Core.Animator
             return this;
         }
         
-        public MilInstantAnimator UsingResetMode(RuntimeAnimationPart.AnimationResetMode mode)
+        public MilInstantAnimator UsingResetMode(AnimationResetMode mode)
         {
             DefaultResetMode = mode;
             return this;
@@ -71,7 +71,7 @@ namespace Milease.Core.Animator
         {
             foreach (var part in Collection[^1])
             {
-                part.Source.StartTime += time;
+                part.Delay(time);
             }
             return this;
         }
@@ -152,7 +152,7 @@ namespace Milease.Core.Animator
         /// <param name="mode">Reset mode</param>
         /// <param name="revertToChanges">Also revert MileaseTo changes</param>
         public void Reset(
-            RuntimeAnimationPart.AnimationResetMode mode = RuntimeAnimationPart.AnimationResetMode.ResetToOriginalState,
+            AnimationResetMode mode = AnimationResetMode.ResetToOriginalState,
             bool revertToChanges = true)
         {
             Time = 0f;
@@ -160,8 +160,8 @@ namespace Milease.Core.Animator
             var cnt = Collection.Count;
             var resetCount = mode switch
             {
-                RuntimeAnimationPart.AnimationResetMode.ResetToOriginalState => Math.Min(PlayIndex + 1, cnt),
-                RuntimeAnimationPart.AnimationResetMode.ResetToInitialState => cnt,
+                AnimationResetMode.ResetToOriginalState => Math.Min(PlayIndex + 1, cnt),
+                AnimationResetMode.ResetToInitialState => cnt,
                 _ => 0
             };
             
@@ -221,7 +221,7 @@ namespace Milease.Core.Animator
                 return;
             }
 
-            if (PlayIndex >= Collection.Count || DefaultResetMode == RuntimeAnimationPart.AnimationResetMode.ResetToInitialState)
+            if (PlayIndex >= Collection.Count || DefaultResetMode == AnimationResetMode.ResetToInitialState)
             {
                 Reset(DefaultResetMode, revertToChanges);
             }
@@ -230,13 +230,31 @@ namespace Milease.Core.Animator
             {
                 foreach (var ani in Collection[0])
                 {
-                    RuntimeAnimationPart.SetValue(ani, 0f);
+                    ApplyAnimation(ani, 0f);
                 }
             }
             MilInstantAnimatorManager.Animations.Add(this);
             ActiveScene = SceneManager.GetActiveScene().name;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void ApplyAnimation(IAnimationController ani, float pro)
+        {
+            if (!ani.ShouldUpdate(pro))
+            {
+                return;
+            }
+            
+            ani.SetOriginalValue();
+            
+            if (ani.InvokeSelfHandling(pro))
+            {
+                return;
+            }
+            
+            ani.Apply(pro);
+        }
+        
         public void Stop()
         {
             Reset(DefaultResetMode);
@@ -257,7 +275,7 @@ namespace Milease.Core.Animator
             
             foreach (var ani in animator.Collection[0])
             {
-                ani.Source.Duration = duration;
+                ani.SetDuration(duration);
             }
 
             return animator;
@@ -280,7 +298,7 @@ namespace Milease.Core.Animator
             
             foreach (var ani in animator.Collection[0])
             {
-                ani.Source.BlendingMode = blendingMode;
+                ani.SetBlendingMode(blendingMode);
             }
 
             return animator;
