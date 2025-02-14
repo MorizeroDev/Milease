@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+﻿#if UNITY_EDITOR && MILEASE_ENABLE_EXPRESSION
 using System.IO;
 using System.Text;
 using Milease.Core;

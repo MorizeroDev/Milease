@@ -66,7 +66,6 @@ sysinfo.txt
 # Builds
 *.apk
 *.aab
-*.unitypackage
 
 # Crashlytics generated file
 crashlytics-build.properties
@@ -457,3 +456,7 @@ Assets/Epic Toon FX/Upgrade/ETFX 2019.4.24f1 URP Upgrade.unitypackage.meta
 Assets/Le Tai's Asset/TranslucentImage/UniversalRP support.unitypackage.meta
 Demos.meta
 TextMesh Pro.meta
+
+Milease.CodeGen/
+
+Milease.CodeGen.meta

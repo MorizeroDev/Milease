@@ -3,7 +3,8 @@
     "rootNamespace": "Milease",
     "references": [
         "party.para.util.colors",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Milease.CodeGen"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

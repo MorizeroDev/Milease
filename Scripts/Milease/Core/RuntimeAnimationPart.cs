@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Milease.CodeGen;
 using Milease.Core.Animation;
 using Milease.Core.Animator;
 using Milease.Enums;
@@ -21,11 +22,18 @@ namespace Milease.Core
         public readonly MileaseHandleFunction<T, E> HandleFunction;
         public readonly MileaseHandleFunction<T, E> ResetFunction;
 
+#if MILEASE_ENABLE_EXPRESSION
         private readonly OffsetAnimatorExpression<T, E> offsetExpression;
         private readonly AnimatorExpression<T, E> expression;
         
         public readonly Action<T, E> ValueSetter;
         public readonly Func<T, E> ValueGetter;
+#else
+        private readonly OffsetCalculateFunction<E> offsetCalcFunc;
+        private readonly CalculateFunction<E> calcFunc;
+        
+        public readonly MemberInfo BindMember;
+#endif
         
         public string MemberPath { get; }
         public readonly ValueTypeEnum ValueType;
@@ -68,12 +76,18 @@ namespace Milease.Core
             if (memberExpr != null)
             {
                 MemberPath = memberExpr.Member.Name + target.GetHashCode();
-                
+#if MILEASE_ENABLE_EXPRESSION
                 ValueGetter = AnimatorExprManager.GetValGetter<T, E>(memberExpr);
                 ValueSetter = AnimatorExprManager.GetValSetter<T, E>(memberExpr);
             
                 expression = AnimatorExprManager.GetExpr<T, E>(memberExpr);
                 offsetExpression = AnimatorExprManager.GetExprWithOffset<T, E>(memberExpr);
+#else
+                BindMember = memberExpr.Member;
+                
+                offsetCalcFunc = GeneratedCalculation.GetOffsetFunc<E>();
+                calcFunc = GeneratedCalculation.GetFunc<E>();
+#endif
             }
             else
             {
@@ -150,7 +164,18 @@ namespace Milease.Core
                 _ => throw new ArgumentOutOfRangeException(nameof(resetMode), resetMode, null)
             };
             
+#if MILEASE_ENABLE_EXPRESSION
             ValueSetter.Invoke(Target, targetValue);
+#else
+            if (BindMember.MemberType == MemberTypes.Field)
+            {
+                ((FieldInfo)BindMember).SetValue(Target, targetValue);
+            }
+            else
+            {
+                ((PropertyInfo)BindMember).SetValue(Target, targetValue);
+            }
+#endif
             
             return true;
         }
@@ -158,10 +183,12 @@ namespace Milease.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void IAnimationController.Apply(float progress)
         {
+#if MILEASE_ENABLE_EXPRESSION
             if (expression == null)
             {
                 return;
             }
+
             if (Source.BlendingMode == MilAnimation.BlendingMode.Additive)
             {
 #if UNITY_EDITOR
@@ -177,6 +204,25 @@ namespace Milease.Core
             {
                 expression.Invoke(Target, StartValue, ToValue, progress);
             }
+#else
+            if (calcFunc == null)
+            {
+                return;
+            }
+            
+            var targetValue = Source.BlendingMode == MilAnimation.BlendingMode.Additive
+                ? offsetCalcFunc.Invoke(StartValue, ToValue, progress, OriginalValue)
+                : calcFunc.Invoke(StartValue, ToValue, progress);
+                
+            if (BindMember.MemberType == MemberTypes.Field)
+            {
+                ((FieldInfo)BindMember).SetValue(Target, targetValue);
+            }
+            else
+            {
+                ((PropertyInfo)BindMember).SetValue(Target, targetValue);
+            }
+#endif
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -187,11 +233,24 @@ namespace Milease.Core
                 return;
             }
             IsPrepared = true;
+#if MILEASE_ENABLE_EXPRESSION
             if (ValueGetter == null)
             {
                 return;
             }
             OriginalValue = ValueGetter.Invoke(Target);
+#else
+            if (BindMember == null)
+            {
+                return;
+            }
+            OriginalValue = BindMember.MemberType switch
+            {
+                MemberTypes.Field => (E)((FieldInfo)BindMember).GetValue(Target),
+                MemberTypes.Property => (E)((PropertyInfo)BindMember).GetValue(Target),
+                _ => throw new MilUnsupportedMemberTypeException(BindMember.Name)
+            };
+#endif
             if (Source.PendingTo)
             {
                 StartValue = OriginalValue;

@@ -64,7 +64,18 @@ namespace Milease.Translate
             return e =>
             {
                 var result = colorTransformation(e);
+#if MILEASE_ENABLE_EXPRESSION
                 e.Animation.ValueSetter.Invoke(e.Target, (E)(object)result);
+#else
+                if (e.Animation.BindMember.MemberType == MemberTypes.Field)
+                {
+                    ((FieldInfo)e.Animation.BindMember).SetValue(e.Target, result);
+                }
+                else
+                {
+                    ((PropertyInfo)e.Animation.BindMember).SetValue(e.Target, result);
+                }
+#endif
             };
         }
 
