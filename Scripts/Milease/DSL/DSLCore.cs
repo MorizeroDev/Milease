@@ -53,7 +53,16 @@ namespace Milease.DSL
             EaseType easeType, EaseFunction easeFunction
         )
         {
-            if (mbExpr.Body is not MemberExpression memberExpr)
+            MemberInfo memberInfo = null;
+            if (mbExpr.Body is MemberExpression memberExpr)
+            {
+                memberInfo = memberExpr.Member;
+            }
+            else if (mbExpr.Body is UnaryExpression unaryExpr && unaryExpr.Operand is MemberExpression propExpr)
+            {
+                memberInfo = propExpr.Member;
+            }
+            else
             {
                 throw new Exception("You must pass in a MemberExpression to construct the animator.");
             }
@@ -74,7 +83,7 @@ namespace Milease.DSL
             
             animator.Collection.Add(new List<IAnimationController>()
             {
-                new RuntimeAnimationPart<T,E>(target, animator, animationPart, memberExpr, handleFunction)
+                new RuntimeAnimationPart<T,E>(target, animator, animationPart, memberInfo, handleFunction)
             });
 
             return animator;

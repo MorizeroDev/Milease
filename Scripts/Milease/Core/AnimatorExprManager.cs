@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Milease.Core
 {
@@ -24,33 +25,42 @@ namespace Milease.Core
 
         public static void WarmUp<T, E>(Expression<Func<T, E>> mbExpr)
         {
-            if (mbExpr.Body is not MemberExpression memberExpr)
+            MemberInfo memberInfo = null;
+            if (mbExpr.Body is MemberExpression memberExpr)
+            {
+                memberInfo = memberExpr.Member;
+            }
+            else if (mbExpr.Body is UnaryExpression unaryExpr && unaryExpr.Operand is MemberExpression propExpr)
+            {
+                memberInfo = propExpr.Member;
+            }
+            else
             {
                 throw new Exception("You must pass in a MemberExpression to construct the animator.");
             }
-            _ = GetExprWithOffset<T, E>(memberExpr);
-            _ = GetExpr<T, E>(memberExpr);
-            _ = GetValSetter<T, E>(memberExpr);
-            _ = GetValGetter<T, E>(memberExpr);
+            _ = GetExprWithOffset<T, E>(memberInfo);
+            _ = GetExpr<T, E>(memberInfo);
+            _ = GetValSetter<T, E>(memberInfo);
+            _ = GetValGetter<T, E>(memberInfo);
         }
         
-        internal static OffsetAnimatorExpression<T, E> GetExprWithOffset<T, E>(MemberExpression memberExpr)
+        internal static OffsetAnimatorExpression<T, E> GetExprWithOffset<T, E>(MemberInfo memberInfo)
         {
-            var key = (typeof(T), memberExpr.Member.Name);
+            var key = (typeof(T), memberInfo.Name);
             if (offsetExpressionMap.TryGetValue(key, out var expr))
             {
                 return (OffsetAnimatorExpression<T, E>)expr;
             }
 
-            expr = MakeExprWithOffset<T, E>(memberExpr);
+            expr = MakeExprWithOffset<T, E>(memberInfo);
             offsetExpressionMap.Add(key, expr);
             return (OffsetAnimatorExpression<T, E>)expr;
         }
 
-        private static OffsetAnimatorExpression<T, E> MakeExprWithOffset<T, E>(MemberExpression memberExpr)
+        private static OffsetAnimatorExpression<T, E> MakeExprWithOffset<T, E>(MemberInfo memberInfo)
         {
             var targetParam = Expression.Parameter(typeof(T), "target");
-            var mutableMemberExpr = Expression.MakeMemberAccess(targetParam, memberExpr.Member);
+            var mutableMemberExpr = Expression.MakeMemberAccess(targetParam, memberInfo);
         
             var startParam = Expression.Parameter(typeof(E), "start");
             var endParam = Expression.Parameter(typeof(E), "end");
@@ -82,15 +92,15 @@ namespace Milease.Core
             }
         }
         
-        internal static AnimatorExpression<T, E> GetExpr<T, E>(MemberExpression memberExpr)
+        internal static AnimatorExpression<T, E> GetExpr<T, E>(MemberInfo memberInfo)
         {
-            var key = (typeof(T), memberExpr.Member.Name);
+            var key = (typeof(T), memberInfo.Name);
             if (expressionMap.TryGetValue(key, out var expr))
             {
                 return (AnimatorExpression<T, E>)expr;
             }
 
-            expr = MakeExpr<T, E>(memberExpr);
+            expr = MakeExpr<T, E>(memberInfo);
             expressionMap.Add(key, expr);
             
 #if UNITY_EDITOR
@@ -98,17 +108,17 @@ namespace Milease.Core
             {
                 TName = typeof(T).FullName,
                 EName = typeof(E).FullName,
-                MemberName = memberExpr.Member.Name
+                MemberName = memberInfo.Name
             });
 #endif
             
             return (AnimatorExpression<T, E>)expr;
         }
 
-        private static AnimatorExpression<T, E> MakeExpr<T, E>(MemberExpression memberExpr)
+        private static AnimatorExpression<T, E> MakeExpr<T, E>(MemberInfo memberInfo)
         {
             var targetParam = Expression.Parameter(typeof(T), "target");
-            var mutableMemberExpr = Expression.MakeMemberAccess(targetParam, memberExpr.Member);
+            var mutableMemberExpr = Expression.MakeMemberAccess(targetParam, memberInfo);
         
             var startParam = Expression.Parameter(typeof(E), "start");
             var endParam = Expression.Parameter(typeof(E), "end");
@@ -143,44 +153,44 @@ namespace Milease.Core
             }
         }
         
-        internal static Func<T, E> GetValGetter<T, E>(MemberExpression memberExpr)
+        internal static Func<T, E> GetValGetter<T, E>(MemberInfo memberInfo)
         {
-            var key = (typeof(T), memberExpr.Member.Name);
+            var key = (typeof(T), memberInfo.Name);
             if (valueGetterMap.TryGetValue(key, out var expr))
             {
                 return (Func<T, E>)expr;
             }
 
-            expr = MakeGetter<T, E>(memberExpr);
+            expr = MakeGetter<T, E>(memberInfo);
             valueGetterMap.Add(key, expr);
             return (Func<T, E>)expr;
         }
         
-        private static Func<T, E> MakeGetter<T, E>(MemberExpression memberExpr)
+        private static Func<T, E> MakeGetter<T, E>(MemberInfo memberInfo)
         {
             var targetParam = Expression.Parameter(typeof(T), "target");
-            var mutableMemberExpr = Expression.MakeMemberAccess(targetParam, memberExpr.Member);
+            var mutableMemberExpr = Expression.MakeMemberAccess(targetParam, memberInfo);
             
             return Expression.Lambda<Func<T, E>>(mutableMemberExpr, targetParam).Compile();
         }
         
-        internal static Action<T, E> GetValSetter<T, E>(MemberExpression memberExpr)
+        internal static Action<T, E> GetValSetter<T, E>(MemberInfo memberInfo)
         {
-            var key = (typeof(T), memberExpr.Member.Name);
+            var key = (typeof(T), memberInfo.Name);
             if (valueSetterMap.TryGetValue(key, out var expr))
             {
                 return (Action<T, E>)expr;
             }
 
-            expr = MakeSetter<T, E>(memberExpr);
+            expr = MakeSetter<T, E>(memberInfo);
             valueSetterMap.Add(key, expr);
             return (Action<T, E>)expr;
         }
         
-        private static Action<T, E> MakeSetter<T, E>(MemberExpression memberExpr)
+        private static Action<T, E> MakeSetter<T, E>(MemberInfo memberInfo)
         {
             var targetParam = Expression.Parameter(typeof(T), "target");
-            var mutableMemberExpr = Expression.MakeMemberAccess(targetParam, memberExpr.Member);
+            var mutableMemberExpr = Expression.MakeMemberAccess(targetParam, memberInfo);
             var valParam = Expression.Parameter(typeof(E), "value");
             
             return Expression.Lambda<Action<T, E>>(

@@ -60,7 +60,7 @@ namespace Milease.Core
         }
 
         public RuntimeAnimationPart(T target, MilInstantAnimator animator, 
-            MilAnimation.AnimationPart<E> animation, MemberExpression memberExpr, 
+            MilAnimation.AnimationPart<E> animation, MemberInfo member, 
             MileaseHandleFunction<T, E> handleFunction = null)
         {
             if (target == null)
@@ -72,17 +72,17 @@ namespace Milease.Core
             Source = animation;
             ParentAnimator = animator;
             
-            if (memberExpr != null)
+            if (member != null)
             {
-                MemberPath = memberExpr.Member.Name + target.GetHashCode();
+                MemberPath = member.Name + target.GetHashCode();
 #if MILEASE_ENABLE_EXPRESSION
-                ValueGetter = AnimatorExprManager.GetValGetter<T, E>(memberExpr);
-                ValueSetter = AnimatorExprManager.GetValSetter<T, E>(memberExpr);
+                ValueGetter = AnimatorExprManager.GetValGetter<T, E>(member);
+                ValueSetter = AnimatorExprManager.GetValSetter<T, E>(member);
             
-                expression = AnimatorExprManager.GetExpr<T, E>(memberExpr);
-                offsetExpression = AnimatorExprManager.GetExprWithOffset<T, E>(memberExpr);
+                expression = AnimatorExprManager.GetExpr<T, E>(member);
+                offsetExpression = AnimatorExprManager.GetExprWithOffset<T, E>(member);
 #else
-                BindMember = memberExpr.Member;
+                BindMember = member;
                 
                 offsetCalcFunc = RuntimeBridge.GetOffsetFunc<E>();
                 calcFunc = RuntimeBridge.GetFunc<E>();

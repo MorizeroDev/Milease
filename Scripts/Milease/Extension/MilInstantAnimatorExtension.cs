@@ -24,7 +24,9 @@ namespace Milease.Utils
             var animationPart = MilAnimation.SimplePart(action, delay);
             animator.Collection.Add(new List<IAnimationController>()
             {
-                new RuntimeAnimationPart<Action, Action>(default, animator, animationPart, (MemberExpression)null, null)
+                new RuntimeAnimationPart<Action, Action>(default, animator, animationPart, 
+                    (_) => action.Invoke(), 
+                    null)
             });
 
             return animator;
@@ -39,7 +41,7 @@ namespace Milease.Utils
             var animationPart = MilAnimation.SimplePart<E>(duration, delay);
             animator.Collection.Add(new List<IAnimationController>()
             {
-                new RuntimeAnimationPart<E, E>(default, animator, animationPart, (MemberExpression)null, null)
+                new RuntimeAnimationPart<E, E>(default, animator, animationPart, func, null)
             });
             return animator;
         }

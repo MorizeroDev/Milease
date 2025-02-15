@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using Milease.CodeGen;
 using Milease.Core;
@@ -14,6 +15,11 @@ namespace Milease.Editor
 {
     public class Il2CppCalFuncGenerator
     {
+        private class MemberMetaData
+        {
+            public string TName, EName, MemberName;
+        }
+        
         [MenuItem("Milease/Generate source code")]
         public static void Generate()
         {
@@ -31,7 +37,33 @@ namespace Milease.Editor
             EditorUtility.DisplayProgressBar("Milease", "Preparing...", 0f);
 
             var types = GenerationBridge.GetAnimatableTypes();
-            var members = AccessorGenerationList.GetGenerateMembers();
+            var members =
+                AccessorGenerationList.GetGenerateMembers().Select(x =>
+                {
+                    if (x.Body is MemberExpression memberExpr)
+                    {
+                        return new MemberMetaData()
+                        {
+                            TName = x.Parameters[0].Type.FullName,
+                            EName = x.ReturnType.FullName,
+                            MemberName = memberExpr.Member.Name
+                        };
+                    }
+                    else if (x.Body is UnaryExpression unaryExpr && unaryExpr.Operand is MemberExpression propExpr)
+                    {
+                        return new MemberMetaData()
+                        {
+                            TName = x.Parameters[0].Type.FullName,
+                            EName = x.ReturnType.FullName,
+                            MemberName = propExpr.Member.Name
+                        };
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }).Where(x => x != null);
+            
             if (!EditorUtility.DisplayDialog("Milease",
                     $"Found {types.Count()} animatable type(s) and {members.Count()} member(s), " +
                             $"do you want to generate now?",
@@ -80,7 +112,7 @@ namespace Milease.Editor
             AssetDatabase.Refresh();
             AssetDatabase.ImportAsset(path);
             
-            code = GenerateAccessors(ArraySegment<LambdaExpression>.Empty);
+            code = GenerateAccessors(ArraySegment<MemberMetaData>.Empty);
             path = Path.Combine(folder!, "GeneratedAccessors.cs");
             File.WriteAllText(path, code);
             AssetDatabase.Refresh();
@@ -89,7 +121,7 @@ namespace Milease.Editor
             EditorUtility.ClearProgressBar();
         }
 
-        private static string GenerateAccessors(IEnumerable<LambdaExpression> members)
+        private static string GenerateAccessors(IEnumerable<MemberMetaData> members)
         {
             string template;
             var sb = new StringBuilder();
@@ -112,17 +144,12 @@ namespace Milease.CodeGen
             template = "            [(typeof(<<t>>), \"<<m>>\")] = new Func<<<t>>, <<e>>>(_mil_generated_get_<<n>>),";
             foreach (var member in members)
             {
-                if (member.Body is not MemberExpression mbExpr)
-                {
-                    continue;
-                }
-
                 sb.AppendLine(
-                    template.Replace("<<t>>", member.Parameters[0].Type.FullName)
-                            .Replace("<<e>>", member.ReturnType.FullName)
-                            .Replace("<<m>>", mbExpr.Member.Name)
+                    template.Replace("<<t>>", member.TName)
+                            .Replace("<<e>>", member.EName)
+                            .Replace("<<m>>", member.MemberName)
                             .Replace("<<n>>", 
-                                (member.Parameters[0].Type.FullName + "_" + mbExpr.Member.Name)
+                                (member.TName + "_" + member.MemberName)
                                         .Replace(".", "_")
                             )
                 );
@@ -137,17 +164,12 @@ namespace Milease.CodeGen
             template = "            [(typeof(<<t>>), \"<<m>>\")] = new Action<<<t>>, <<e>>>(_mil_generated_set_<<n>>),";
             foreach (var member in members)
             {
-                if (member.Body is not MemberExpression mbExpr)
-                {
-                    continue;
-                }
-
                 sb.AppendLine(
-                    template.Replace("<<t>>", member.Parameters[0].Type.FullName)
-                        .Replace("<<e>>", member.ReturnType.FullName)
-                        .Replace("<<m>>", mbExpr.Member.Name)
+                    template.Replace("<<t>>", member.TName)
+                        .Replace("<<e>>", member.EName)
+                        .Replace("<<m>>", member.MemberName)
                         .Replace("<<n>>", 
-                            (member.Parameters[0].Type.FullName + "_" + mbExpr.Member.Name)
+                            (member.TName + "_" + member.MemberName)
                             .Replace(".", "_")
                         )
                 );
@@ -171,17 +193,12 @@ namespace Milease.CodeGen
 ";
             foreach (var member in members)
             {
-                if (member.Body is not MemberExpression mbExpr)
-                {
-                    continue;
-                }
-
                 sb.AppendLine(
-                    template.Replace("<<t>>", member.Parameters[0].Type.FullName)
-                        .Replace("<<e>>", member.ReturnType.FullName)
-                        .Replace("<<m>>", mbExpr.Member.Name)
+                    template.Replace("<<t>>", member.TName)
+                        .Replace("<<e>>", member.EName)
+                        .Replace("<<m>>", member.MemberName)
                         .Replace("<<n>>", 
-                            (member.Parameters[0].Type.FullName + "_" + mbExpr.Member.Name)
+                            (member.TName + "_" + member.MemberName)
                             .Replace(".", "_")
                         )
                 );
