@@ -38,13 +38,18 @@ However, compilation itself can be time-consuming. Fortunately, you can generate
 
 > Due to technical compatibility issues, animation generation statements from v1 (including most **Milease** and **MileaseTo** extension methods) are no longer supported.
 
-**This method is only applicable to the Mono backend and does not work on IL2CPP.** It is disabled by default, but you can enable it by defining the symbol `MILEASE_ENABLE_EXPRESSION`. It will be significantly faster than the IL2CPP approach.
+**This method is only applicable to the Mono backend and does not work on IL2CPP.** It is disabled by default, but you can enable it by defining the symbol `MILEASE_ENABLE_EXPRESSION`. 
 
 # Alternative Solution for IL2CPP: Source Code Generation
 
-Due to compatibility and performance issues of `Expression` on IL2CPP, Milease has to use an alternative approach to generate animation calculation functions to reduce runtime overhead.
+Due to compatibility and performance issues of `Expression` on IL2CPP, Milease has to use an alternative approach to generate animation code to reduce runtime overhead.
 
-When introducing Milease into your project for the first time, you need to import the "il2cpp support" folder inside the Milease directory. Then, you can generate animation calculation source code via the "Milease" menu options. Additionally, you can manually specify types and namespaces to exclude from generation in `GenerationDisableList.cs`.
+When introducing Milease into your project for the first time, you need to import the "il2cpp support" folder inside the Milease directory. Then, you can generate animation calculation source code via the "Milease" menu options. 
+
+**Additions**:
+
+* You can manually specify types and namespaces to exclude from generation in `GenerationDisableList.cs`.
+* You can specify the members for which accessors should be generated in `AccessorGenerationList.cs` to improve runtime efficiency.
 
 # Animate Anything
 

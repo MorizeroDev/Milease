@@ -25,15 +25,14 @@ namespace Milease.Core
 #if MILEASE_ENABLE_EXPRESSION
         private readonly OffsetAnimatorExpression<T, E> offsetExpression;
         private readonly AnimatorExpression<T, E> expression;
-        
-        public readonly Action<T, E> ValueSetter;
-        public readonly Func<T, E> ValueGetter;
 #else
         private readonly OffsetCalculateFunction<E> offsetCalcFunc;
         private readonly CalculateFunction<E> calcFunc;
         
-        public readonly MemberInfo BindMember;
+        private readonly MemberInfo BindMember;
 #endif
+        public readonly Action<T, E> ValueSetter;
+        public readonly Func<T, E> ValueGetter;
         
         public string MemberPath { get; }
         public readonly ValueTypeEnum ValueType;
@@ -85,8 +84,18 @@ namespace Milease.Core
 #else
                 BindMember = memberExpr.Member;
                 
-                offsetCalcFunc = GeneratedCalculation.GetOffsetFunc<E>();
-                calcFunc = GeneratedCalculation.GetFunc<E>();
+                offsetCalcFunc = RuntimeBridge.GetOffsetFunc<E>();
+                calcFunc = RuntimeBridge.GetFunc<E>();
+
+                if (!RuntimeBridge.TryGetGetter(BindMember.Name, out ValueGetter))
+                {
+                    ValueGetter = GetValueByReflection;
+                }
+                
+                if (!RuntimeBridge.TryGetSetter(BindMember.Name, out ValueSetter))
+                {
+                    ValueSetter = SetValueByReflection;
+                }
 #endif
             }
             else
@@ -102,6 +111,32 @@ namespace Milease.Core
             }
             ToValue = animation.ToValue;
         }
+
+#if !MILEASE_ENABLE_EXPRESSION
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private E GetValueByReflection(T _)
+        {
+            return BindMember.MemberType switch
+            {
+                MemberTypes.Field => (E)((FieldInfo)BindMember).GetValue(Target),
+                MemberTypes.Property => (E)((PropertyInfo)BindMember).GetValue(Target),
+                _ => throw new MilUnsupportedMemberTypeException(BindMember.Name)
+            };
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValueByReflection(T _, E value)
+        {
+            if (BindMember.MemberType == MemberTypes.Field)
+            {
+                ((FieldInfo)BindMember).SetValue(Target, value);
+            }
+            else
+            {
+                ((PropertyInfo)BindMember).SetValue(Target, value);
+            }
+        }
+#endif
 
         void IAnimationController.ResetAnimation()
         {
@@ -164,18 +199,7 @@ namespace Milease.Core
                 _ => throw new ArgumentOutOfRangeException(nameof(resetMode), resetMode, null)
             };
             
-#if MILEASE_ENABLE_EXPRESSION
             ValueSetter.Invoke(Target, targetValue);
-#else
-            if (BindMember.MemberType == MemberTypes.Field)
-            {
-                ((FieldInfo)BindMember).SetValue(Target, targetValue);
-            }
-            else
-            {
-                ((PropertyInfo)BindMember).SetValue(Target, targetValue);
-            }
-#endif
             
             return true;
         }
@@ -214,14 +238,7 @@ namespace Milease.Core
                 ? offsetCalcFunc.Invoke(StartValue, ToValue, progress, OriginalValue)
                 : calcFunc.Invoke(StartValue, ToValue, progress);
                 
-            if (BindMember.MemberType == MemberTypes.Field)
-            {
-                ((FieldInfo)BindMember).SetValue(Target, targetValue);
-            }
-            else
-            {
-                ((PropertyInfo)BindMember).SetValue(Target, targetValue);
-            }
+            ValueSetter.Invoke(Target, targetValue);
 #endif
         }
         
@@ -233,24 +250,13 @@ namespace Milease.Core
                 return;
             }
             IsPrepared = true;
-#if MILEASE_ENABLE_EXPRESSION
+            
             if (ValueGetter == null)
             {
                 return;
             }
             OriginalValue = ValueGetter.Invoke(Target);
-#else
-            if (BindMember == null)
-            {
-                return;
-            }
-            OriginalValue = BindMember.MemberType switch
-            {
-                MemberTypes.Field => (E)((FieldInfo)BindMember).GetValue(Target),
-                MemberTypes.Property => (E)((PropertyInfo)BindMember).GetValue(Target),
-                _ => throw new MilUnsupportedMemberTypeException(BindMember.Name)
-            };
-#endif
+            
             if (Source.PendingTo)
             {
                 StartValue = OriginalValue;

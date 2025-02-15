@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if MILEASE_ENABLE_EXPRESSION
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
@@ -188,3 +189,4 @@ namespace Milease.Core
         }
     }
 }
+#endif
