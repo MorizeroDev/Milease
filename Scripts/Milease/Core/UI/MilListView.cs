@@ -113,7 +113,7 @@ namespace Milease.Core.UI
                 itemRect.pivot = new Vector2(itemRect.pivot.x, 1f);
                 if (Align == AlignMode.Center)
                 {
-                    Debug.LogWarning($"Vertical mode hasn't supported center align mode yet.");
+                    LogUtils.Warning($"Vertical mode hasn't supported center align mode yet.");
                 }
             }
             else
@@ -230,7 +230,7 @@ namespace Milease.Core.UI
             }
             if (index < 0 || index >= Items.Count)
             {
-                Debug.LogWarning("Index out of range.");
+                LogUtils.Warning("Index out of range.");
                 return false;
             }
             if (bindDisplay[index])
@@ -476,7 +476,7 @@ namespace Milease.Core.UI
 
             if (LoopList && Items.Count < cnt - 1)
             {
-                Debug.LogWarning($"Your item count({Items.Count}) is smaller than the list can display({cnt}), this may cause abnormal appearance.");
+                LogUtils.Warning($"Your item count({Items.Count}) is smaller than the list can display({cnt}), this may cause abnormal appearance.");
             }
 
             if (LoopList && start < 0)
@@ -532,7 +532,7 @@ namespace Milease.Core.UI
                 {
                     if (j >= avaliable.Count)
                     {
-                        Debug.LogWarning("Lack of item object.");
+                        LogUtils.Warning("Lack of item object.");
                         continue;
                     }
                     avaliable[j].Binding = Items[k];

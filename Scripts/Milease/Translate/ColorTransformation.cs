@@ -30,24 +30,24 @@ namespace Milease.Translate
             return false;
         }
 
-        public static MileaseHandleFunction<T, E> MakeTransformation<T, E>(MilAnimation.BlendingMode blendingMode)
+        public static MileaseHandleFunction<T, E> MakeTransformation<T, E>(BlendingMode blendingMode)
         {
             return MakeTransformation<T, E>(MileaseConfiguration.Configuration.DefaultColorTransformationType, blendingMode);
         }
 
         public static MileaseHandleFunction<T, E> MakeTransformation<T, E>(ColorTransformationType colorTransformation,
-            MilAnimation.BlendingMode blendingMode)
+            BlendingMode blendingMode)
         {
             return blendingMode switch
             {
-                MilAnimation.BlendingMode.Default => colorTransformation switch
+                BlendingMode.Default => colorTransformation switch
                 {
                     ColorTransformationType.RGB => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)RgbNormalTransformation),
                     ColorTransformationType.OKLAB => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)OklabNormalTransformation),
                     ColorTransformationType.OKLCH => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)OklchNormalTransformation),
                     _ => throw new ArgumentOutOfRangeException(nameof(colorTransformation), colorTransformation, null)
                 },
-                MilAnimation.BlendingMode.Additive => colorTransformation switch
+                BlendingMode.Additive => colorTransformation switch
                 {
                     ColorTransformationType.RGB => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)RgbAdditiveTransformation),
                     ColorTransformationType.OKLAB => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)OklabAdditiveTransformation),

@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using Milease.Core.Animation;
 using Milease.Core.Manager;
 using Milease.Enums;
+using Milease.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -90,13 +91,13 @@ namespace Milease.Core.Animator
             var state = StateList.Find(x => x.StateID == id);
             if (state == null)
             {
-                Debug.LogWarning($"Required state {stateID} not found.");
+                LogUtils.Warning($"Required state {stateID} not found.");
                 return this;
             }
             var index = state.Values.FindIndex(x => x.Target == target && x.Member == member);
             if (index == -1)
             {
-                Debug.LogWarning($"Required member {member} not found.");
+                LogUtils.Warning($"Required member {member} not found.");
             }
             else
             {
@@ -112,7 +113,7 @@ namespace Milease.Core.Animator
             var state = StateList.Find(x => x.StateID == id);
             if (state == null)
             {
-                Debug.LogWarning($"Required state {stateID} not found.");
+                LogUtils.Warning($"Required state {stateID} not found.");
                 return this;
             }
             foreach (var val in states)

@@ -8,6 +8,7 @@ using Milease.Core.Animation;
 using Milease.Core.Animator;
 using Milease.Enums;
 using Milease.Milease.Exception;
+using Milease.Utils;
 using UnityEngine;
 
 namespace Milease.Core
@@ -90,6 +91,9 @@ namespace Milease.Core
                 if (!RuntimeBridge.TryGetGetter(BindMember.Name, out ValueGetter))
                 {
                     ValueGetter = GetValueByReflection;
+                    LogUtils.Warning($"Accessors for {typeof(T).FullName}.{member} is not generated, " +
+                                         "use Reflection instead, which would lower the performance!\n" +
+                                         "Check AccessorGenerationList.cs and include this member, then re-generate code in the 'Milease' menu.");
                 }
                 
                 if (!RuntimeBridge.TryGetSetter(BindMember.Name, out ValueSetter))
@@ -179,7 +183,7 @@ namespace Milease.Core
                 return true;
             }
 
-            if (Source.PendingTo || Source.BlendingMode == MilAnimation.BlendingMode.Additive)
+            if (Source.PendingTo || Source.BlendingMode == BlendingMode.Additive)
             {
                 // MileaseTo or additive blending animation doesn't have a initial state,
                 // force to reset to original state instead.
@@ -234,7 +238,7 @@ namespace Milease.Core
                 return;
             }
             
-            var targetValue = Source.BlendingMode == MilAnimation.BlendingMode.Additive
+            var targetValue = Source.BlendingMode == BlendingMode.Additive
                 ? offsetCalcFunc.Invoke(StartValue, ToValue, progress, OriginalValue)
                 : calcFunc.Invoke(StartValue, ToValue, progress);
                 
@@ -306,7 +310,7 @@ namespace Milease.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void IAnimationController.SetBlendingMode(MilAnimation.BlendingMode mode)
+        void IAnimationController.SetBlendingMode(BlendingMode mode)
         {
             Source.BlendingMode = mode;
         }

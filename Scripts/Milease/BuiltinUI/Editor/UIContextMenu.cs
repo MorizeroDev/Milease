@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+using Milease.Utils;
 using TMPro;
 using UnityEngine;
 using UnityEditor;
@@ -45,7 +46,7 @@ namespace Milease.BuiltinUI.Editor
             }
             else
             {
-                Debug.LogError("Failed to instantiate prefab.");
+                LogUtils.Error("Failed to instantiate prefab.");
             }
         }
     }

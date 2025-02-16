@@ -26,7 +26,7 @@ namespace Milease.Core
         internal void SetDuration(float duration);
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void SetBlendingMode(MilAnimation.BlendingMode mode);
+        internal void SetBlendingMode(BlendingMode mode);
 
         public bool Reset(AnimationResetMode resetMode, bool revertToChanges = true);
 

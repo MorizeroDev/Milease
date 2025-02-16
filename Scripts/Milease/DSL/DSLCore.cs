@@ -7,6 +7,7 @@ using Milease.Core.Animation;
 using Milease.Core.Animator;
 using Milease.Enums;
 using Milease.Translate;
+using Milease.Utils;
 
 namespace Milease.DSL
 {
@@ -66,6 +67,19 @@ namespace Milease.DSL
             {
                 throw new Exception("You must pass in a MemberExpression to construct the animator.");
             }
+            
+#if UNITY_EDITOR
+            var memberType = memberInfo.MemberType switch
+            {
+                MemberTypes.Field => ((FieldInfo)memberInfo).FieldType,
+                MemberTypes.Property => ((PropertyInfo)memberInfo).PropertyType,
+                _ => throw new ArgumentException(nameof(mbExpr))
+            };
+            if (memberType != typeof(E))
+            {
+                LogUtils.Throw($"Type mismatch, expected '{memberType.FullName}', actual '{typeof(E).FullName}'");
+            }
+#endif
             
             var animator = new MilInstantAnimator();
             

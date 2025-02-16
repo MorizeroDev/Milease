@@ -8,13 +8,13 @@ using UnityEngine;
 
 namespace Milease.Core.Animation
 {
+    public enum BlendingMode
+    {
+        Default, Additive
+    }
+    
     public class MilAnimation : ScriptableObject
     {
-        public enum BlendingMode
-        {
-            Default, Additive
-        }
-
         public abstract class AnimationPartBase
         {
             public BlendingMode BlendingMode = BlendingMode.Default;

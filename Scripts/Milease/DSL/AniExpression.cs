@@ -9,7 +9,7 @@ namespace Milease.DSL
         internal float Duration = 0f;
         internal float StartTime = 0f;
         internal bool ToOnly = false;
-        internal MilAnimation.BlendingMode BlendingMode = MilAnimation.BlendingMode.Default;
+        internal BlendingMode BlendingMode = BlendingMode.Default;
         
         public static AniExpression<T> operator /(float duration, AniExpression<T> expr)
         {
@@ -23,7 +23,7 @@ namespace Milease.DSL
             return expr;
         }
         
-        public static AniExpression<T> operator -(AniExpression<T> expr, MilAnimation.BlendingMode blendingMode)
+        public static AniExpression<T> operator -(AniExpression<T> expr, BlendingMode blendingMode)
         {
             expr.BlendingMode = blendingMode;
             return expr;

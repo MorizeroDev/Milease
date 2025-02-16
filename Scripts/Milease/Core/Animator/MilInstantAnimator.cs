@@ -289,7 +289,7 @@ namespace Milease.Core.Animator
             return animator.Delayed(delay);
         }
 
-        public static MilInstantAnimator operator -(MilInstantAnimator animator, MilAnimation.BlendingMode blendingMode)
+        public static MilInstantAnimator operator -(MilInstantAnimator animator, BlendingMode blendingMode)
         {
             if (animator.Collection.Count == 0)
             {

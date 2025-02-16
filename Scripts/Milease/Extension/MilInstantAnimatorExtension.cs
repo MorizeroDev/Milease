@@ -54,7 +54,7 @@ namespace Milease.Utils
             ////////
             EaseFunction easeFunction = EaseFunction.Quad,
             EaseType easeType = EaseType.In,
-            MilAnimation.BlendingMode blendingMode = MilAnimation.BlendingMode.Default
+            BlendingMode blendingMode = BlendingMode.Default
         )
         {
             var animator = new MilInstantAnimator();

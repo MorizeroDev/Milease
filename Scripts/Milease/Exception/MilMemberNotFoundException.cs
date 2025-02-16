@@ -1,4 +1,6 @@
-﻿namespace Milease.Milease.Exception
+﻿using Milease.Utils;
+
+namespace Milease.Milease.Exception
 {
     public class MilMemberNotFoundException : System.Exception
     {
@@ -6,7 +8,7 @@
             : base($"Target object doesn't have a field/property of '{memberName}', " +
                    $"please check the spelling, member type, upper/lower cases, and accessibility.")
         {
-            
+            LogUtils.Error(base.Message);
         }
     }
 }
