@@ -3,137 +3,119 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Milease.CodeGen;
+using Milease.Core.Animator;
 using Milease.Enums;
 using Milease.Milease.Exception;
+using Milease.Utils;
 using UnityEngine;
 
 namespace Milease.Core.Animation
 {
-    public class MilStateAnimation
+    public static class MilStateAnimation
     {
         [Serializable]
-        public class AnimationValue
+        public class AnimationValue<T, E> : MilStateParameter
         {
-            public EaseType EaseType;
-            public EaseFunction EaseFunction;
-            public AnimationCurve CustomCurve;
-            public object Target;
-            public MemberInfo BindMember;
+            public T Target;
+            
             public string Member;
-            public object ToValue, StartValue;
-            public readonly ValueTypeEnum ValueType;
-            public readonly Type ValueTypeInfo;
-            public readonly MethodInfo AdditionOperator, SubtractionOperator, MultiplyOperator;
+            public E ToValue, StartValue;
+
+#if MILEASE_ENABLE_EXPRESSION
+            private readonly AnimatorExpression<T, E> expression;
+#else
+            private readonly CalculateFunction<E> calcFunc;
+        
+            private readonly MemberInfo BindMember;
+#endif
+            public readonly Action<T, E> ValueSetter;
+            public readonly Func<T, E> ValueGetter;
             
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public AnimationValue(object target, MemberInfo member, object toValue)
+            public AnimationValue(T target, MemberInfo member, E toValue)
             {
                 Target = target ?? throw new MilTargetNotFoundException();
                 Member = member.Name;
                 BindMember = member;
-                
-                ValueTypeInfo = BindMember.MemberType switch
-                {
-                    MemberTypes.Field => ((FieldInfo)BindMember).FieldType,
-                    MemberTypes.Property => ((PropertyInfo)BindMember).PropertyType,
-                    _ => throw new MilUnsupportedMemberTypeException(BindMember.Name)
-                };
 
                 ToValue = toValue;
-                if (ValueTypeInfo == typeof(string))
-                {
-                    ValueType = ValueTypeEnum.Other;
-                    return;
-                }
-                else if (ValueTypeInfo!.IsPrimitive)
-                {
-                    ValueType = ValueTypeEnum.PrimitiveType;
-                    ToValue = Convert.ChangeType(toValue, TypeCode.Double);
-                    return;
-                }
+                MemberHash = target.GetHashCode() + member.Name;
+                
+#if MILEASE_ENABLE_EXPRESSION
+                ValueGetter = AnimatorExprManager.GetValGetter<T, E>(member);
+                ValueSetter = AnimatorExprManager.GetValSetter<T, E>(member);
+            
+                expression = AnimatorExprManager.GetExpr<T, E>(member);
+#else
+                BindMember = member;
 
-                var curType = ValueTypeInfo;
-                var methods = curType!.GetMethods(BindingFlags.Public | BindingFlags.Static).ToList();
-                AdditionOperator = methods.Find(x =>
+                calcFunc = RuntimeBridge.GetFunc<E>();
+
+                if (!RuntimeBridge.TryGetGetter(BindMember.Name, out ValueGetter))
                 {
-                    var param = x.GetParameters();
-                    return x.Name == "op_Addition" && param[0].ParameterType == curType &&
-                           param[1].ParameterType == curType && x.ReturnType == curType;
-                });
-                SubtractionOperator = methods.Find(x =>
+                    ValueGetter = GetValueByReflection;
+                    LogUtils.Warning($"Accessors for {typeof(T).FullName}.{member} is not generated, " +
+                                     "use Reflection instead, which would lower the performance!\n" +
+                                     "Check AccessorGenerationList.cs and include this member, then re-generate code in the 'Milease' menu.");
+                }
+                
+                if (!RuntimeBridge.TryGetSetter(BindMember.Name, out ValueSetter))
                 {
-                    var param = x.GetParameters();
-                    return x.Name == "op_Subtraction" && param[0].ParameterType == curType &&
-                           param[1].ParameterType == curType && x.ReturnType == curType;
-                });
-                MultiplyOperator = methods.Find(x =>
+                    ValueSetter = SetValueByReflection;
+                }
+#endif
+            }
+            
+#if !MILEASE_ENABLE_EXPRESSION
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private E GetValueByReflection(T _)
+            {
+                return BindMember.MemberType switch
                 {
-                    var param = x.GetParameters();
-                    return x.Name == "op_Multiply" && param[0].ParameterType == curType &&
-                           (param[1].ParameterType == typeof(Single) || param[1].ParameterType == typeof(Double)) && x.ReturnType == curType;
-                });
-                ValueType = AdditionOperator != null && SubtractionOperator != null && MultiplyOperator != null ? ValueTypeEnum.CustomType : ValueTypeEnum.Other;
+                    MemberTypes.Field => (E)((FieldInfo)BindMember).GetValue(Target),
+                    MemberTypes.Property => (E)((PropertyInfo)BindMember).GetValue(Target),
+                    _ => throw new MilUnsupportedMemberTypeException(BindMember.Name)
+                };
+            }
+        
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private void SetValueByReflection(T _, E value)
+            {
+                if (BindMember.MemberType == MemberTypes.Field)
+                {
+                    ((FieldInfo)BindMember).SetValue(Target, value);
+                }
+                else
+                {
+                    ((PropertyInfo)BindMember).SetValue(Target, value);
+                }
+            }
+#endif
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal override void Prepare()
+            {
+                StartValue = ValueGetter.Invoke(Target);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal override void ApplyState(float pro)
+            {
+#if MILEASE_ENABLE_EXPRESSION
+                expression.Invoke(Target, StartValue, ToValue, pro);
+#else
+                var targetValue = calcFunc.Invoke(StartValue, ToValue, pro);
+                ValueSetter.Invoke(Target, targetValue);
+#endif
             }
         }
+        
         [Serializable]
         public class AnimationState
         {
             public int StateID;
             public float Duration;
-            public List<AnimationValue> Values = new();
-            
-            private float lastProgress = -1f;
-            public void Reset()
-            {
-                lastProgress = -1f;
-            }
-        }
-
-        public static void ApplyState(AnimationValue ani, float pro)
-        {
-            var result = ani.ValueType switch
-            {
-                ValueTypeEnum.PrimitiveType => Convert.ChangeType((double)ani.StartValue + ((double)ani.ToValue - (double)ani.StartValue) * pro, ani.ValueTypeInfo),
-                ValueTypeEnum.CustomType => 
-                    ani.AdditionOperator.Invoke(null, new object[] 
-                    {
-                        ani.StartValue, 
-                        ani.MultiplyOperator.Invoke(null, new object[]
-                        {
-                            ani.SubtractionOperator.Invoke(null, new object[]
-                            {
-                                ani.ToValue, 
-                                ani.StartValue
-                            }), 
-                            pro
-                        })
-                    }),
-                ValueTypeEnum.Other => pro >= 1f ? ani.ToValue : ani.StartValue,
-                _ => default
-            };
-            
-            if (ani.BindMember.MemberType == MemberTypes.Field)
-            {
-                ((FieldInfo)ani.BindMember).SetValue(ani.Target, result);
-            }
-            else
-            {
-                ((PropertyInfo)ani.BindMember).SetValue(ani.Target,result);
-            }
-        }
-
-        public static void PrepareState(AnimationValue ani)
-        {
-            ani.StartValue = ani.BindMember.MemberType switch
-            {
-                MemberTypes.Field => ((FieldInfo)ani.BindMember).GetValue(ani.Target),
-                MemberTypes.Property => ((PropertyInfo)ani.BindMember).GetValue(ani.Target),
-                _ => null
-            };
-            if (ani.ValueType == ValueTypeEnum.PrimitiveType)
-            {
-                ani.StartValue = Convert.ChangeType(ani.StartValue, TypeCode.Double);
-            }
+            public List<MilStateParameter> Values = new();
         }
     }
 }

@@ -45,7 +45,7 @@ namespace Milease.Core.Manager
                 foreach (var val in animator.CurrentAnimationState.Values)
                 {
                     var easedPro = val.CustomCurve?.Evaluate(pro) ?? EaseUtility.GetEasedProgress(pro, val.EaseType, val.EaseFunction);
-                    MilStateAnimation.ApplyState(val, easedPro);
+                    val.ApplyState(easedPro);
                 }
             }
         }

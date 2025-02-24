@@ -11,15 +11,18 @@ using UnityEngine.SceneManagement;
 
 namespace Milease.Core.Animator
 {
-    public class MilStateParameter
+    public abstract class MilStateParameter
     {
-        public object Target;
-        public MemberInfo Member;
-        public EaseFunction EaseFunction;
         public EaseType EaseType;
+        public EaseFunction EaseFunction;
         public AnimationCurve CustomCurve;
-        public object ToValue;
+        
+        internal string MemberHash;
+        
+        internal abstract void Prepare();
+        internal abstract void ApplyState(float pro);
     }
+    
     public class MilStateAnimator
     {
         public readonly List<MilStateAnimation.AnimationState> StateList = new();
@@ -53,14 +56,14 @@ namespace Milease.Core.Animator
         /// Set the state, but without transition, it will be changed immediately.
         /// </summary>
         /// <param name="state">target state</param>
-        public void SetState<T>(T state) where T : Enum
+        public void SetState<I>(I state) where I : Enum
         {
             CurrentState = Convert.ToInt32(state);
             CurrentAnimationState = StateList.Find(x => x.StateID == CurrentState);
             foreach (var val in CurrentAnimationState.Values)
             {
-                MilStateAnimation.PrepareState(val);
-                MilStateAnimation.ApplyState(val, 1f);
+                val.Prepare();
+                val.ApplyState(1f);
             }
             Time = CurrentAnimationState.Duration;
         }
@@ -69,23 +72,23 @@ namespace Milease.Core.Animator
         /// Transform to the target state with animations
         /// </summary>
         /// <param name="state">target state</param>
-        public void Transition<T>(T state) where T : Enum
+        public void Transition<I>(I state) where I : Enum
         {
             CurrentState = Convert.ToInt32(state);
             CurrentAnimationState = StateList.Find(x => x.StateID == CurrentState);
             foreach (var val in CurrentAnimationState.Values)
             {
-                MilStateAnimation.PrepareState(val);
+                val.Prepare();
             }
             Time = 0f;
         }
 
-        public bool IsStateEmpty<T>(T state) where T : Enum
+        public bool IsStateEmpty<I>(I state) where I : Enum
         {
             return StateList.Find(x => x.StateID == Convert.ToInt32(state)).Values.Count == 0;
         }
         
-        public MilStateAnimator ModifyState<T>(T stateID, object target, string member, object value) where T : Enum
+        public MilStateAnimator ModifyState<I, T, E>(I stateID, T target, string member, E value) where I : Enum
         {
             var id = Convert.ToInt32(stateID);
             var state = StateList.Find(x => x.StateID == id);
@@ -94,20 +97,22 @@ namespace Milease.Core.Animator
                 LogUtils.Warning($"Required state {stateID} not found.");
                 return this;
             }
-            var index = state.Values.FindIndex(x => x.Target == target && x.Member == member);
+
+            var hash = target.GetHashCode() + member;
+            var index = state.Values.FindIndex(x => x.MemberHash == hash);
             if (index == -1)
             {
                 LogUtils.Warning($"Required member {member} not found.");
             }
             else
             {
-                state.Values[index].ToValue = value;
+                ((MilStateAnimation.AnimationValue<T, E>)state.Values[index]).ToValue = value;
             }
             
             return this;
         }
         
-        public MilStateAnimator ModifyState<T>(T stateID, IEnumerable<MilStateParameter> states) where T : Enum
+        public MilStateAnimator ModifyState<I>(I stateID, IEnumerable<MilStateParameter> states) where I : Enum
         {
             var id = Convert.ToInt32(stateID);
             var state = StateList.Find(x => x.StateID == id);
@@ -118,53 +123,39 @@ namespace Milease.Core.Animator
             }
             foreach (var val in states)
             {
-                var ani = new MilStateAnimation.AnimationValue(val.Target, val.Member, val.ToValue)
-                {
-                    EaseType = val.EaseType,
-                    EaseFunction = val.EaseFunction,
-                    CustomCurve = val.CustomCurve
-                };
-                var index = state.Values.FindIndex(x => x.Target == val.Target && x.Member == val.Member.Name);
+                var index = state.Values.FindIndex(x => x.MemberHash == val.MemberHash);
                 if (index == -1)
                 {
-                    state.Values.Add(ani);
+                    state.Values.Add(val);
                 }
                 else
                 {
-                    state.Values[index] = ani;
+                    state.Values[index] = val;
                 }
             }
             return this;
         }
         
-        public MilStateAnimator AddState<T>(T stateID, float duration, IEnumerable<MilStateParameter> states) where T : Enum
+        public MilStateAnimator AddState<I>(I stateID, float duration, IEnumerable<MilStateParameter> states) where I : Enum
         {
             var state = new MilStateAnimation.AnimationState()
             {
                 StateID = Convert.ToInt32(stateID),
                 Duration = duration
             };
-            foreach (var val in states)
-            {
-                state.Values.Add(new MilStateAnimation.AnimationValue(val.Target, val.Member, val.ToValue)
-                {
-                    EaseType = val.EaseType,
-                    EaseFunction = val.EaseFunction,
-                    CustomCurve = val.CustomCurve
-                });
-            }
+            state.Values.AddRange(states);
             StateList.Add(state);
             return this;
         }
 
-        public MilStateAnimator SetDefaultState<T>(T state) where T : Enum
+        public MilStateAnimator SetDefaultState<I>(I state) where I : Enum
         {
             CurrentState = Convert.ToInt32(state);
             CurrentAnimationState = StateList.Find(x => x.StateID == CurrentState);
             foreach (var val in CurrentAnimationState.Values)
             {
-                MilStateAnimation.PrepareState(val);
-                MilStateAnimation.ApplyState(val, 1f);
+                val.Prepare();
+                val.ApplyState(1f);
             }
             Time = CurrentAnimationState.Duration;
             MilStateAnimatorManager.EnsureInitialized();
