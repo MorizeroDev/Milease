@@ -4,7 +4,9 @@
 
 <p align="center"><b>UI Development · Animation · Productivity</b></p>
 
-> ⚠ The documentation is not yet complete.
+> [!WARNING] 
+>
+> The documentation is not yet complete.
 
 🎥 Milease is a toolkit aimed at enhancing the Unity UI development experience. It includes more convenient UI animation tools, such as using the Milease Animator to create UI transition animations or using the State Animator for a CSS-like UI design experience. Additionally, Milease contains other UI tools, such as infinite lists and a modified ContentSizeFitter.
 
@@ -30,13 +32,22 @@ https://github.com/MorizeroDev/Milease.git
 https://github.com/ParaParty/ParaPartyUtil.git?path=Colors
 ```
 
+Or including these in `manifest.json`:
+
+```
+"com.morizero.milease": "https://github.com/MorizeroDev/Milease.git",
+"party.para.util.colors": "https://github.com/ParaParty/ParaPartyUtil.git?path=Colors",
+```
+
+> [!WARNING] 
+>
+> Due to technical compatibility issues, animation generation statements from v1 (including most **Milease** and **MileaseTo** extension methods) are no longer supported.
+
 # Expression-Driven Animation Updater
 
-Milease compiling animation control code via `Expressions` reduces execution time by approximately **90%** compared to using pure reflection.
+Milease compiling animation control code via `Expression` reduces execution time by approximately **90%** compared to using pure reflection.
 
 However, compilation itself can be time-consuming. Fortunately, you can generate a preload script for animation control code by clicking **"Milease -> Generate Milease warming up script"** in the menu. This will compile the control code in advance, ensuring smoother gameplay.
-
-> Due to technical compatibility issues, animation generation statements from v1 (including most **Milease** and **MileaseTo** extension methods) are no longer supported.
 
 **This method is only applicable to the Mono backend and does not work on IL2CPP.** It is disabled by default, but you can enable it by defining the symbol `MILEASE_ENABLE_EXPRESSION`. 
 
@@ -53,7 +64,7 @@ When introducing Milease into your project for the first time, you need to impor
 
 # Animate Anything
 
-By `object.Milease` and `object.MileaseTo`, use Milease anywhere to create and play animations for any field/property! 
+By a series of extension methods, use Milease anywhere to create and play animations for any field/property! 
 
 Milease supports animation operations for most types such as `Vector3`, `Vector2`, `Color`, `double`, `float`, `int`, `bool`, etc., as long as your type satisfies one of the following conditions:
 
@@ -68,7 +79,7 @@ AudioSource.MQuadOut(x => x.volume, 1f / 0f.ToThis()).Play();
 
 # Create Animations by Organized Code
 
-By using the methods `Milease`, `While`, `Then`, `Delayed`, easily generate complex animations with readable code through nesting:
+By using the methods `Milease`, `And`, `Then`, `Delayed`, easily generate complex animations with readable code through nesting:
 
 ```c#
 var spriteRenderer = GetComponent<SpriteRenderer>();
@@ -170,25 +181,25 @@ public class MilListItemDemo : MilListViewItem
     protected override IEnumerable<MilStateParameter> ConfigDefaultState()
         => new[]
         {
-            Background.MilState(UMN.Color, Color.clear),
-            Content.rectTransform.MilState(UMN.AnchoredPosition, new Vector2(138f, 2.3f),
+            Background.MilState(x => x.color, Color.clear),
+            Content.rectTransform.MilState(x => x.anchoredPosition, new Vector2(138f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
-            Arrow.MilState(UMN.Color, Color.clear),
-            Arrow.rectTransform.MilState(UMN.AnchoredPosition, new Vector2(88f, 2.3f),
+            Arrow.MilState(x => x.color, Color.clear),
+            Arrow.rectTransform.MilState(x => x.anchoredPosition, new Vector2(88f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
-            Content.MilState(UMN.Color, Color.black)
+            Content.MilState(x => x.color, Color.black)
         };
 
     protected override IEnumerable<MilStateParameter> ConfigSelectedState()
         => new[]
         {
-            Background.MilState(UMN.Color, ColorUtils.RGB(0,153,255)),
-            Content.rectTransform.MilState(UMN.AnchoredPosition, new Vector2(186f, 2.3f),
+            Background.MilState(x => x.color, ColorUtils.RGB(0,153,255)),
+            Content.rectTransform.MilState(x => x.anchoredPosition, new Vector2(186f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
-            Arrow.MilState(UMN.Color, Color.white),
-            Arrow.rectTransform.MilState(UMN.AnchoredPosition, new Vector2(138f, 2.3f),
+            Arrow.MilState(x => x.color, Color.white),
+            Arrow.rectTransform.MilState(x => x.anchoredPosition, new Vector2(138f, 2.3f),
                 EaseFunction.Back, EaseType.Out),
-            Content.MilState(UMN.Color, Color.white)
+            Content.MilState(x => x.color, Color.white)
         };
 
     protected override void OnSelect(PointerEventData eventData)
