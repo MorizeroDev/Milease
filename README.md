@@ -20,6 +20,22 @@ Milease is developed by the Morizero team for creating UI tools for their non-co
 
 The animation system in Unity is often not well-suited for creating UI animations, and its ease of use in terms of tween editing is relatively limited. Milease integrates tween functions from https://easings.net, allowing you to quickly generate and control them through code. 
 
+# Compatibility
+
+**🛠️ Engine Version Compatibility**  
+
+* ✅ Unity 6000, Unity 2022, Unity 2021, Unity 2020  
+* 🚫 Unity 2019 and earlier versions  
+
+**🎥 Script Backend Compatibility with Animation Implementation** 
+
+* **Mono:** ✅ Source Code Generation ✅ Expression Tree **(but cannot run on platforms that do not support JIT, such as iOS)** 
+* **IL2CPP:** ✅ Source Code Generation 🚫 Expression Tree 
+
+> [!NOTE]
+>  
+>  **If you choose the default "Source Code Generation" approach**, when introducing Milease into your project for the first time, you need to import the "il2cpp support" folder inside the Milease directory. Then, you can generate animation calculation source code via the "Milease" menu options.
+
 # Setup
 
 Unity Editor -> Package Manger -> Add package from git URL...
