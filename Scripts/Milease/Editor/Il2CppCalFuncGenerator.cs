@@ -106,13 +106,13 @@ namespace Milease.Editor
             
             EditorUtility.DisplayProgressBar("Milease", "Resetting source code...", 0.5f);
 
-            var code = GenerateFunctions(ArraySegment<Type>.Empty);
+            var code = GenerateFunctions(new Type[]{ });
             path = Path.Combine(folder!, "GeneratedCalculation.cs");
             File.WriteAllText(path, code);
             AssetDatabase.Refresh();
             AssetDatabase.ImportAsset(path);
             
-            code = GenerateAccessors(ArraySegment<MemberMetaData>.Empty);
+            code = GenerateAccessors(new MemberMetaData[]{ });
             path = Path.Combine(folder!, "GeneratedAccessors.cs");
             File.WriteAllText(path, code);
             AssetDatabase.Refresh();
@@ -138,7 +138,7 @@ namespace Milease.CodeGen
 {
     public static partial class GeneratedAccessors
     {
-        internal static readonly Dictionary<(Type, string), object> getters = new()
+        internal static readonly Dictionary<(Type, string), object> getters = new Dictionary<(Type, string), object>()
         {");
 
             template = "            [(typeof(<<t>>), \"<<m>>\")] = new Func<<<t>>, <<e>>>(_mil_generated_get_<<n>>),";
@@ -158,7 +158,7 @@ namespace Milease.CodeGen
             sb.AppendLine(
 @"        };
         
-        internal static readonly Dictionary<(Type, string), object> setters = new()
+        internal static readonly Dictionary<(Type, string), object> setters = new Dictionary<(Type, string), object>()
         {");
             
             template = "            [(typeof(<<t>>), \"<<m>>\")] = new Action<<<t>>, <<e>>>(_mil_generated_set_<<n>>),";
@@ -230,7 +230,7 @@ namespace Milease.CodeGen
     public delegate E OffsetCalculateFunction<E>(E start, E end, float progress, E offset);
     public static partial class GeneratedCalculation
     {
-        internal static readonly Dictionary<Type, object> calculateFunctions = new()
+        internal static readonly Dictionary<Type, object> calculateFunctions = new Dictionary<Type, object>()
         {");
 
             template = "            [typeof(<<t>>)] = new CalculateFunction<<<t>>>(_mil_generated_calc),";
@@ -252,7 +252,7 @@ namespace Milease.CodeGen
             [typeof(object)] = new CalculateFunction<object>(_mil_generated_calc)
         };
 
-        internal static readonly Dictionary<Type, object> offsetCalculateFunctions = new()
+        internal static readonly Dictionary<Type, object> offsetCalculateFunctions = new Dictionary<Type, object>()
         {");
             
             template = "            [typeof(<<t>>)] = new OffsetCalculateFunction<<<t>>>(_mil_generated_calc_offset),";

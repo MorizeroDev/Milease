@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Milease.Configuration;
 using Milease.Core.Animation;
 using Paraparty.Colors;
@@ -9,6 +10,21 @@ namespace Milease.Translate
 {
     public class ColorTransformation
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static double Clamp(double value, double min, double max)
+        {
+#if UNITY_2020_1_OR_NEWER && !UNITY_2022_1_OR_NEWER
+            if (value > max)
+            {
+                return max;
+            }
+            
+            return value < min ? min : value;
+#else
+            return Math.Clamp(value, min, max);
+#endif
+        }
+        
         public static bool CanTranslate<E>()
         {
             var type = typeof(E);
@@ -147,11 +163,11 @@ namespace Milease.Translate
             var toColor = GetOklab(ani.ToValue);
 
             var l = originalColor.L + (toColor.L - fromColor.L) * pro + fromColor.L;
-            l = Math.Clamp(l, 0.0, 1.0);
+            l = Clamp(l, 0.0, 1.0);
             var a = originalColor.A + (toColor.A - fromColor.A) * pro + fromColor.A;
-            a = Math.Clamp(a, -0.4, 0.4);
+            a = Clamp(a, -0.4, 0.4);
             var b = originalColor.B + (toColor.B - fromColor.B) * pro + fromColor.B;
-            b = Math.Clamp(b, -0.4, 0.4);
+            b = Clamp(b, -0.4, 0.4);
             var opacity = originalColor.Opacity + (toColor.Opacity - fromColor.Opacity) * pro + fromColor.Opacity;
             return new Oklab(l, a, b, opacity).ToColor();
         }
@@ -194,13 +210,13 @@ namespace Milease.Translate
             var hueDiff = NormalizeHue(toH - fromH);
 
             var l = originalColor.L + (toColor.L - fromColor.L) * pro + fromColor.L;
-            l = Math.Clamp(l, 0.0, 1.0);
+            l = Clamp(l, 0.0, 1.0);
             var c = originalColor.C + (toColor.C - fromColor.C) * pro + fromColor.C;
             var h = originalColor.H + fromH + hueDiff * pro;
             h = NormalizeHue(h);
 
             var opacity = (toColor.Opacity - fromColor.Opacity) * pro + fromColor.Opacity;
-            opacity = Math.Clamp(opacity, 0.0, 1.0);
+            opacity = Clamp(opacity, 0.0, 1.0);
 
             return new Oklch(l, c, h, opacity).ToColor();
         }

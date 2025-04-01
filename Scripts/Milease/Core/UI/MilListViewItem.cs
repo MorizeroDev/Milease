@@ -15,7 +15,7 @@ namespace Milease.Core.UI
             Default, Selected
         }
         private MilInstantAnimator clickAnimator;
-        public readonly MilStateAnimator animator = new();
+        public readonly MilStateAnimator animator = new MilStateAnimator();
 
         public float DefaultTransition = 0.25f;
         public float SelectTransition = 0.5f;

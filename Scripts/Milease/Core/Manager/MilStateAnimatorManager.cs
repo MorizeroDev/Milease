@@ -11,7 +11,7 @@ namespace Milease.Core.Manager
     public class MilStateAnimatorManager : MonoBehaviour
     {
         public static MilStateAnimatorManager Instance;
-        public static readonly List<MilStateAnimator> Animators = new();
+        public static readonly List<MilStateAnimator> Animators = new List<MilStateAnimator>();
         
         public static void EnsureInitialized()
         {

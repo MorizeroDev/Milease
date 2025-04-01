@@ -15,7 +15,7 @@ namespace Milease.Core.UI
             Default, Hover, Selected
         }
         private MilInstantAnimator clickAnimator;
-        private readonly MilStateAnimator animator = new();
+        private readonly MilStateAnimator animator = new MilStateAnimator();
         private UIState lastState = UIState.Default;
         
         public float DefaultTransition = 0.25f;

@@ -115,7 +115,7 @@ namespace Milease.Core.Animation
         {
             public int StateID;
             public float Duration;
-            public List<MilStateParameter> Values = new();
+            public List<MilStateParameter> Values = new List<MilStateParameter>();
         }
     }
 }

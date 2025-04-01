@@ -22,7 +22,7 @@ namespace Milease.Core.UI
         public int SelectedIndex { get; internal set; } = -1;
 
         [HideInInspector]
-        public readonly List<object> Items = new();
+        public readonly List<object> Items = new List<object>();
 
         [Header("Basic")]
         public GameObject ItemPrefab;
@@ -47,8 +47,8 @@ namespace Milease.Core.UI
         [Header("Events")]
         public UnityEvent OnScrollDone;
         
-        private readonly List<MilListViewItem> bindDisplay = new();
-        private readonly List<MilListViewItem> display = new();
+        private readonly List<MilListViewItem> bindDisplay = new List<MilListViewItem>();
+        private readonly List<MilListViewItem> display = new List<MilListViewItem>();
         private MilListViewItem tempDisplay;
         private float ItemSize;
         private Vector2 ItemPivot;
@@ -91,7 +91,7 @@ namespace Milease.Core.UI
             public string UUID = Guid.NewGuid().ToString();
         }
         
-        private readonly Dictionary<ItemTracker, int> itemTracker = new();
+        private readonly Dictionary<ItemTracker, int> itemTracker = new Dictionary<ItemTracker, int>();
 
         private void Awake()
         {

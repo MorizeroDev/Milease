@@ -28,7 +28,7 @@ namespace Milease.Core.Manager
             };
         }
 
-        public static readonly List<MilInstantAnimator> Animations = new();
+        public static readonly List<MilInstantAnimator> Animations = new List<MilInstantAnimator>();
 
         private void Update()
         {

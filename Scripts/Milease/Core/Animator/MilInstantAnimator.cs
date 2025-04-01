@@ -10,7 +10,7 @@ namespace Milease.Core.Animator
 {
     public class MilInstantAnimator
     {
-        public readonly List<List<IAnimationController>> Collection = new();
+        public readonly List<List<IAnimationController>> Collection = new List<List<IAnimationController>>();
 
         public AnimationResetMode DefaultResetMode = AnimationResetMode.ResetToOriginalState;
 
@@ -69,7 +69,7 @@ namespace Milease.Core.Animator
         
         public MilInstantAnimator Delayed(float time)
         {
-            foreach (var part in Collection[^1])
+            foreach (var part in Collection[Collection.Count - 1])
             {
                 part.Delay(time);
             }
@@ -107,7 +107,7 @@ namespace Milease.Core.Animator
             {
                 foreach (var ani in part)
                 {
-                    Collection[^1].Add(ani);
+                    Collection[Collection.Count - 1].Add(ani);
                 }
             }
             

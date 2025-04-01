@@ -25,7 +25,7 @@ namespace Milease.Core.Animator
     
     public class MilStateAnimator
     {
-        public readonly List<MilStateAnimation.AnimationState> StateList = new();
+        public readonly List<MilStateAnimation.AnimationState> StateList = new List<MilStateAnimation.AnimationState>();
         public MilStateAnimation.AnimationState CurrentAnimationState;
         public int CurrentState;
         

@@ -25,7 +25,9 @@ namespace Milease.Utils
 
         public static MileaseHandleFunction<GameObject, GameObject> AutoActiveReset(GameObject go)
         {
-            return go.activeSelf ? ActiveWhenReset : DeativeWhenReset;
+            return go.activeSelf 
+                ? new MileaseHandleFunction<GameObject, GameObject>(ActiveWhenReset) 
+                : new MileaseHandleFunction<GameObject, GameObject>(DeativeWhenReset);
         }
     }
 }
