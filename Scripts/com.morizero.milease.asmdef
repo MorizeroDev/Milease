@@ -3,6 +3,7 @@
     "rootNamespace": "Milease",
     "references": [
         "party.para.util.colors",
+        "party.para.util.unitypolyfill",
         "Unity.TextMeshPro",
         "Milease.CodeGen"
     ],

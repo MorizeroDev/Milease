@@ -130,7 +130,7 @@ namespace Milease.Core.Animator
             var cnt = animations.Length;
             for (var i = 1; i < cnt; i++)
             {
-                While(animations[i]);
+                And(animations[i]);
             }
             
             return this;
