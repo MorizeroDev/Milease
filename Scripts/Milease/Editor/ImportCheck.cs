@@ -337,7 +337,7 @@ namespace Milease.Editor
                     if (newSolution == (int)AnimationImplSolution.CodeGen)
                     {
                         scriptCompiling = true;
-                        AssetDatabase.ImportPackage(AssetDatabase.GUIDToAssetPath("676ef914e26d06f428d9c1641f750c7e"), false);
+                        AssetDatabase.ImportPackage(AssetDatabase.GUIDToAssetPath("676ef914e26d06f428d9c1641f750c7e"), Directory.Exists(Path.Combine("Assets", "Milease.CodeGen")));
                         AddScriptingDefineSymbols("MILEASE_ENABLE_CODEGEN");
                     }
                     CompilationPipeline.RequestScriptCompilation();
