@@ -16,12 +16,12 @@ namespace Milease.Core
             public string TName, EName, MemberName;
         }
 
-        internal static readonly List<ExprMetaData> MetaData = new();
+        internal static readonly List<ExprMetaData> MetaData = new List<ExprMetaData>();
         
-        private static readonly Dictionary<(Type, string), object> expressionMap = new();
-        private static readonly Dictionary<(Type, string), object> offsetExpressionMap = new();
-        private static readonly Dictionary<(Type, string), object> valueGetterMap = new();
-        private static readonly Dictionary<(Type, string), object> valueSetterMap = new();
+        private static readonly Dictionary<(Type, string), object> expressionMap = new Dictionary<(Type, string), object>();
+        private static readonly Dictionary<(Type, string), object> offsetExpressionMap = new Dictionary<(Type, string), object>();
+        private static readonly Dictionary<(Type, string), object> valueGetterMap = new Dictionary<(Type, string), object>();
+        private static readonly Dictionary<(Type, string), object> valueSetterMap = new Dictionary<(Type, string), object>();
 
         public static void WarmUp<T, E>(Expression<Func<T, E>> mbExpr)
         {

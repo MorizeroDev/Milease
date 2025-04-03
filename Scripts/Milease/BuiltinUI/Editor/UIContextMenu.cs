@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+﻿#if UNITY_EDITOR && TMP_SETUP
 using Milease.Utils;
 using TMPro;
 using UnityEngine;

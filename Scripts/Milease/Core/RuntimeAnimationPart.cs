@@ -26,7 +26,7 @@ namespace Milease.Core
 #if MILEASE_ENABLE_EXPRESSION
         private readonly OffsetAnimatorExpression<T, E> offsetExpression;
         private readonly AnimatorExpression<T, E> expression;
-#else
+#elif MILEASE_ENABLE_CODEGEN
         private readonly OffsetCalculateFunction<E> offsetCalcFunc;
         private readonly CalculateFunction<E> calcFunc;
         
@@ -82,7 +82,7 @@ namespace Milease.Core
             
                 expression = AnimatorExprManager.GetExpr<T, E>(member);
                 offsetExpression = AnimatorExprManager.GetExprWithOffset<T, E>(member);
-#else
+#elif MILEASE_ENABLE_CODEGEN
                 BindMember = member;
                 
                 offsetCalcFunc = RuntimeBridge.GetOffsetFunc<E>();
@@ -116,7 +116,7 @@ namespace Milease.Core
             ToValue = animation.ToValue;
         }
 
-#if !MILEASE_ENABLE_EXPRESSION
+#if MILEASE_ENABLE_CODEGEN
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private E GetValueByReflection(T _)
         {
@@ -217,7 +217,7 @@ namespace Milease.Core
                 return;
             }
 
-            if (Source.BlendingMode == MilAnimation.BlendingMode.Additive)
+            if (Source.BlendingMode == BlendingMode.Additive)
             {
 #if UNITY_EDITOR
                 if (offsetExpression == null)
@@ -232,7 +232,7 @@ namespace Milease.Core
             {
                 expression.Invoke(Target, StartValue, ToValue, progress);
             }
-#else
+#elif MILEASE_ENABLE_CODEGEN
             if (calcFunc == null)
             {
                 return;

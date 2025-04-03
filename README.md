@@ -32,46 +32,31 @@ The animation system in Unity is often not well-suited for creating UI animation
 * **Mono:** ✅ Source Code Generation ✅ Expression Tree **(but cannot run on platforms that do not support JIT, such as iOS)** 
 * **IL2CPP:** ✅ Source Code Generation 🚫 Expression Tree 
 
-> [!NOTE]
->  
->  **If you choose the default "Source Code Generation" approach**, when introducing Milease into your project for the first time, you need to import the "il2cpp support" folder inside the Milease directory. Then, you can generate animation calculation source code via the "Milease" menu options.
-
 # Setup
 
-Unity Editor -> Package Manger -> Add package from git URL...
-
-```
-# Milease Core
-https://github.com/MorizeroDev/Milease.git
-
-# Color Tools
-https://github.com/ParaParty/ParaPartyUtil.git?path=Colors
-```
-
-Or including these in `manifest.json`:
+Including these in `manifest.json`:
 
 ```
 "com.morizero.milease": "https://github.com/MorizeroDev/Milease.git",
 "party.para.util.colors": "https://github.com/ParaParty/ParaPartyUtil.git?path=Colors",
+"party.para.util.unitypolyfill": "https://github.com/ParaParty/ParaPartyUtil.git?path=UnityPolyfill",
 ```
 
 > [!WARNING] 
 >
 > Due to technical compatibility issues, animation generation statements from v1 (including most **Milease** and **MileaseTo** extension methods) are no longer supported.
 
-# Expression-Driven Animation Updater
+# Solution1: Expression-Driven Animation Updater
 
 Milease compiling animation control code via `Expression` reduces execution time by approximately **90%** compared to using pure reflection.
 
 However, compilation itself can be time-consuming. Fortunately, you can generate a preload script for animation control code by clicking **"Milease -> Generate Milease warming up script"** in the menu. This will compile the control code in advance, ensuring smoother gameplay.
 
-**This method is only applicable to the Mono backend and does not work on IL2CPP.** It is disabled by default, but you can enable it by defining the symbol `MILEASE_ENABLE_EXPRESSION`. 
+# Solution2: Source Code Generation
 
-# Alternative Solution for IL2CPP: Source Code Generation
+Due to compatibility and performance issues of `Expression` on IL2CPP, Milease has to use an alternative approach to generate animation code to reduce runtime overhead. 
 
-Due to compatibility and performance issues of `Expression` on IL2CPP, Milease has to use an alternative approach to generate animation code to reduce runtime overhead.
-
-When introducing Milease into your project for the first time, you need to import the "il2cpp support" folder inside the Milease directory. Then, you can generate animation calculation source code via the "Milease" menu options. 
+You can generate animation calculation source code via the "Milease" menu options. 
 
 **Additions**:
 

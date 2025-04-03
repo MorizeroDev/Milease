@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if COLOR_TOOL_SETUP && POLYFILL_SETUP
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Milease.Configuration;
@@ -224,3 +225,4 @@ namespace Milease.Translate
         }
     }
 }
+#endif

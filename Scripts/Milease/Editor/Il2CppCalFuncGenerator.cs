@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR && !MILEASE_ENABLE_EXPRESSION
+﻿#if UNITY_EDITOR && MILEASE_ENABLE_CODEGEN
 using System;
 using System.Collections.Generic;
 using System.IO;

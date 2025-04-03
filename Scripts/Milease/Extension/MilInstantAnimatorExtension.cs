@@ -9,7 +9,6 @@ using Milease.Core.Animation;
 using Milease.Core.Animator;
 using Milease.Enums;
 using Milease.Milease.Exception;
-using Milease.Translate;
 using Milease.Utils;
 using UnityEngine;
 using Debug = UnityEngine.Debug;

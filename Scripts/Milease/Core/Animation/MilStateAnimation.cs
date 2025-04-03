@@ -24,7 +24,7 @@ namespace Milease.Core.Animation
 
 #if MILEASE_ENABLE_EXPRESSION
             private readonly AnimatorExpression<T, E> expression;
-#else
+#elif MILEASE_ENABLE_CODEGEN
             private readonly CalculateFunction<E> calcFunc;
         
             private readonly MemberInfo BindMember;
@@ -37,7 +37,6 @@ namespace Milease.Core.Animation
             {
                 Target = target ?? throw new MilTargetNotFoundException();
                 Member = member.Name;
-                BindMember = member;
 
                 ToValue = toValue;
                 MemberHash = target.GetHashCode() + member.Name;
@@ -47,7 +46,7 @@ namespace Milease.Core.Animation
                 ValueSetter = AnimatorExprManager.GetValSetter<T, E>(member);
             
                 expression = AnimatorExprManager.GetExpr<T, E>(member);
-#else
+#elif MILEASE_ENABLE_CODEGEN
                 BindMember = member;
 
                 calcFunc = RuntimeBridge.GetFunc<E>();
@@ -67,7 +66,7 @@ namespace Milease.Core.Animation
 #endif
             }
             
-#if !MILEASE_ENABLE_EXPRESSION
+#if MILEASE_ENABLE_CODEGEN
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private E GetValueByReflection(T _)
             {
@@ -103,7 +102,7 @@ namespace Milease.Core.Animation
             {
 #if MILEASE_ENABLE_EXPRESSION
                 expression.Invoke(Target, StartValue, ToValue, pro);
-#else
+#elif MILEASE_ENABLE_CODEGEN
                 var targetValue = calcFunc.Invoke(StartValue, ToValue, pro);
                 ValueSetter.Invoke(Target, targetValue);
 #endif
