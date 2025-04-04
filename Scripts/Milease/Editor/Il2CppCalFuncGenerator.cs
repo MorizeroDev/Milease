@@ -208,7 +208,7 @@ namespace Milease.CodeGen
 @"    }
 }");
             
-            return sb.ToString();
+            return sb.ToString().Replace("\r\n", "\n");
         }
         
         private static string GenerateFunctions(IEnumerable<Type> types)
@@ -226,13 +226,36 @@ using UnityEngine;
 
 namespace Milease.CodeGen
 {
-    public delegate E CalculateFunction<E>(E start, E end, float progress);
-    public delegate E OffsetCalculateFunction<E>(E start, E end, float progress, E offset);
+    public delegate E DeltaCalculateFunction<E>(E start, E to);
+    public delegate E CalculateFunction<E>(E start, E delta, float progress);
+    public delegate E OffsetCalculateFunction<E>(E start, E delta, float progress, E offset);
     public static partial class GeneratedCalculation
     {
-        internal static readonly Dictionary<Type, object> calculateFunctions = new Dictionary<Type, object>()
+        internal static readonly Dictionary<Type, object> deltaCalculateFunctions = new Dictionary<Type, object>()
         {");
 
+            template = "            [typeof(<<t>>)] = new DeltaCalculateFunction<<<t>>>(_mil_generated_calc_delta),";
+            foreach (var type in types)
+            {
+                sb.AppendLine(template.Replace("<<t>>", type.FullName));
+            }
+            
+            sb.AppendLine(
+@"            [typeof(ushort)] = new DeltaCalculateFunction<ushort>(_mil_generated_calc_delta),
+            [typeof(short)] = new DeltaCalculateFunction<short>(_mil_generated_calc_delta),
+            [typeof(uint)] = new DeltaCalculateFunction<uint>(_mil_generated_calc_delta),
+            [typeof(int)] = new DeltaCalculateFunction<int>(_mil_generated_calc_delta),
+            [typeof(ulong)] = new DeltaCalculateFunction<ulong>(_mil_generated_calc_delta),
+            [typeof(long)] = new DeltaCalculateFunction<long>(_mil_generated_calc_delta),
+            [typeof(float)] = new DeltaCalculateFunction<float>(_mil_generated_calc_delta),
+            [typeof(double)] = new DeltaCalculateFunction<double>(_mil_generated_calc_delta),
+            [typeof(string)] = new DeltaCalculateFunction<string>(_mil_generated_calc_delta),
+            [typeof(object)] = new DeltaCalculateFunction<object>(_mil_generated_calc_delta)
+        };
+        
+        internal static readonly Dictionary<Type, object> calculateFunctions = new Dictionary<Type, object>()
+        {");
+            
             template = "            [typeof(<<t>>)] = new CalculateFunction<<<t>>>(_mil_generated_calc),";
             foreach (var type in types)
             {
@@ -279,13 +302,19 @@ namespace Milease.CodeGen
 @"        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static <<t>> _mil_generated_calc(<<t>> a, <<t>> b, float p)
         {
-            return a + (b - a) * p;
+            return a + b * p;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static <<t>> _mil_generated_calc_offset(<<t>> a, <<t>> b, float p, <<t>> o)
         {
-            return a + (b - a) * p + o;
+            return a + b * p + o;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static <<t>> _mil_generated_calc_delta(<<t>> a, <<t>> b)
+        {
+            return b - a;
         }
         ";
             foreach (var type in types)
@@ -297,97 +326,145 @@ namespace Milease.CodeGen
 @"        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort _mil_generated_calc(ushort a, ushort b, float p)
         {
-            return (ushort)(a + (b - a) * p);
+            return (ushort)(a + b * p);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort _mil_generated_calc_offset(ushort a, ushort b, float p, ushort o)
         {
-            return (ushort)(a + (b - a) * p + o);
+            return (ushort)(a + b * p + o);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ushort _mil_generated_calc_delta(ushort a, ushort b)
+        {
+            return (ushort)(b - a);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static short _mil_generated_calc(short a, short b, float p)
         {
-            return (short)(a + (b - a) * p);
+            return (short)(a + b * p);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static short _mil_generated_calc_offset(short a, short b, float p, short o)
         {
-            return (short)(a + (b - a) * p + o);
+            return (short)(a + b * p + o);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static short _mil_generated_calc_delta(short a, short b)
+        {
+            return (short)(b - a);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint _mil_generated_calc(uint a, uint b, float p)
         {
-            return (uint)(a + (b - a) * p);
+            return (uint)(a + b * p);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint _mil_generated_calc_offset(uint a, uint b, float p, uint o)
         {
-            return (uint)(a + (b - a) * p + o);
+            return (uint)(a + b * p + o);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint _mil_generated_calc_delta(uint a, uint b)
+        {
+            return (b - a);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int _mil_generated_calc(int a, int b, float p)
         {
-            return (int)(a + (b - a) * p);
+            return (int)(a + b * p);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int _mil_generated_calc_offset(int a, int b, float p, int o)
         {
-            return (int)(a + (b - a) * p + o);
+            return (int)(a + b * p + o);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int _mil_generated_calc_delta(int a, int b)
+        {
+            return b - a;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong _mil_generated_calc(ulong a, ulong b, float p)
         {
-            return (ulong)(a + (b - a) * p);
+            return (ulong)(a + b * p);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong _mil_generated_calc_offset(ulong a, ulong b, float p, ulong o)
         {
-            return (ulong)(a + (b - a) * p + o);
+            return (ulong)(a + b * p + o);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong _mil_generated_calc_delta(ulong a, ulong b)
+        {
+            return b - a;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long _mil_generated_calc(long a, long b, float p)
         {
-            return (long)(a + (b - a) * p);
+            return (long)(a + b * p);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long _mil_generated_calc_offset(long a, long b, float p, long o)
         {
-            return (long)(a + (b - a) * p + o);
+            return (long)(a + b * p + o);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long _mil_generated_calc_delta(long a, long b)
+        {
+            return b - a;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float _mil_generated_calc(float a, float b, float p)
         {
-            return a + (b - a) * p;
+            return a + b * p;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float _mil_generated_calc_offset(float a, float b, float p, float o)
         {
-            return a + (b - a) * p + o;
+            return a + b * p + o;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float _mil_generated_calc_delta(float a, float b)
+        {
+            return b - a;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double _mil_generated_calc(double a, double b, float p)
         {
-            return a + (b - a) * p;
+            return a + b * p;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double _mil_generated_calc_offset(double a, double b, float p, double o)
         {
-            return a + (b - a) * p + o;
+            return a + b * p + o;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double _mil_generated_calc_delta(double a, double b)
+        {
+            return b - a;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -403,6 +480,12 @@ namespace Milease.CodeGen
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string _mil_generated_calc_delta(string a, string b)
+        {
+            return b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object _mil_generated_calc(object a, object b, float p)
         {
             return (p >= 1f ? b : a);
@@ -413,10 +496,16 @@ namespace Milease.CodeGen
         {
             return (p >= 1f ? b : a);
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static object _mil_generated_calc_delta(object a, object b)
+        {
+            return b;
+        }
     }
 }");
 
-            return sb.ToString();
+            return sb.ToString().Replace("\r\n", "\n");
         }
     }
 }

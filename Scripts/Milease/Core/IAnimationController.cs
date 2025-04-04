@@ -11,15 +11,6 @@ namespace Milease.Core
         internal void Apply(float progress);
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void SetOriginalValue();
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool InvokeSelfHandling(float progress);
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool ShouldUpdate(float progress);
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Delay(float time);
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

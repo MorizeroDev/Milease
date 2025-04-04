@@ -14,10 +14,10 @@ namespace Milease.Core.Animator
 
         public AnimationResetMode DefaultResetMode = AnimationResetMode.ResetToOriginalState;
 
-        public bool Loop { get; set; } = false;
+        public bool Loop = false;
 
-        public TimeSource TimeSource { get; set; } = TimeSource.UnScaledTime;
-
+        public TimeSource TimeSource = TimeSource.UnScaledTime;
+        
         internal Action PlayCallback;
         
         internal int PlayIndex = 0;
@@ -110,7 +110,6 @@ namespace Milease.Core.Animator
                     Collection[Collection.Count - 1].Add(ani);
                 }
             }
-            
             return this;
         }
         
@@ -142,7 +141,6 @@ namespace Milease.Core.Animator
             {
                 Collection.Add(part);
             }
-            
             return this;
         }
         
@@ -230,29 +228,11 @@ namespace Milease.Core.Animator
             {
                 foreach (var ani in Collection[0])
                 {
-                    ApplyAnimation(ani, 0f);
+                    ani.Apply(0f);
                 }
             }
             MilInstantAnimatorManager.SubmitPlayTask(this);
             ActiveScene = SceneManager.GetActiveScene().name;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void ApplyAnimation(IAnimationController ani, float pro)
-        {
-            if (!ani.ShouldUpdate(pro))
-            {
-                return;
-            }
-            
-            ani.SetOriginalValue();
-            
-            if (ani.InvokeSelfHandling(pro))
-            {
-                return;
-            }
-            
-            ani.Apply(pro);
         }
         
         public void Stop()
@@ -300,7 +280,6 @@ namespace Milease.Core.Animator
             {
                 ani.SetBlendingMode(blendingMode);
             }
-
             return animator;
         }
         

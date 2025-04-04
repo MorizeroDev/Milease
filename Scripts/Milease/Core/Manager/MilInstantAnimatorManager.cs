@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Milease.Core.Animator;
 using Milease.Enums;
 using Milease.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Debug = UnityEngine.Debug;
 
 namespace Milease.Core.Manager
 {
@@ -59,7 +62,6 @@ namespace Milease.Core.Manager
             var cnt = _animations.Count;
             var scaledDeltaTime = Time.deltaTime;
             var unscaledDeltaTime = Mathf.Min(Time.unscaledDeltaTime, Time.maximumDeltaTime);
-            
             for (var i = 0; i < cnt; i++)
             {
                 var set = _animations[i];
@@ -82,9 +84,8 @@ namespace Milease.Core.Manager
                     {
                         pro = Mathf.Clamp((set.Time - ani.ControlInfo.StartTime) / ani.ControlInfo.Duration, 0f, 1f);
                     }
-
-                    var easedPro = ani.ControlInfo.CustomCurve?.Evaluate(pro) ?? EaseUtility.GetEasedProgress(pro, ani.ControlInfo.EaseType, ani.ControlInfo.EaseFunction);
-                    MilInstantAnimator.ApplyAnimation(collection[j], easedPro);
+                    var easedPro = EaseUtility.GetEasedProgress(pro, ani.ControlInfo.EaseType, ani.ControlInfo.EaseFunction);
+                    collection[j].Apply(easedPro);
                 }
 
                 if (set.Time >= latestTime)

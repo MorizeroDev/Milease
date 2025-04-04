@@ -22,7 +22,6 @@ namespace Milease.Core.Animation
             public float Duration;
             public EaseType EaseType;
             public EaseFunction EaseFunction;
-            public AnimationCurve CustomCurve;
             public bool PendingTo;
         }
         

@@ -29,7 +29,10 @@ namespace Milease.Core
 #elif MILEASE_ENABLE_CODEGEN
         private readonly OffsetCalculateFunction<E> offsetCalcFunc;
         private readonly CalculateFunction<E> calcFunc;
-        
+        private readonly DeltaCalculateFunction<E> deltaFunc;
+
+        private E delta;
+            
         private readonly MemberInfo BindMember;
 #endif
         public readonly Action<T, E> ValueSetter;
@@ -46,8 +49,6 @@ namespace Milease.Core
         public readonly MilInstantAnimator ParentAnimator;
         
         public bool IsPrepared { get; internal set; }
-
-        private float lastProgress = -1f;
         
         public RuntimeAnimationPart(T target, MilInstantAnimator animator, 
             MilAnimation.AnimationPart<E> animation, 
@@ -91,6 +92,7 @@ namespace Milease.Core
                 
                 offsetCalcFunc = RuntimeBridge.GetOffsetFunc<E>();
                 calcFunc = RuntimeBridge.GetFunc<E>();
+                deltaFunc = RuntimeBridge.GetDeltaFunc<E>();
 
                 if (!RuntimeBridge.TryGetGetter(BindMember.Name, out ValueGetter))
                 {
@@ -154,7 +156,6 @@ namespace Milease.Core
             }
             
             IsPrepared = false;
-            lastProgress = -1f;
         }
         
         public bool Reset(AnimationResetMode resetMode, bool revertToChanges = true)
@@ -215,6 +216,35 @@ namespace Milease.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void IAnimationController.Apply(float progress)
         {
+            if (!IsPrepared)
+            {
+                IsPrepared = true;
+            
+                if (ValueGetter == null)
+                {
+                    return;
+                }
+                OriginalValue = ValueGetter.Invoke(Target);
+            
+                if (ControlInfo.PendingTo)
+                {
+                    StartValue = OriginalValue;
+                }
+
+                delta = deltaFunc.Invoke(StartValue, ToValue);
+            }
+
+            if (ValueType == ValueTypeEnum.SelfHandle || HandleFunction != null)
+            {
+                HandleFunction(new MilHandleFunctionArgs<T, E>()
+                {
+                    Animation = this,
+                    Target = Target,
+                    Progress = progress,
+                    Animator = ParentAnimator
+                });
+                return;
+            }
 #if MILEASE_ENABLE_EXPRESSION
             if (expression == null)
             {
@@ -243,62 +273,11 @@ namespace Milease.Core
             }
             
             var targetValue = ControlInfo.BlendingMode == BlendingMode.Additive
-                ? offsetCalcFunc.Invoke(StartValue, ToValue, progress, OriginalValue)
-                : calcFunc.Invoke(StartValue, ToValue, progress);
+                ? offsetCalcFunc.Invoke(StartValue, delta, progress, OriginalValue)
+                : calcFunc.Invoke(StartValue, delta, progress);
                 
             ValueSetter.Invoke(Target, targetValue);
 #endif
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void IAnimationController.SetOriginalValue()
-        {
-            if (IsPrepared)
-            {
-                return;
-            }
-            IsPrepared = true;
-            
-            if (ValueGetter == null)
-            {
-                return;
-            }
-            OriginalValue = ValueGetter.Invoke(Target);
-            
-            if (ControlInfo.PendingTo)
-            {
-                StartValue = OriginalValue;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool IAnimationController.InvokeSelfHandling(float progress)
-        {
-            if (ValueType == ValueTypeEnum.SelfHandle || HandleFunction != null)
-            {
-                HandleFunction(new MilHandleFunctionArgs<T, E>()
-                {
-                    Animation = this,
-                    Target = Target,
-                    Progress = progress,
-                    Animator = ParentAnimator
-                });
-                return true;
-            }
-
-            return false;
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool IAnimationController.ShouldUpdate(float progress)
-        {
-            if (progress == lastProgress)
-            {
-                return false;
-            }
-
-            lastProgress = progress;
-            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
