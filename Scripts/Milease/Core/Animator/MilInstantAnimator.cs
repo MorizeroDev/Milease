@@ -189,7 +189,7 @@ namespace Milease.Core.Animator
 
         public void Pause()
         {
-            MilInstantAnimatorManager.Animations.Remove(this);
+            MilInstantAnimatorManager.CancelPlayTask(this);
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace Milease.Core.Animator
         {
             PlayCallback = callback;
             
-            if (MilInstantAnimatorManager.Animations.Contains(this))
+            if (MilInstantAnimatorManager.IsPlayTaskActive(this))
             {
                 Reset(DefaultResetMode, revertToChanges);
                 return;
@@ -233,7 +233,7 @@ namespace Milease.Core.Animator
                     ApplyAnimation(ani, 0f);
                 }
             }
-            MilInstantAnimatorManager.Animations.Add(this);
+            MilInstantAnimatorManager.SubmitPlayTask(this);
             ActiveScene = SceneManager.GetActiveScene().name;
         }
 

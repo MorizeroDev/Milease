@@ -24,21 +24,45 @@ namespace Milease.Core.Manager
             Instance = go.GetComponent<MilInstantAnimatorManager>();
             SceneManager.sceneUnloaded += (scene) =>
             {
-                Animations.RemoveAll(x => !x.dontStopOnLoad && x.ActiveScene == scene.name);
+                _animations.RemoveAll(x => !x.dontStopOnLoad && x.ActiveScene == scene.name);
             };
         }
 
-        public static readonly List<MilInstantAnimator> Animations = new List<MilInstantAnimator>();
+        private static readonly List<MilInstantAnimator> _animations = new List<MilInstantAnimator>();
+        private static readonly HashSet<MilInstantAnimator> _aniHashSet = new HashSet<MilInstantAnimator>();
+
+        internal static bool IsPlayTaskActive(MilInstantAnimator animator)
+            => _aniHashSet.Contains(animator);
+        
+        internal static void SubmitPlayTask(MilInstantAnimator animator)
+        {
+            if (_aniHashSet.Contains(animator))
+            {
+                return;
+            }
+            _animations.Add(animator);
+            _aniHashSet.Add(animator);
+        }
+        
+        internal static void CancelPlayTask(MilInstantAnimator animator)
+        {
+            if (!_aniHashSet.Contains(animator))
+            {
+                return;
+            }
+            _animations.Remove(animator);
+            _aniHashSet.Remove(animator);
+        }
 
         private void Update()
         {
-            var cnt = Animations.Count;
+            var cnt = _animations.Count;
             var scaledDeltaTime = Time.deltaTime;
             var unscaledDeltaTime = Mathf.Min(Time.unscaledDeltaTime, Time.maximumDeltaTime);
             
             for (var i = 0; i < cnt; i++)
             {
-                var set = Animations[i];
+                var set = _animations[i];
                 var collection = set.Collection[set.PlayIndex];
                 var cCnt = collection.Count;
                 var latestTime = 0f;
@@ -47,19 +71,19 @@ namespace Milease.Core.Manager
                 {
                     var ani = (RuntimeAnimationBase)collection[j];
 
-                    latestTime = Mathf.Max(latestTime, ani.Source.StartTime + ani.Source.Duration);
-                    if (set.Time < ani.Source.StartTime)
+                    latestTime = Mathf.Max(latestTime, ani.ControlInfo.StartTime + ani.ControlInfo.Duration);
+                    if (set.Time < ani.ControlInfo.StartTime)
                     {
                         continue;
                     }
                     
                     var pro = 1f;
-                    if (ani.Source.Duration > 0f)
+                    if (ani.ControlInfo.Duration > 0f)
                     {
-                        pro = Mathf.Clamp((set.Time - ani.Source.StartTime) / ani.Source.Duration, 0f, 1f);
+                        pro = Mathf.Clamp((set.Time - ani.ControlInfo.StartTime) / ani.ControlInfo.Duration, 0f, 1f);
                     }
 
-                    var easedPro = ani.Source.CustomCurve?.Evaluate(pro) ?? EaseUtility.GetEasedProgress(pro, ani.Source.EaseType, ani.Source.EaseFunction);
+                    var easedPro = ani.ControlInfo.CustomCurve?.Evaluate(pro) ?? EaseUtility.GetEasedProgress(pro, ani.ControlInfo.EaseType, ani.ControlInfo.EaseFunction);
                     MilInstantAnimator.ApplyAnimation(collection[j], easedPro);
                 }
 
@@ -70,7 +94,8 @@ namespace Milease.Core.Manager
                     if (set.PlayIndex >= set.Collection.Count)
                     {
                         set.PlayCallback?.Invoke();
-                        Animations.RemoveAt(i);
+                        _aniHashSet.Remove(_animations[i]);
+                        _animations.RemoveAt(i);
                         i--;
                         cnt--;
                         if (set.Loop)

@@ -15,7 +15,7 @@ namespace Milease.Core
 {
     public abstract class RuntimeAnimationBase
     {
-        internal MilAnimation.AnimationPartBase Source;
+        internal MilAnimation.AnimationControlInfo ControlInfo;
     }
     
     public class RuntimeAnimationPart<T, E> : RuntimeAnimationBase, IAnimationController
@@ -35,6 +35,8 @@ namespace Milease.Core
         public readonly Action<T, E> ValueSetter;
         public readonly Func<T, E> ValueGetter;
         
+        private MilAnimation.AnimationPart<E> _animationData;
+        
         public string MemberPath { get; }
         public readonly ValueTypeEnum ValueType;
         
@@ -52,7 +54,8 @@ namespace Milease.Core
             MileaseHandleFunction<T, E> handleFunction, MileaseHandleFunction<T, E> resetFunction = null)
         {
             HandleFunction = handleFunction;
-            Source = animation;
+            ControlInfo = animation.ControlInfo;
+            _animationData = animation;
             Target = target;
             ResetFunction = resetFunction;
             ValueType = ValueTypeEnum.SelfHandle;
@@ -70,7 +73,8 @@ namespace Milease.Core
             }
             
             HandleFunction = handleFunction;
-            Source = animation;
+            ControlInfo = animation.ControlInfo;
+            _animationData = animation;
             ParentAnimator = animator;
             
             if (member != null)
@@ -109,7 +113,7 @@ namespace Milease.Core
             
             Target = target;
             
-            if (!animation.PendingTo)
+            if (!ControlInfo.PendingTo)
             {
                 StartValue = animation.StartValue;
             }
@@ -155,7 +159,7 @@ namespace Milease.Core
         
         public bool Reset(AnimationResetMode resetMode, bool revertToChanges = true)
         {
-            if (!revertToChanges && Source.PendingTo)
+            if (!revertToChanges && ControlInfo.PendingTo)
             {
                 return false;
             }
@@ -183,7 +187,7 @@ namespace Milease.Core
                 return true;
             }
 
-            if (Source.PendingTo || Source.BlendingMode == BlendingMode.Additive)
+            if (ControlInfo.PendingTo || ControlInfo.BlendingMode == BlendingMode.Additive)
             {
                 // MileaseTo or additive blending animation doesn't have a initial state,
                 // force to reset to original state instead.
@@ -238,7 +242,7 @@ namespace Milease.Core
                 return;
             }
             
-            var targetValue = Source.BlendingMode == BlendingMode.Additive
+            var targetValue = ControlInfo.BlendingMode == BlendingMode.Additive
                 ? offsetCalcFunc.Invoke(StartValue, ToValue, progress, OriginalValue)
                 : calcFunc.Invoke(StartValue, ToValue, progress);
                 
@@ -261,7 +265,7 @@ namespace Milease.Core
             }
             OriginalValue = ValueGetter.Invoke(Target);
             
-            if (Source.PendingTo)
+            if (ControlInfo.PendingTo)
             {
                 StartValue = OriginalValue;
             }
@@ -300,19 +304,19 @@ namespace Milease.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void IAnimationController.Delay(float time)
         {
-            Source.StartTime += time;
+            ControlInfo.StartTime += time;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void IAnimationController.SetDuration(float duration)
         {
-            Source.Duration = duration;
+            ControlInfo.Duration = duration;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void IAnimationController.SetBlendingMode(BlendingMode mode)
         {
-            Source.BlendingMode = mode;
+            ControlInfo.BlendingMode = mode;
         }
     }
 }

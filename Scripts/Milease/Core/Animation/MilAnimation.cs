@@ -15,20 +15,21 @@ namespace Milease.Core.Animation
     
     public class MilAnimation : ScriptableObject
     {
-        public abstract class AnimationPartBase
+        public struct AnimationControlInfo
         {
-            public BlendingMode BlendingMode = BlendingMode.Default;
+            public BlendingMode BlendingMode;
             public float StartTime;
             public float Duration;
             public EaseType EaseType;
             public EaseFunction EaseFunction;
             public AnimationCurve CustomCurve;
-            public bool PendingTo = false;
+            public bool PendingTo;
         }
         
         [Serializable]
-        public class AnimationPart<E> : AnimationPartBase
+        public struct AnimationPart<E>
         {
+            public AnimationControlInfo ControlInfo;
             public E StartValue;
             public E ToValue;
         }
@@ -38,13 +39,16 @@ namespace Milease.Core.Animation
         {
             return new AnimationPart<E>()
             {
-                BlendingMode = blendingMode,
-                StartTime = delay,
-                Duration = duration,
-                EaseType = easeType,
-                EaseFunction = easeFunction,
-                ToValue = toValue,
-                PendingTo = true
+                ControlInfo = new AnimationControlInfo()
+                {
+                    BlendingMode = blendingMode,
+                    StartTime = delay,
+                    Duration = duration,
+                    EaseType = easeType,
+                    EaseFunction = easeFunction,
+                    PendingTo = true
+                },
+                ToValue = toValue
             };
         }
         
@@ -57,11 +61,14 @@ namespace Milease.Core.Animation
         {
             return new AnimationPart<E>()
             {
-                BlendingMode = blendingMode,
-                StartTime = delay,
-                Duration = 0f,
-                EaseType = easeType,
-                EaseFunction = easeFunction,
+                ControlInfo = new AnimationControlInfo()
+                {
+                    BlendingMode = blendingMode,
+                    StartTime = delay,
+                    Duration = 0f,
+                    EaseType = easeType,
+                    EaseFunction = easeFunction
+                },
                 StartValue = startValue,
                 ToValue = startValue
             };
@@ -76,11 +83,14 @@ namespace Milease.Core.Animation
         {
             return new AnimationPart<E>()
             {
-                BlendingMode = blendingMode,
-                StartTime = delay,
-                Duration = duration,
-                EaseType = easeType,
-                EaseFunction = easeFunction,
+                ControlInfo = new AnimationControlInfo()
+                {
+                    BlendingMode = blendingMode,
+                    StartTime = delay,
+                    Duration = duration,
+                    EaseType = easeType,
+                    EaseFunction = easeFunction
+                },
                 StartValue = startValue,
                 ToValue = toValue
             };
@@ -91,11 +101,14 @@ namespace Milease.Core.Animation
         {
             return new AnimationPart<E>()
             {
-                BlendingMode = blendingMode,
-                StartTime = delay,
-                Duration = duration,
-                EaseType = easeType,
-                EaseFunction = easeFunction
+                ControlInfo = new AnimationControlInfo()
+                {
+                    BlendingMode = blendingMode,
+                    StartTime = delay,
+                    Duration = duration,
+                    EaseType = easeType,
+                    EaseFunction = easeFunction
+                }
             };
         }
     }
