@@ -52,6 +52,8 @@ namespace Milease.Core
         public readonly MilInstantAnimator ParentAnimator;
         
         public bool IsPrepared { get; internal set; }
+
+        private float lastProgress = -1f;
         
         public RuntimeAnimationPart(T target, MilInstantAnimator animator, 
             MilAnimation.AnimationPart<E> animation, 
@@ -159,6 +161,7 @@ namespace Milease.Core
             }
             
             IsPrepared = false;
+            lastProgress = -1f;
         }
 
 #if UNITY_EDITOR
@@ -331,6 +334,13 @@ namespace Milease.Core
 
                 delta = deltaFunc.Invoke(StartValue, ToValue);
             }
+
+            if (lastProgress == progress)
+            {
+                return;
+            }
+
+            lastProgress = progress;
 
             if (ValueType == ValueTypeEnum.SelfHandle || HandleFunction != null)
             {
