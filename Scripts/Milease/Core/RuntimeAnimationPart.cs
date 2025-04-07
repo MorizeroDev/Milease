@@ -10,6 +10,9 @@ using Milease.Enums;
 using Milease.Milease.Exception;
 using Milease.Utils;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Milease.Core
 {
@@ -32,9 +35,9 @@ namespace Milease.Core
         private readonly DeltaCalculateFunction<E> deltaFunc;
 
         private E delta;
-            
-        private readonly MemberInfo BindMember;
 #endif
+        private readonly MemberInfo BindMember;
+        
         public readonly Action<T, E> ValueSetter;
         public readonly Func<T, E> ValueGetter;
         
@@ -77,6 +80,7 @@ namespace Milease.Core
             ControlInfo = animation.ControlInfo;
             _animationData = animation;
             ParentAnimator = animator;
+            BindMember = member;
             
             if (member != null)
             {
@@ -88,7 +92,6 @@ namespace Milease.Core
                 expression = AnimatorExprManager.GetExpr<T, E>(member);
                 offsetExpression = AnimatorExprManager.GetExprWithOffset<T, E>(member);
 #elif MILEASE_ENABLE_CODEGEN
-                BindMember = member;
                 
                 offsetCalcFunc = RuntimeBridge.GetOffsetFunc<E>();
                 calcFunc = RuntimeBridge.GetFunc<E>();
@@ -157,7 +160,93 @@ namespace Milease.Core
             
             IsPrepared = false;
         }
+
+#if UNITY_EDITOR
+        private void PrintEditorField(string text, E value)
+        {
+            if (value is Color color)
+            {
+                EditorGUILayout.ColorField(text, color);
+            }
+            else if (value is Vector2 vector2)
+            {
+                EditorGUILayout.Vector2Field(text, vector2);
+            }
+            else if (value is Vector3 vector3)
+            {
+                EditorGUILayout.Vector3Field(text, vector3);
+            }
+            else if (value is float f)
+            {
+                EditorGUILayout.FloatField(text, f);
+            }
+            else if (value is int i)
+            {
+                EditorGUILayout.IntField(text, i);
+            }
+            else if (value is string s)
+            {
+                EditorGUILayout.TextField(text, s);
+            }
+        }
         
+        void IAnimationController.DrawWindow(float time, Color color)
+        {
+            EditorGUILayout.BeginVertical(new GUIStyle(EditorStyles.helpBox)
+            {
+                padding = new RectOffset(6, 6, 6, 6)
+            });
+            
+            if (BindMember != null)
+            {
+                EditorGUILayout.LabelField($"<color=cyan>{time + ControlInfo.StartTime:F3}s -> {time + ControlInfo.StartTime + ControlInfo.Duration:F3}s</color>: {BindMember.Name} ({typeof(T).FullName} {typeof(E).FullName})", new GUIStyle(EditorStyles.boldLabel)
+                {
+                    normal =
+                    {
+                        textColor = color
+                    },
+                    richText = true
+                });
+            }
+            else
+            {
+                EditorGUILayout.LabelField($"<color=cyan>{time + ControlInfo.StartTime:F3}s -> {time + ControlInfo.StartTime + ControlInfo.Duration:F3}s</color>: <Event>", new GUIStyle(EditorStyles.boldLabel)
+                {
+                    normal =
+                    {
+                        textColor = color
+                    },
+                    richText = true
+                });
+            }
+            EditorGUILayout.LabelField($"Duration: <b><color=cyan>{ControlInfo.Duration:F3}s</color></b>, Self Delay: <b><color=cyan>{ControlInfo.StartTime:F3}s</color></b>", new GUIStyle(EditorStyles.boldLabel)
+            {
+                normal =
+                {
+                    textColor = color
+                },
+                richText = true
+            });
+
+            GUI.enabled = false;
+            PrintEditorField("Start Value", StartValue);
+            PrintEditorField("End Value", ToValue);
+            GUI.enabled = true;
+            
+            EditorGUILayout.EndVertical();
+        }
+
+        float IAnimationController.GetStartTime()
+        {
+            return ControlInfo.StartTime;
+        }
+        
+        float IAnimationController.GetDuration()
+        {
+            return ControlInfo.Duration;
+        }
+#endif
+
         public bool Reset(AnimationResetMode resetMode, bool revertToChanges = true)
         {
             if (!revertToChanges && ControlInfo.PendingTo)

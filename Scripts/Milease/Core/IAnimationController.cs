@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Milease.Core.Animation;
+using UnityEngine;
 
 namespace Milease.Core
 {
@@ -22,5 +23,13 @@ namespace Milease.Core
         public bool Reset(AnimationResetMode resetMode, bool revertToChanges = true);
 
         internal void ResetAnimation();
+
+#if UNITY_EDITOR
+        internal void DrawWindow(float time, Color color);
+
+        internal float GetStartTime();
+        
+        internal float GetDuration();
+#endif
     }
 }

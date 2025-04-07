@@ -4,12 +4,17 @@ using System.Linq;
 using Milease.Core.Animator;
 using Milease.Enums;
 using Milease.Utils;
+#if UNITY_EDITOR
+using Milease.Editor;
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
 
 namespace Milease.Core.Manager
 {
+    [ExecuteAlways]
     public class MilInstantAnimatorManager : MonoBehaviour
     {
         public static MilInstantAnimatorManager Instance;
@@ -21,6 +26,20 @@ namespace Milease.Core.Manager
             {
                 return;
             }
+#if UNITY_EDITOR
+            if (!EditorApplication.isPlaying)
+            {
+                var editorGo = new GameObject("[MilInstantAnimatorManager]", typeof(MilInstantAnimatorManager))
+                    {
+                        hideFlags = HideFlags.HideAndDontSave
+                    };
+                editorGo.SetActive(true);
+                Instance = editorGo.GetComponent<MilInstantAnimatorManager>();
+                Instance.EditorMode = true;
+                lstTime = (float)EditorApplication.timeSinceStartup;
+                return;
+            }
+#endif
             var go = new GameObject("[MilInstantAnimatorManager]", typeof(MilInstantAnimatorManager));
             DontDestroyOnLoad(go);
             go.SetActive(true);
@@ -57,11 +76,35 @@ namespace Milease.Core.Manager
             _aniHashSet.Remove(animator);
         }
 
+#if UNITY_EDITOR
+        internal static void ResetEditorTime()
+        {
+            lstTime = (float)EditorApplication.timeSinceStartup;
+        }
+#endif
+        
+        internal bool EditorMode;
+        private static float lstTime;
+        
         private void Update()
         {
             var cnt = _animations.Count;
             var scaledDeltaTime = Time.deltaTime;
             var unscaledDeltaTime = Mathf.Min(Time.unscaledDeltaTime, Time.maximumDeltaTime);
+
+#if UNITY_EDITOR
+            if (Instance != this)
+            {
+                return;
+            }
+            if (EditorMode)
+            {
+                scaledDeltaTime = unscaledDeltaTime = (float)EditorApplication.timeSinceStartup - lstTime;
+                lstTime = (float)EditorApplication.timeSinceStartup;
+                //Debug.Log("Tick " + scaledDeltaTime);
+            }
+#endif
+            
             for (var i = 0; i < cnt; i++)
             {
                 var set = _animations[i];
@@ -111,6 +154,18 @@ namespace Milease.Core.Manager
                     }
                 }
             }
+            
+#if UNITY_EDITOR
+            if (EditorMode)
+            {
+                SceneView.RepaintAll();
+            }
+
+            if (_animations.Count == 0)
+            {
+                InstantAnimatorDebugWindow.Playing = false;
+            }
+#endif
         }
     }
 }
