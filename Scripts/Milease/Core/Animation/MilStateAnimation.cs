@@ -20,12 +20,13 @@ namespace Milease.Core.Animation
             public T Target;
             
             public string Member;
-            public E ToValue, StartValue;
+            public E ToValue, StartValue, DeltaValue;
 
 #if MILEASE_ENABLE_EXPRESSION
             private readonly AnimatorExpression<T, E> expression;
 #elif MILEASE_ENABLE_CODEGEN
             private readonly CalculateFunction<E> calcFunc;
+            private readonly DeltaCalculateFunction<E> deltaFunc;
         
             private readonly MemberInfo BindMember;
 #endif
@@ -50,6 +51,7 @@ namespace Milease.Core.Animation
                 BindMember = member;
 
                 calcFunc = RuntimeBridge.GetFunc<E>();
+                deltaFunc = RuntimeBridge.GetDeltaFunc<E>();
 
                 if (!RuntimeBridge.TryGetGetter(BindMember.Name, out ValueGetter))
                 {
@@ -95,6 +97,7 @@ namespace Milease.Core.Animation
             internal override void Prepare()
             {
                 StartValue = ValueGetter.Invoke(Target);
+                DeltaValue = deltaFunc.Invoke(StartValue, ToValue);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -103,7 +106,7 @@ namespace Milease.Core.Animation
 #if MILEASE_ENABLE_EXPRESSION
                 expression.Invoke(Target, StartValue, ToValue, pro);
 #elif MILEASE_ENABLE_CODEGEN
-                var targetValue = calcFunc.Invoke(StartValue, ToValue, pro);
+                var targetValue = calcFunc.Invoke(StartValue, DeltaValue, pro);
                 ValueSetter.Invoke(Target, targetValue);
 #endif
             }
