@@ -20,6 +20,7 @@ namespace Milease.Editor
             public MilInstantAnimator ParsedAnimator;
             public Exception ParseException;
             public float AnimationLength;
+            public float[] ClipStartTime;
         }
 
         private List<AnimatorFunction> _functions;
@@ -37,6 +38,8 @@ namespace Milease.Editor
                                 FunctionName = x.Name,
                                 ParsedAnimator = (MilInstantAnimator)x.Invoke(obj, null)
                             };
+                            ret.ClipStartTime = new float[ret.ParsedAnimator.Collection.Count];
+                            var index = 0;
                             foreach (var ani in ret.ParsedAnimator.Collection)
                             {
                                 var duration = 0f;
@@ -44,6 +47,9 @@ namespace Milease.Editor
                                 {
                                     duration = Mathf.Max(duration, part.GetStartTime() + part.GetDuration());
                                 }
+
+                                ret.ClipStartTime[index] = ret.AnimationLength;
+                                index++;
 
                                 ret.AnimationLength += duration;
                             }

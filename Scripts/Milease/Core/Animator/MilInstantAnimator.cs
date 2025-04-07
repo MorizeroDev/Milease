@@ -4,6 +4,10 @@ using System.Runtime.CompilerServices;
 using Milease.Core.Animation;
 using Milease.Core.Manager;
 using Milease.Enums;
+#if UNITY_EDITOR
+using Milease.Editor;
+using UnityEditor;
+#endif
 using UnityEngine.SceneManagement;
 
 namespace Milease.Core.Animator
@@ -24,6 +28,9 @@ namespace Milease.Core.Animator
         internal float Time = 0f;
         internal string ActiveScene;
         internal bool dontStopOnLoad = false;
+
+        internal bool EditorPauseSignal = false;
+        internal int EditorEndPlayIndex = -1;
 
         public static MilInstantAnimator Empty()
         {
@@ -240,6 +247,55 @@ namespace Milease.Core.Animator
             Reset(DefaultResetMode);
             Pause();
         }
+        
+#if UNITY_EDITOR
+        internal void SetTime(int playIndex, float time, float[] timeList, bool continuePlay = false)
+        {
+            var needReset = false;
+            if (playIndex == PlayIndex)
+            {
+                if (time - timeList[PlayIndex] < Time)
+                {
+                    needReset = true;
+                }
+                else
+                {
+                    Time = time - timeList[PlayIndex];
+                }
+            }
+            else if (playIndex < PlayIndex)
+            {
+                needReset = true;
+            }
+            else if (playIndex > PlayIndex)
+            {
+                Time = time - timeList[PlayIndex];
+            }
+
+            if (needReset)
+            {
+                Reset();
+                Play();
+                Time = time;
+            }
+
+            if (!MilInstantAnimatorManager.IsPlayTaskActive(this))
+            {
+                MilInstantAnimatorManager.EnsureInitialized();
+                MilInstantAnimatorManager.SubmitPlayTask(this);
+            }
+
+            if (!continuePlay)
+            {
+                EditorPauseSignal = true;
+            }
+            else
+            {
+                InstantAnimatorDebugWindow.Playing = true;
+            }
+            EditorApplication.QueuePlayerLoopUpdate();
+        }
+#endif
 
         #region DSL Support
 

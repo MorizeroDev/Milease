@@ -130,7 +130,7 @@ namespace Milease.Core.Manager
                     var easedPro = EaseUtility.GetEasedProgress(pro, ani.ControlInfo.EaseType, ani.ControlInfo.EaseFunction);
                     collection[j].Apply(easedPro);
                 }
-
+                
                 if (set.Time >= latestTime)
                 {
                     set.Time -= latestTime;
@@ -138,7 +138,7 @@ namespace Milease.Core.Manager
                     if (set.PlayIndex >= set.Collection.Count)
                     {
                         set.PlayCallback?.Invoke();
-                        _aniHashSet.Remove(_animations[i]);
+                        _aniHashSet.Remove(set);
                         _animations.RemoveAt(i);
                         i--;
                         cnt--;
@@ -153,6 +153,20 @@ namespace Milease.Core.Manager
                         continue;
                     }
                 }
+                
+#if UNITY_EDITOR
+                if (set.EditorPauseSignal || (set.EditorEndPlayIndex != -1 && set.PlayIndex >= set.EditorEndPlayIndex))
+                {
+                    set.EditorPauseSignal = false;
+                    if (_aniHashSet.Contains(set))
+                    {
+                        _aniHashSet.Remove(set);
+                        _animations.RemoveAt(i);
+                        i--;
+                        cnt--;
+                    }
+                }
+#endif
             }
             
 #if UNITY_EDITOR

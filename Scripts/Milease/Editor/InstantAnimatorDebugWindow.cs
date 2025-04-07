@@ -29,6 +29,7 @@ namespace Milease.Editor
         [SerializeField] 
         private List<EditorStatus> _status;
         
+        [SerializeField] 
         private Vector2 scrollPos;
         
         internal static bool Playing;
@@ -85,7 +86,7 @@ namespace Milease.Editor
                     continue;
                 }
                 ani.ParsedAnimator.Reset();
-                ani.ParsedAnimator.Stop();
+                ani.ParsedAnimator.Pause();
             }
         }
 
@@ -203,14 +204,36 @@ namespace Milease.Editor
                     _status[aniIndex].ViewDetail = EditorGUILayout.Foldout(_status[aniIndex].ViewDetail, "Debug");
                     if (_status[aniIndex].ViewDetail)
                     {
-                        EditorGUILayout.Slider($"{ani.ParsedAnimator.Time:F3}s/{ani.AnimationLength:F3}s",
-                            ani.ParsedAnimator.Time, 0f, ani.AnimationLength);
+                        var time = 
+                            ani.ParsedAnimator.PlayIndex >= ani.ParsedAnimator.Collection.Count
+                            ? ani.AnimationLength
+                            : ani.ClipStartTime[ani.ParsedAnimator.PlayIndex] + ani.ParsedAnimator.Time;
+                        
+                        var newTime = EditorGUILayout.Slider(
+                            $"{time:F3}s/{ani.AnimationLength:F3}s",
+                            time, 0f, ani.AnimationLength);
+                        if (!Mathf.Approximately(time, newTime))
+                        {
+                            var startIndex = 0;
+                            for (; startIndex < ani.ClipStartTime.Length; startIndex++)
+                            {
+                                if (ani.ClipStartTime[startIndex] > newTime)
+                                {
+                                    break;
+                                }
+                            }
+
+                            ani.ParsedAnimator.EditorEndPlayIndex = -1;
+                            MilInstantAnimatorManager.ResetEditorTime();
+                            ani.ParsedAnimator.SetTime(startIndex - 1, newTime, ani.ClipStartTime);
+                        }
                         
                         EditorGUILayout.BeginHorizontal();
 
                         if (GUILayout.Button("Play"))
                         {
                             Playing = true;
+                            ani.ParsedAnimator.EditorEndPlayIndex = -1;
                             MilInstantAnimatorManager.ResetEditorTime();
                             ani.ParsedAnimator.Play();
                         }
@@ -228,20 +251,47 @@ namespace Milease.Editor
                         EditorGUILayout.EndHorizontal();
                         
                         var index = 0;
-                        var time = 0f;
                         foreach (var part in ani.ParsedAnimator.Collection)
                         {
                             EditorGUILayout.BeginVertical(panelStyle);
-                            _status[aniIndex].PartView[index] = EditorGUILayout.Foldout(_status[aniIndex].PartView[index], $"<b>Part {index}</b>: <color=cyan>+{time}s</color>, {part.Count} animations", new GUIStyle(EditorStyles.foldout)
-                            {
-                                normal =
+
+                            EditorGUILayout.BeginHorizontal();
+                            _status[aniIndex].PartView[index] = EditorGUILayout.Foldout(_status[aniIndex].PartView[index], 
+                                (ani.ParsedAnimator.PlayIndex == index ? "<color=yellow>" : "") +
+                                $"<b>Part {index}</b>: <color=cyan>+{ani.ClipStartTime[index]:F3}s</color>, {part.Count} animations"
+                                + (ani.ParsedAnimator.PlayIndex == index ? "</color>" : ""), 
+                                new GUIStyle(EditorStyles.foldout)
                                 {
-                                    textColor = ani.ParsedAnimator.PlayIndex == index ? Color.cyan : Color.gray
-                                },
-                                fontSize = 14,
-                                fontStyle = FontStyle.Bold,
-                                richText = true
-                            });
+                                    fontSize = 14,
+                                    fontStyle = FontStyle.Bold,
+                                    richText = true
+                                });
+
+                            if (GUILayout.Button("...", new GUIStyle(EditorStyles.miniButton)
+                                {
+                                    fixedWidth = 40f
+                                }))
+                            {
+                                var menu = new GenericMenu();
+                                var i = index;
+                                menu.AddItem(new GUIContent("Play from this part..."), false, () =>
+                                {
+                                    ani.ParsedAnimator.EditorEndPlayIndex = -1;
+                                    MilInstantAnimatorManager.ResetEditorTime();
+                                    ani.ParsedAnimator.SetTime(i, ani.ClipStartTime[i], ani.ClipStartTime, true);
+                                });
+                                menu.AddItem(new GUIContent("Play this part only..."), false, () =>
+                                {
+                                    ani.ParsedAnimator.EditorEndPlayIndex = i + 1;
+                                    MilInstantAnimatorManager.ResetEditorTime();
+                                    ani.ParsedAnimator.SetTime(i, ani.ClipStartTime[i], ani.ClipStartTime, true);
+                                });
+                                menu.ShowAsContext();
+                            }
+                            
+                            EditorGUILayout.EndHorizontal();
+                            
+                            EditorGUILayout.Separator();
 
                             if (_status[aniIndex].PartView[index])
                             {
@@ -252,20 +302,12 @@ namespace Milease.Editor
                                     {
                                         if (ani.ParsedAnimator.Time >= clip.GetStartTime() && ani.ParsedAnimator.Time <= clip.GetStartTime() + clip.GetDuration())
                                         {
-                                            color = Color.cyan;
+                                            color = Color.yellow;
                                         }
                                     }
-                                    clip.DrawWindow(time, color);
+                                    clip.DrawWindow(ani.ClipStartTime[index], color);
                                 }
                             }
-
-                            var newTime = 0f;
-                            foreach (var clip in part)
-                            {
-                                newTime = Math.Max(newTime, time + clip.GetStartTime());
-                            }
-
-                            time = newTime;
                             
                             index++;
                             EditorGUILayout.EndVertical();
