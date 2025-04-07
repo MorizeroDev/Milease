@@ -32,6 +32,11 @@ namespace Milease.Editor
         
         [SerializeField] 
         private Vector2 scrollPos;
+
+        [SerializeField]
+        private float speedFactor = 1f;
+
+        internal static float SpeedFactor = 1f;
         
         internal static bool Playing;
 
@@ -141,6 +146,14 @@ namespace Milease.Editor
                 EditorGUILayout.EndVertical();
                 return;
             }
+            
+            EditorGUILayout.BeginVertical(panelStyle);
+            
+            EditorGUILayout.LabelField("General", titleStyle);
+            speedFactor = EditorGUILayout.Slider("Play Speed", speedFactor, 0f, 2f);
+            SpeedFactor = speedFactor;
+            
+            EditorGUILayout.EndVertical();
 
             if (_functions == null && _objectSrc)
             {
@@ -231,6 +244,8 @@ namespace Milease.Editor
                             ? ani.AnimationLength
                             : ani.ClipStartTime[ani.ParsedAnimator.PlayIndex] + ani.ParsedAnimator.Time;
                         
+                        EditorGUILayout.BeginVertical(panelStyle);
+                        
                         EditorGUILayout.LabelField($"Playing part {ani.ParsedAnimator.PlayIndex}/{ani.ClipStartTime.Length}...", new GUIStyle(EditorStyles.boldLabel)
                         {
                             alignment = TextAnchor.MiddleCenter
@@ -266,6 +281,8 @@ namespace Milease.Editor
                         }
                         
                         EditorGUILayout.EndHorizontal();
+                        
+                        EditorGUILayout.EndVertical();
                         
                         EditorGUILayout.Separator();
                         

@@ -231,6 +231,15 @@ namespace Milease.Core
             GUI.enabled = false;
             PrintEditorField("Start Value", StartValue);
             PrintEditorField("End Value", ToValue);
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField($"Easing Function:  {ControlInfo.EaseFunction} {ControlInfo.EaseType}");
+            EditorGUILayout.LabelField($"Blending:  {ControlInfo.BlendingMode}");
+            if (ControlInfo.PendingTo)
+            {
+                EditorGUILayout.HelpBox("This is a 'To' animation.", MessageType.Info);
+            }
+            EditorGUILayout.EndHorizontal();
             GUI.enabled = true;
             
             EditorGUILayout.EndVertical();

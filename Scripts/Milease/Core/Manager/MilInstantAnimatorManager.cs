@@ -99,9 +99,9 @@ namespace Milease.Core.Manager
             }
             if (EditorMode)
             {
-                scaledDeltaTime = unscaledDeltaTime = (float)EditorApplication.timeSinceStartup - lstTime;
+                scaledDeltaTime = unscaledDeltaTime = ((float)EditorApplication.timeSinceStartup - lstTime) 
+                                                      * InstantAnimatorDebugWindow.SpeedFactor;
                 lstTime = (float)EditorApplication.timeSinceStartup;
-                //Debug.Log("Tick " + scaledDeltaTime);
             }
 #endif
             
