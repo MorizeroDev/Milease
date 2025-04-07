@@ -85,6 +85,10 @@ namespace Milease.Editor
 
         private void ResetAnimators()
         {
+            if (_functions == null)
+            {
+                return;
+            }
             foreach (var ani in _functions)
             {
                 if (ani.ParsedAnimator == null)
