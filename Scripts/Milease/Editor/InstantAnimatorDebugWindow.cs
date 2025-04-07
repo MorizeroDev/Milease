@@ -19,6 +19,7 @@ namespace Milease.Editor
         {
             public bool ViewDetail;
             public bool[] PartView;
+            public float EditorTime;
         }
         
         [SerializeField]
@@ -97,6 +98,22 @@ namespace Milease.Editor
             EditorSceneManager.sceneSaving -= EditorSceneManagerOnsceneSaving;
         }
 
+        private void SetAnimatorTime(InstantAnimatorViewer.AnimatorFunction func, float time)
+        {
+            var startIndex = 0;
+            for (; startIndex < func.ClipStartTime.Length; startIndex++)
+            {
+                if (func.ClipStartTime[startIndex] > time)
+                {
+                    break;
+                }
+            }
+
+            func.ParsedAnimator.EditorEndPlayIndex = -1;
+            MilInstantAnimatorManager.ResetEditorTime();
+            func.ParsedAnimator.SetTime(startIndex - 1, time, func.ClipStartTime);
+        }
+        
         private void OnGUI()
         {
             var titleStyle = new GUIStyle()
@@ -151,6 +168,11 @@ namespace Milease.Editor
                         var newPartView = new bool[cnt];
                         Array.Copy(_status[i].PartView, newPartView, Math.Min(_status[i].PartView.Length, cnt));
                         _status[i].PartView = newPartView; 
+                    }
+
+                    if (_status[i].EditorTime > 0f)
+                    {
+                        SetAnimatorTime(_functions[i], _status[i].EditorTime);
                     }
                 }
             }
@@ -209,23 +231,18 @@ namespace Milease.Editor
                             ? ani.AnimationLength
                             : ani.ClipStartTime[ani.ParsedAnimator.PlayIndex] + ani.ParsedAnimator.Time;
                         
+                        EditorGUILayout.LabelField($"Playing part {ani.ParsedAnimator.PlayIndex}/{ani.ClipStartTime.Length}...", new GUIStyle(EditorStyles.boldLabel)
+                        {
+                            alignment = TextAnchor.MiddleCenter
+                        });
+                        
                         var newTime = EditorGUILayout.Slider(
                             $"{time:F3}s/{ani.AnimationLength:F3}s",
                             time, 0f, ani.AnimationLength);
+                        _status[aniIndex].EditorTime = newTime;
                         if (!Mathf.Approximately(time, newTime))
                         {
-                            var startIndex = 0;
-                            for (; startIndex < ani.ClipStartTime.Length; startIndex++)
-                            {
-                                if (ani.ClipStartTime[startIndex] > newTime)
-                                {
-                                    break;
-                                }
-                            }
-
-                            ani.ParsedAnimator.EditorEndPlayIndex = -1;
-                            MilInstantAnimatorManager.ResetEditorTime();
-                            ani.ParsedAnimator.SetTime(startIndex - 1, newTime, ani.ClipStartTime);
+                            SetAnimatorTime(ani, newTime);
                         }
                         
                         EditorGUILayout.BeginHorizontal();
@@ -242,7 +259,7 @@ namespace Milease.Editor
                             Playing = true;
                             ani.ParsedAnimator.Pause();
                         }
-                        if (GUILayout.Button("Reset"))
+                        if (GUILayout.Button("Stop"))
                         {
                             Playing = true;
                             ani.ParsedAnimator.Reset();
@@ -250,11 +267,13 @@ namespace Milease.Editor
                         
                         EditorGUILayout.EndHorizontal();
                         
+                        EditorGUILayout.Separator();
+                        
                         var index = 0;
                         foreach (var part in ani.ParsedAnimator.Collection)
                         {
                             EditorGUILayout.BeginVertical(panelStyle);
-
+                            
                             EditorGUILayout.BeginHorizontal();
                             _status[aniIndex].PartView[index] = EditorGUILayout.Foldout(_status[aniIndex].PartView[index], 
                                 (ani.ParsedAnimator.PlayIndex == index ? "<color=yellow>" : "") +
