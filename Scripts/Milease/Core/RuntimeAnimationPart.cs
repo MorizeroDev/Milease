@@ -238,11 +238,11 @@ namespace Milease.Core
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField($"Easing Function:  {ControlInfo.EaseFunction} {ControlInfo.EaseType}");
             EditorGUILayout.LabelField($"Blending:  {ControlInfo.BlendingMode}");
+            EditorGUILayout.EndHorizontal();
             if (ControlInfo.PendingTo)
             {
                 EditorGUILayout.HelpBox("This is a 'To' animation.", MessageType.Info);
             }
-            EditorGUILayout.EndHorizontal();
             GUI.enabled = true;
             
             EditorGUILayout.EndVertical();
@@ -317,30 +317,29 @@ namespace Milease.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void IAnimationController.Apply(float progress)
         {
-            if (!IsPrepared)
-            {
-                IsPrepared = true;
-            
-                if (ValueGetter == null)
-                {
-                    return;
-                }
-                OriginalValue = ValueGetter.Invoke(Target);
-            
-                if (ControlInfo.PendingTo)
-                {
-                    StartValue = OriginalValue;
-                }
-
-                delta = deltaFunc.Invoke(StartValue, ToValue);
-            }
-
             if (lastProgress == progress)
             {
                 return;
             }
 
             lastProgress = progress;
+            
+            if (!IsPrepared)
+            {
+                IsPrepared = true;
+            
+                if (ValueGetter != null)
+                {
+                    OriginalValue = ValueGetter.Invoke(Target);
+            
+                    if (ControlInfo.PendingTo)
+                    {
+                        StartValue = OriginalValue;
+                    }
+
+                    delta = deltaFunc.Invoke(StartValue, ToValue);
+                }
+            }
 
             if (ValueType == ValueTypeEnum.SelfHandle || HandleFunction != null)
             {
