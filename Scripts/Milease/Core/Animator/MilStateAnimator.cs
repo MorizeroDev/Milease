@@ -13,8 +13,8 @@ namespace Milease.Core.Animator
 {
     public abstract class MilStateParameter
     {
-        public EaseType EaseType;
-        public EaseFunction EaseFunction;
+        public EaseType EaseType = EaseType.In;
+        public EaseFunction EaseFunction = EaseFunction.Quad;
         public AnimationCurve CustomCurve;
         
         internal string MemberHash;
