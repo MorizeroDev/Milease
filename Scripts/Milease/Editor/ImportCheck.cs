@@ -22,6 +22,7 @@ namespace Milease.Editor
             public string TypeFullName;
             public string PackageName;
             public string PackageUrl;
+            public string Description;
             public bool IsUnityPackage;
             public bool IsOptional;
         }
@@ -33,7 +34,9 @@ namespace Milease.Editor
                 Assembly = "party.para.util.colors",
                 TypeFullName = "Paraparty.Colors.ColorUtils",
                 PackageName = "party.para.util.colors",
-                PackageUrl = "https://github.com/ParaParty/ParaPartyUtil.git?path=Colors"
+                PackageUrl = "https://github.com/ParaParty/ParaPartyUtil.git?path=Colors",
+                Description = "Provide richer color transition effects, with support for Oklab and Oklch.",
+                IsOptional = true
             },
 #if !NET_STANDARD_2_1
             new PackageCheck()
@@ -41,13 +44,15 @@ namespace Milease.Editor
                 Assembly = "party.para.util.unitypolyfill",
                 TypeFullName = "Paraparty.UnityPolyfill.CollectionsPolyfill",
                 PackageName = "party.para.util.unitypolyfill",
-                PackageUrl = "https://github.com/ParaParty/ParaPartyUtil.git?path=UnityPolyfill"
+                PackageUrl = "https://github.com/ParaParty/ParaPartyUtil.git?path=UnityPolyfill",
+                Description = "Add compatibility patches for Unity 2020 and Unity 2021. If you're using one of these versions, you must import the patch."
             },
 #endif
             new PackageCheck()
             {
                 Assembly = "Unity.TextMeshPro",
                 TypeFullName = "TMPro.TMP_Text",
+                Description = "If you need to use features related to TextMeshPro, such as the built-in UI components, you’ll need to import it.",
                 IsUnityPackage = true,
                 IsOptional = true
             }
@@ -378,6 +383,14 @@ namespace Milease.Editor
                     alignment = TextAnchor.MiddleRight
                 });
                 EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginVertical(panelStyle);
+                EditorGUILayout.LabelField(item.Description, new GUIStyle(EditorStyles.label)
+                {
+                    wordWrap = true
+                });
+                EditorGUILayout.EndVertical();
+                
                 if (type == null)
                 {
                     missing.Add(item);
