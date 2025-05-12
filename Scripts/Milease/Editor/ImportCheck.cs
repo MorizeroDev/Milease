@@ -35,6 +35,7 @@ namespace Milease.Editor
                 PackageName = "party.para.util.colors",
                 PackageUrl = "https://github.com/ParaParty/ParaPartyUtil.git?path=Colors"
             },
+#if !NET_STANDARD_2_1
             new PackageCheck()
             {
                 Assembly = "party.para.util.unitypolyfill",
@@ -42,6 +43,7 @@ namespace Milease.Editor
                 PackageName = "party.para.util.unitypolyfill",
                 PackageUrl = "https://github.com/ParaParty/ParaPartyUtil.git?path=UnityPolyfill"
             },
+#endif
             new PackageCheck()
             {
                 Assembly = "Unity.TextMeshPro",

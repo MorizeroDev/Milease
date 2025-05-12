@@ -6,7 +6,7 @@ using Milease.Core;
 using Milease.Core.Animation;
 using Milease.Core.Animator;
 using Milease.Enums;
-#if COLOR_TOOL_SETUP && POLYFILL_SETUP
+#if COLOR_TOOL_SETUP && (NET_STANDARD_2_1 || POLYFILL_SETUP)
 using Milease.Translate;
 #endif
 using Milease.Utils;
@@ -87,7 +87,7 @@ namespace Milease.DSL
             
             MileaseHandleFunction<T, E> handleFunction = null;
             
-#if COLOR_TOOL_SETUP && POLYFILL_SETUP
+#if COLOR_TOOL_SETUP && (NET_STANDARD_2_1 || POLYFILL_SETUP)
             // TODO complex transformation provider manager
             if (ColorTransformation.CanTranslate<E>())
             {

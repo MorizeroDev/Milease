@@ -1,12 +1,17 @@
-﻿#if COLOR_TOOL_SETUP && POLYFILL_SETUP
+﻿#if COLOR_TOOL_SETUP && (NET_STANDARD_2_1 || POLYFILL_SETUP)
 using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Milease.Configuration;
 using Milease.Core.Animation;
 using Paraparty.Colors;
-using Paraparty.UnityPolyfill;
 using UnityEngine;
+
+#if NET_STANDARD_2_1
+using MathPolyfill = System.Math;
+#else
+using MathPolyfill = Paraparty.UnityPolyfill.MathPolyfill;
+#endif
 
 namespace Milease.Translate
 {
