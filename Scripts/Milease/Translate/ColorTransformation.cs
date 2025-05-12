@@ -9,16 +9,16 @@ using UnityEngine;
 
 #if NET_STANDARD_2_1
 using MathPolyfill = System.Math;
+
 #else
 using MathPolyfill = Paraparty.UnityPolyfill.MathPolyfill;
 #endif
 
 namespace Milease.Translate
 {
-    public class ColorTransformation
+    public class ColorTransformation : ITransformation
     {
-        
-        public static bool CanTranslate<E>()
+        public bool CanTranslate<E>()
         {
             var type = typeof(E);
             if (type == typeof(Color))
@@ -39,35 +39,42 @@ namespace Milease.Translate
             return false;
         }
 
-        public static MileaseHandleFunction<T, E> MakeTransformation<T, E>(BlendingMode blendingMode)
+        public MileaseHandleFunction<T, E> MakeTransformation<T, E>(BlendingMode blendingMode)
         {
-            return MakeTransformation<T, E>(MileaseConfiguration.Configuration.DefaultColorTransformationType, blendingMode);
+            return MakeTransformation<T, E>(MileaseConfiguration.Configuration.DefaultColorTransformationType,
+                blendingMode);
         }
 
-        public static MileaseHandleFunction<T, E> MakeTransformation<T, E>(ColorTransformationType colorTransformation,
+        public MileaseHandleFunction<T, E> MakeTransformation<T, E>(ColorTransformationType colorTransformation,
             BlendingMode blendingMode)
         {
             return blendingMode switch
             {
                 BlendingMode.Default => colorTransformation switch
                 {
-                    ColorTransformationType.RGB => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)RgbNormalTransformation),
-                    ColorTransformationType.OKLAB => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)OklabNormalTransformation),
-                    ColorTransformationType.OKLCH => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)OklchNormalTransformation),
+                    ColorTransformationType.RGB => MakeTransformation(
+                        (Func<MilHandleFunctionArgs<T, E>, Color>)RgbNormalTransformation),
+                    ColorTransformationType.OKLAB => MakeTransformation(
+                        (Func<MilHandleFunctionArgs<T, E>, Color>)OklabNormalTransformation),
+                    ColorTransformationType.OKLCH => MakeTransformation(
+                        (Func<MilHandleFunctionArgs<T, E>, Color>)OklchNormalTransformation),
                     _ => throw new ArgumentOutOfRangeException(nameof(colorTransformation), colorTransformation, null)
                 },
                 BlendingMode.Additive => colorTransformation switch
                 {
-                    ColorTransformationType.RGB => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)RgbAdditiveTransformation),
-                    ColorTransformationType.OKLAB => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)OklabAdditiveTransformation),
-                    ColorTransformationType.OKLCH => MakeTransformation((Func<MilHandleFunctionArgs<T, E>, Color>)OklchAdditiveTransformation),
+                    ColorTransformationType.RGB => MakeTransformation(
+                        (Func<MilHandleFunctionArgs<T, E>, Color>)RgbAdditiveTransformation),
+                    ColorTransformationType.OKLAB => MakeTransformation(
+                        (Func<MilHandleFunctionArgs<T, E>, Color>)OklabAdditiveTransformation),
+                    ColorTransformationType.OKLCH => MakeTransformation(
+                        (Func<MilHandleFunctionArgs<T, E>, Color>)OklchAdditiveTransformation),
                     _ => throw new ArgumentOutOfRangeException(nameof(colorTransformation), colorTransformation, null)
                 },
                 _ => throw new ArgumentException("unsupported color transformation mode")
             };
         }
 
-        private static MileaseHandleFunction<T, E> MakeTransformation<T, E>(
+        private MileaseHandleFunction<T, E> MakeTransformation<T, E>(
             Func<MilHandleFunctionArgs<T, E>, Color> colorTransformation)
         {
             return e =>
@@ -77,7 +84,7 @@ namespace Milease.Translate
             };
         }
 
-        private static Oklab GetOklab(object obj)
+        private Oklab GetOklab(object obj)
         {
             return obj switch
             {
@@ -88,7 +95,7 @@ namespace Milease.Translate
             };
         }
 
-        private static Oklch GetOklch(object obj)
+        private Oklch GetOklch(object obj)
         {
             return obj switch
             {
@@ -99,7 +106,7 @@ namespace Milease.Translate
             };
         }
 
-        private static Color GetColor(object obj)
+        private Color GetColor(object obj)
         {
             return obj switch
             {
@@ -110,7 +117,7 @@ namespace Milease.Translate
             };
         }
 
-        private static Color RgbNormalTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
+        private Color RgbNormalTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
         {
             var ani = e.Animation;
             var pro = e.Progress;
@@ -120,7 +127,7 @@ namespace Milease.Translate
             return fromColor + (toColor - fromColor) * pro;
         }
 
-        private static Color RgbAdditiveTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
+        private Color RgbAdditiveTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
         {
             var ani = e.Animation;
             var pro = e.Progress;
@@ -131,7 +138,7 @@ namespace Milease.Translate
             return originalColor + fromColor + (toColor - fromColor) * pro;
         }
 
-        private static Color OklabNormalTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
+        private Color OklabNormalTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
         {
             var ani = e.Animation;
             var pro = e.Progress;
@@ -146,7 +153,7 @@ namespace Milease.Translate
             return new Oklab(l, a, b, opacity).ToColor();
         }
 
-        private static Color OklabAdditiveTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
+        private Color OklabAdditiveTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
         {
             var ani = e.Animation;
             var pro = e.Progress;
@@ -165,7 +172,7 @@ namespace Milease.Translate
             return new Oklab(l, a, b, opacity).ToColor();
         }
 
-        private static Color OklchNormalTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
+        private Color OklchNormalTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
         {
             var ani = e.Animation;
             var pro = e.Progress;
@@ -189,7 +196,7 @@ namespace Milease.Translate
             return new Oklch(l, c, h, opacity).ToColor();
         }
 
-        private static Color OklchAdditiveTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
+        private Color OklchAdditiveTransformation<T, E>(MilHandleFunctionArgs<T, E> e)
         {
             var ani = e.Animation;
             var pro = e.Progress;
@@ -214,7 +221,7 @@ namespace Milease.Translate
             return new Oklch(l, c, h, opacity).ToColor();
         }
 
-        private static double NormalizeHue(double hue)
+        private double NormalizeHue(double hue)
         {
             while (hue > 180)
             {
