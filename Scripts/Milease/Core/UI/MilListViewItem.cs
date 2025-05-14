@@ -41,6 +41,18 @@ namespace Milease.Core.UI
         
         public RectTransform RectTransform { get; private set; }
         public GameObject GameObject { get; private set; }
+
+        public bool TryGetBinding<T>(out T value)
+        {
+            if (Binding is T ret)
+            {
+                value = ret;
+                return true;
+            }
+
+            value = default(T);
+            return false;
+        }
         
         public void Initialize()
         {
@@ -62,15 +74,33 @@ namespace Milease.Core.UI
             animator.Stop();
             OnTerminate();
         }
+
+        protected virtual IEnumerable<MilStateParameter> ConfigDefaultState()
+            => Array.Empty<MilStateParameter>();
         
-        protected abstract IEnumerable<MilStateParameter> ConfigDefaultState();
-        protected abstract IEnumerable<MilStateParameter> ConfigSelectedState();
+        protected virtual IEnumerable<MilStateParameter> ConfigSelectedState()
+            => Array.Empty<MilStateParameter>();
+        
         public abstract void OnSelect(PointerEventData eventData);
-        protected abstract void OnInitialize();
-        protected abstract void OnTerminate();
-        protected abstract MilInstantAnimator ConfigClickAnimation();
+
+        protected virtual void OnInitialize()
+        {
+            
+        }
+
+        protected virtual void OnTerminate()
+        {
+            
+        }
+
+        protected virtual MilInstantAnimator ConfigClickAnimation() => null;
+        
         public abstract void UpdateAppearance();
-        public abstract void AdjustAppearance(float pos);
+
+        public virtual void AdjustAppearance(float pos)
+        {
+            
+        }
         
         public void OnPointerClick(PointerEventData eventData)
         {

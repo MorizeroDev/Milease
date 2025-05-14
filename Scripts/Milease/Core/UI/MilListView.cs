@@ -21,8 +21,8 @@ namespace Milease.Core.UI
         
         public int SelectedIndex { get; internal set; } = -1;
 
-        [HideInInspector]
-        public readonly List<object> Items = new List<object>();
+        public IReadOnlyList<object> Items => _items;
+        private readonly List<object> _items = new List<object>();
 
         [Header("Basic")]
         public GameObject ItemPrefab;
@@ -218,7 +218,7 @@ namespace Milease.Core.UI
             {
                 Awake();
             }
-            Items.Add(data);
+            _items.Add(data);
             bindDisplay.Add(null);
         }
 
@@ -228,7 +228,7 @@ namespace Milease.Core.UI
             {
                 Awake();
             }
-            if (index < 0 || index >= Items.Count)
+            if (index < 0 || index >= _items.Count)
             {
                 LogUtils.Warning("Index out of range.");
                 return false;
@@ -245,7 +245,7 @@ namespace Milease.Core.UI
                 }
             }
             
-            foreach (var tracker in itemTracker.Keys.Where(x => x.ItemData == Items[index]))
+            foreach (var tracker in itemTracker.Keys.Where(x => x.ItemData == _items[index]))
             {
                 if (SelectedIndex != -1)
                 {
@@ -261,7 +261,7 @@ namespace Milease.Core.UI
                     itemTracker[pair.Key]--;
                 }
             }
-            Items.RemoveAt(index);
+            _items.RemoveAt(index);
             bindDisplay.RemoveAt(index);
             CheckLoopListPosition();
             targetPos = Position;
@@ -269,9 +269,29 @@ namespace Milease.Core.UI
             return true;
         }
         
+        public void UpdateItem(int index, object newItem)
+        {
+            if (!initialized)
+            {
+                Awake();
+            }
+            if (index < 0 || index >= _items.Count)
+            {
+                LogUtils.Warning("Index out of range.");
+                return;
+            }
+            if (bindDisplay[index])
+            {
+                bindDisplay[index].Binding = newItem;
+                bindDisplay[index].UpdateAppearance();
+            }
+            
+            _items[index] = newItem;
+        }
+        
         public bool Remove(object data)
         {
-            var index = Items.FindIndex(x => x == data);
+            var index = _items.FindIndex(x => x == data);
             if (index == -1)
                 return false;
             return Remove(index);
@@ -290,7 +310,7 @@ namespace Milease.Core.UI
             }
             Select(-1);
             bindDisplay.Clear();
-            Items.Clear();
+            _items.Clear();
             CheckLoopListPosition();
             targetPos = Position;
             CheckPosition();
@@ -320,7 +340,7 @@ namespace Milease.Core.UI
                 }
             }
             
-            if (index < 0 || index >= Items.Count)
+            if (index < 0 || index >= _items.Count)
             {
                 SelectedIndex = index;
                 return;
@@ -328,13 +348,13 @@ namespace Milease.Core.UI
 
             var tracker = new ItemTracker()
             {
-                ItemData = Items[index]
+                ItemData = _items[index]
             };
             itemTracker.Add(tracker, index);
             
             if (!bindDisplay[index] && !dontCall)
             {
-                tempDisplay.Binding = Items[index];
+                tempDisplay.Binding = _items[index];
                 tempDisplay.Index = index;
                 tempDisplay.ParentListView = this;
                 tempDisplay.OnSelect(args);
@@ -365,7 +385,7 @@ namespace Milease.Core.UI
             {
                 // ensure that the slide progress is smooth in loop list
                 CheckLoopListPosition();
-                var len = (ItemSize + Spacing) * Items.Count;
+                var len = (ItemSize + Spacing) * _items.Count;
                 if (Vertical)
                 {
                     while (position > len)
@@ -430,7 +450,7 @@ namespace Milease.Core.UI
             {
                 for (var i = cnt; i < display.Count; i++)
                 {
-                    if (display[i].Index < 0 || display[i].Index >= Items.Count)
+                    if (display[i].Index < 0 || display[i].Index >= _items.Count)
                         continue;
                     bindDisplay[display[i].Index] = null;
                     Destroy(display[i].gameObject);
@@ -474,14 +494,14 @@ namespace Milease.Core.UI
 
             CheckObjectPool(cnt);
 
-            if (LoopList && Items.Count < cnt - 1)
+            if (LoopList && _items.Count < cnt - 1)
             {
-                LogUtils.Warning($"Your item count({Items.Count}) is smaller than the list can display({cnt}), this may cause abnormal appearance.");
+                LogUtils.Warning($"Your item count({_items.Count}) is smaller than the list can display({cnt}), this may cause abnormal appearance.");
             }
 
             if (LoopList && start < 0)
             {
-                start += Items.Count;
+                start += _items.Count;
             }
 
             // Check avaliable item object
@@ -495,11 +515,11 @@ namespace Milease.Core.UI
                 }
                 else
                 {
-                    var b1 = start % Items.Count;
+                    var b1 = start % _items.Count;
                     var b2 = b1 + cnt;
-                    if (b2 >= Items.Count)
+                    if (b2 >= _items.Count)
                     {
-                        canRecycle = (display[i].Index != -1) && (display[i].Index < b1 && display[i].Index >= b2 % Items.Count);
+                        canRecycle = (display[i].Index != -1) && (display[i].Index < b1 && display[i].Index >= b2 % _items.Count);
                     }
                     else
                     {
@@ -526,16 +546,16 @@ namespace Milease.Core.UI
                 var k = i;
                 if (LoopList)
                 {
-                    k %= Items.Count;
+                    k %= _items.Count;
                 }
-                if (k >= 0 && k < Items.Count && !bindDisplay[k])
+                if (k >= 0 && k < _items.Count && !bindDisplay[k])
                 {
                     if (j >= avaliable.Count)
                     {
                         LogUtils.Warning("Lack of item object.");
                         continue;
                     }
-                    avaliable[j].Binding = Items[k];
+                    avaliable[j].Binding = _items[k];
                     bindDisplay[k] = avaliable[j];
                     avaliable[j].Index = k;
                     avaliable[j].ParentListView = this;
@@ -556,9 +576,9 @@ namespace Milease.Core.UI
                 var k = i;
                 if (LoopList)
                 {
-                    k %= Items.Count;
+                    k %= _items.Count;
                 }
-                if (k >= 0 && k < Items.Count && bindDisplay[k])
+                if (k >= 0 && k < _items.Count && bindDisplay[k])
                 {
                     var p = Vertical switch
                     {
@@ -666,9 +686,9 @@ namespace Milease.Core.UI
         {
             minPos = Vertical ?
                 GetOriginPointPosition():
-                Mathf.Min(0f, -1f * (Items.Count * (ItemSize + Spacing) - RectTransform.rect.width - ItemSize * ItemPivot.x + EndPadding));
+                Mathf.Min(0f, -1f * (_items.Count * (ItemSize + Spacing) - RectTransform.rect.width - ItemSize * ItemPivot.x + EndPadding));
             maxPos = Vertical ?
-                Mathf.Max(0f, Items.Count * (ItemSize + Spacing) - RectTransform.rect.height - ItemSize * (1f - ItemPivot.y) + EndPadding) :
+                Mathf.Max(0f, _items.Count * (ItemSize + Spacing) - RectTransform.rect.height - ItemSize * (1f - ItemPivot.y) + EndPadding) :
                 GetOriginPointPosition();
         }
         
@@ -678,7 +698,7 @@ namespace Milease.Core.UI
             {
                 // secretly decrease the position number
                 var tmp = Position;
-                var len = (ItemSize + Spacing) * Items.Count;
+                var len = (ItemSize + Spacing) * _items.Count;
                 while (tmp < len * (Vertical ? 1f : -3f))
                 {
                     tmp += len;
