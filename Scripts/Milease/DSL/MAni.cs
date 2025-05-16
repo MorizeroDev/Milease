@@ -95,7 +95,12 @@ namespace Milease.DSL
             }
         }
         
-        public static bool Ease(EaseFunction func, EaseType type = EaseType.In)
+        public static bool Ease(EaseFunction func)
+        {
+            return true;
+        }
+        
+        public static bool Ease(EaseFunction func, EaseType type)
         {
             return true;
         }
