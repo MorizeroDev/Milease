@@ -12,6 +12,7 @@ using Debug = UnityEngine.Debug;
 
 namespace Milease.Core.UI
 {
+    [ExecuteAlways]
     public class MilListView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IScrollHandler
     {
         public enum AlignMode
@@ -93,8 +94,80 @@ namespace Milease.Core.UI
         
         private readonly Dictionary<ItemTracker, int> itemTracker = new Dictionary<ItemTracker, int>();
 
+        private DrivenRectTransformTracker tracker;
+        private bool _dirty = false;
+
+        private void OnEnable()
+        {
+            if (ItemPrefab)
+            {
+                ApplyPivot();
+            }
+        }
+
+        private void OnDisable()
+        {
+            tracker.Clear();
+        }
+        
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            _dirty = true;
+        }
+#endif
+
+        private void ApplyPivot()
+        {
+            tracker.Clear();
+
+            foreach (var item in display)
+            {
+                drivePivot(item.GetComponent<RectTransform>());
+            }
+            
+            drivePivot(ItemPrefab.GetComponent<RectTransform>());
+
+            if (tempDisplay)
+            {
+                drivePivot(tempDisplay.GetComponent<RectTransform>());
+            }
+
+            return;
+
+            void drivePivot(RectTransform rectTrans)
+            {
+                tracker.Add(this, rectTrans, Vertical ? DrivenTransformProperties.PivotY : DrivenTransformProperties.PivotX);
+                if (Vertical)
+                {
+                    rectTrans.pivot = new Vector2(rectTrans.pivot.x, 1f);
+                    if (Align == AlignMode.Center)
+                    {
+                        LogUtils.Warning($"Vertical mode hasn't supported center align mode yet.");
+                    }
+                }
+                else
+                {
+                    switch (Align)
+                    {
+                        case AlignMode.Normal:
+                            rectTrans.pivot = new Vector2(0f, rectTrans.pivot.y);
+                            break;
+                        case AlignMode.Center:
+                            rectTrans.pivot = new Vector2(0.5f, rectTrans.pivot.y);
+                            break;
+                    }
+                }
+            }
+        }
+
         private void Awake()
         {
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+            
             if (initialized)
             {
                 return;
@@ -107,28 +180,8 @@ namespace Milease.Core.UI
             
             ItemPrefab.SetActive(false);
             
+            ApplyPivot();
             var itemRect = ItemPrefab.GetComponent<RectTransform>();
-            if (Vertical)
-            {
-                itemRect.pivot = new Vector2(itemRect.pivot.x, 1f);
-                if (Align == AlignMode.Center)
-                {
-                    LogUtils.Warning($"Vertical mode hasn't supported center align mode yet.");
-                }
-            }
-            else
-            {
-                switch (Align)
-                {
-                    case AlignMode.Normal:
-                        itemRect.pivot = new Vector2(0f, itemRect.pivot.y);
-                        break;
-                    case AlignMode.Center:
-                        itemRect.pivot = new Vector2(0.5f, itemRect.pivot.y);
-                        break;
-                }
-            }
-            
             ItemSize = Vertical ? itemRect.rect.height : itemRect.rect.width;
             RectTransform = GetComponent<RectTransform>();
             ItemPivot = itemRect.pivot;
@@ -148,6 +201,7 @@ namespace Milease.Core.UI
             Position = GetOriginPointPosition();
             targetPos = Position;
             var go = Instantiate(ItemPrefab, transform);
+            go.name = "Temp ListView Item";
             tempDisplay = go.GetComponent<MilListViewItem>();
             go.SetActive(false);
             
@@ -450,12 +504,14 @@ namespace Milease.Core.UI
             {
                 for (var i = cnt; i < display.Count; i++)
                 {
-                    if (display[i].Index < 0 || display[i].Index >= _items.Count)
-                        continue;
-                    bindDisplay[display[i].Index] = null;
                     Destroy(display[i].gameObject);
+                    if (display[i].Index >= 0 && display[i].Index < _items.Count)
+                    {
+                        bindDisplay[display[i].Index] = null;
+                    }
                 }
                 display.RemoveRange(cnt, display.Count - cnt);
+                ApplyPivot();
             }
             else
             {
@@ -463,10 +519,16 @@ namespace Milease.Core.UI
                 for (var i = 0; i < cnt2; i++)
                 {
                     var go = Instantiate(ItemPrefab, transform);
+                    go.name = "Reusable ListItem " + display.Count;
                     var item = go.GetComponent<MilListViewItem>();
                     item.Initialize();
                     display.Add(item);
                     go.SetActive(false);
+                }
+
+                if (cnt2 > 0)
+                {
+                    ApplyPivot();
                 }
             }
         }
@@ -732,6 +794,16 @@ namespace Milease.Core.UI
         
         private void Update()
         {
+            if (!Application.isPlaying)
+            {
+                if (_dirty)
+                {
+                    _dirty = false;
+                    ApplyPivot();
+                }
+                return;
+            }
+            
             if (Scrollbar && Scrollbar.interactable != (Interactable && Scrollable && !LoopList))
             {
                 Scrollbar.interactable = (Interactable && Scrollable && !LoopList);
