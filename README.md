@@ -4,17 +4,17 @@
 
 <p align="center"><b>UI Development · Animation · Productivity</b></p>
 
-> [!WARNING] 
->
-> The documentation is not yet complete.
-
-🎥 Milease is a toolkit aimed at enhancing the Unity UI development experience. It includes more convenient UI animation tools, such as using the Milease Animator to create UI transition animations or using the State Animator for a CSS-like UI design experience. Additionally, Milease contains other UI tools, such as infinite lists and a modified ContentSizeFitter.
+🎥 Milease is a toolkit aimed at enhancing the Unity UI development experience. It includes more convenient UI animation tools, such as using the Milease Animator to create UI transition animations or using the State Animator for a CSS-like UI design experience. Additionally, Milease contains other UI tools, such as infinite lists.
 
 Milease is developed by the Morizero team for creating UI tools for their non-commercial rhythm music game, Milthm. At the same time, it maximizes the provision of more general functionalities to benefit the wider community of Unity frontend developers.
 
 **Special Thanks**: 
 
 * https://easings.net
+
+# Document
+
+简体中文, English:  [milease.milthm.dev](https://milease.milthm.dev/)
 
 # Introduction
 
@@ -41,10 +41,6 @@ Including these in `manifest.json`:
 "party.para.util.colors": "https://github.com/ParaParty/ParaPartyUtil.git?path=Colors",
 "party.para.util.unitypolyfill": "https://github.com/ParaParty/ParaPartyUtil.git?path=UnityPolyfill",
 ```
-
-> [!WARNING] 
->
-> Due to technical compatibility issues, animation generation statements from v1 (including most **Milease** and **MileaseTo** extension methods) are no longer supported.
 
 # Solution1: Expression-Driven Animation Updater
 

@@ -196,7 +196,7 @@ namespace Milease.Editor
             
             if (GUILayout.Button("Documents ↗", new GUIStyle(EditorStyles.linkLabel)))
             {
-                Application.OpenURL("https://github.com/MorizeroDev/Milease/tree/master/~Document");
+                Application.OpenURL("https://milease.milthm.dev/docs/intro");
             }
             GUILayout.Space(10f);
             
