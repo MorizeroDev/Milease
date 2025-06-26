@@ -806,7 +806,7 @@ namespace Milease.Core.UI
         {
             if (!Application.isPlaying)
             {
-                if (_dirty)
+                if (_dirty && ItemPrefab)
                 {
                     _dirty = false;
                     ApplyPivot();
