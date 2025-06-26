@@ -733,6 +733,16 @@ namespace Milease.Core.UI
             return display.FindAll(_ => true);
         }
 
+        public int FindItemIndex(Predicate<object> match)
+        {
+            return _items.FindIndex(match);
+        }
+        
+        public int FindItemLastIndex(Predicate<object> match)
+        {
+            return _items.FindLastIndex(match);
+        }
+
         private float GetOriginPointPosition()
         {
             return (
