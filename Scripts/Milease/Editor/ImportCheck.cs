@@ -90,7 +90,7 @@ namespace Milease.Editor
         {
             var window = GetWindow<ImportCheck>("Milease Setup");
             window.minSize = new Vector2(620f, 600f);
-            window.maxSize = new Vector2(620f, Screen.height);
+            window.maxSize = new Vector2(620f, Screen.currentResolution.height);
             window.ShowPopup();
         }
 
