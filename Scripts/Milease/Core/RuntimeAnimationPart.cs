@@ -3,7 +3,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+#if MILEASE_ENABLE_CODEGEN
 using Milease.CodeGen;
+#endif
 using Milease.Core.Animation;
 using Milease.Core.Animator;
 using Milease.Enums;
@@ -336,8 +338,9 @@ namespace Milease.Core
                     {
                         StartValue = OriginalValue;
                     }
-
+#if MILEASE_ENABLE_CODEGEN
                     delta = deltaFunc.Invoke(StartValue, ToValue);
+#endif
                 }
             }
 

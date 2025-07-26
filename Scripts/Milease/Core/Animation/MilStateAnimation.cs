@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+#if MILEASE_ENABLE_CODEGEN
 using Milease.CodeGen;
+#endif
 using Milease.Core.Animator;
 using Milease.Enums;
 using Milease.Milease.Exception;
@@ -97,7 +99,9 @@ namespace Milease.Core.Animation
             internal override void Prepare()
             {
                 StartValue = ValueGetter.Invoke(Target);
+#if MILEASE_ENABLE_CODEGEN
                 DeltaValue = deltaFunc.Invoke(StartValue, ToValue);
+#endif
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
