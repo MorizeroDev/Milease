@@ -118,6 +118,16 @@ namespace Milease.DSL
                 public EaseType EaseType;
             }
         }
+
+        public static IEnumerable<MilStateParameter> SetEase(this IEnumerable<MilStateParameter> states, EaseFunction easeFunc, EaseType easeType)
+        {
+            foreach (var state in states)
+            {
+                state.EaseFunction = easeFunc;
+                state.EaseType = easeType;
+            }
+            return states;
+        }
         
         public static IEnumerable<MilStateParameter> States(Expression<Func<bool>> stateExpr)
         {
