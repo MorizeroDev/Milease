@@ -429,7 +429,7 @@ namespace Milease.Core.UI
             }
         }
 
-        public void SlideTo(float position, bool withoutTransition = false)
+        public void SlideTo(float position, bool withoutTransition = false, bool clampPosition = false)
         {
             if (!initialized)
             {
@@ -479,6 +479,19 @@ namespace Milease.Core.UI
                 }
             }
 
+            if (clampPosition)
+            {
+                GetPositionBoundary(out var minPos, out var maxPos);
+                if (position > maxPos)
+                {
+                    position = maxPos;
+                }
+                else if (position < minPos)
+                {
+                    position = minPos;
+                }
+            }
+            
             originPos = Position;
             targetPos = position;
             transTime = 0f;
