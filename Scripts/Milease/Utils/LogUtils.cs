@@ -5,6 +5,7 @@ namespace Milease.Utils
 {
     public static class LogUtils
     {
+#if UNITY_EDITOR
         private const string PREFIX =
             "<b><color=white>[</color>" +
             "<color=#3dd5e6>M</color>" +
@@ -15,6 +16,9 @@ namespace Milease.Utils
             "<color=#e75ffc>s</color>" +
             "<color=#f533fe>e</color>" +
             "<color=white>]</color></b> ";
+#else
+        private const string PREFIX = "Milease";
+#endif
         
         public static void Error(string content)
         {
