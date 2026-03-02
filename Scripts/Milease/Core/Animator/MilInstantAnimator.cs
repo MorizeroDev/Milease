@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -7,6 +8,7 @@ using Milease.Core.Animation;
 using Milease.Core.Manager;
 using Milease.Enums;
 using Milease.Milease.Exception;
+using UnityEngine;
 #if UNITY_EDITOR
 using Milease.Editor;
 using UnityEditor;
@@ -246,6 +248,8 @@ namespace Milease.Core.Animator
             MilInstantAnimatorManager.SubmitPlayTask(this);
             ActiveScene = SceneManager.GetActiveScene().name;
         }
+
+        public bool IsPlaying() => MilInstantAnimatorManager.IsPlayTaskActive(this);
         
         public void Stop()
         {
@@ -262,6 +266,14 @@ namespace Milease.Core.Animator
             }
             PlayTcs ??= new TaskCompletionSource<bool>();
             return PlayTcs.Task;
+        }
+
+        public IEnumerator Wait()
+        {
+            while (IsPlaying())
+            {
+                yield return null;
+            }
         }
         
 #if UNITY_EDITOR
