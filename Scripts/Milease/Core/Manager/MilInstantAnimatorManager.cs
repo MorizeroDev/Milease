@@ -119,7 +119,22 @@ namespace Milease.Core.Manager
             
             for (var i = 0; i < cnt; i++)
             {
+                if (cnt <= 0)
+                {
+                    break;
+                }
+                
                 var set = _animations[i];
+
+                if (set.StopOnBindingDispose && !set.BindLifeCycleObject)
+                {
+                    _aniHashSet.Remove(set);
+                    _animations.RemoveAt(i);
+                    i--;
+                    cnt--;
+                    continue;
+                }
+                
                 var collection = set.Collection[set.PlayIndex];
                 var cCnt = collection.Count;
                 var latestTime = 0f;

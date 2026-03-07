@@ -14,6 +14,7 @@ using Milease.Editor;
 using UnityEditor;
 #endif
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace Milease.Core.Animator
 {
@@ -37,6 +38,9 @@ namespace Milease.Core.Animator
 
         internal bool EditorPauseSignal = false;
         internal int EditorEndPlayIndex = -1;
+
+        internal Object BindLifeCycleObject;
+        internal bool StopOnBindingDispose = false;
 
         public static MilInstantAnimator Empty()
         {
@@ -154,6 +158,18 @@ namespace Milease.Core.Animator
             {
                 Collection.Add(part);
             }
+            return this;
+        }
+        
+        /// <summary>
+        /// The animator will automatically stop when the target object is destroyed.
+        /// Stopping by this way will not trigger the finish callback.
+        /// </summary>
+        /// <param name="obj">Target object</param>
+        public MilInstantAnimator BindLifeCycle(Object obj)
+        {
+            BindLifeCycleObject = obj;
+            StopOnBindingDispose = true;
             return this;
         }
         
