@@ -53,7 +53,8 @@ namespace Milease.Core.Manager
 
         private static readonly List<MilInstantAnimator> _animations = new List<MilInstantAnimator>();
         private static readonly HashSet<MilInstantAnimator> _aniHashSet = new HashSet<MilInstantAnimator>();
-
+        private static readonly List<MilInstantAnimator> _willStopAnimations = new List<MilInstantAnimator>();
+        
         private void OnExitApplication()
         {
             Application.quitting -= OnExitApplication;
@@ -82,8 +83,7 @@ namespace Milease.Core.Manager
             {
                 return;
             }
-            _animations.Remove(animator);
-            _aniHashSet.Remove(animator);
+            _willStopAnimations.Add(animator);
         }
 
 #if UNITY_EDITOR
@@ -98,6 +98,14 @@ namespace Milease.Core.Manager
         
         private void Update()
         {
+            for (var i = 0; i < _willStopAnimations.Count; i++)
+            {
+                var animator = _willStopAnimations[i];
+                _animations.Remove(animator);
+                _aniHashSet.Remove(animator);
+            }
+            _willStopAnimations.Clear();
+            
             var cnt = _animations.Count;
             var scaledDeltaTime = Time.deltaTime;
             var unscaledDeltaTime = Mathf.Min(Time.unscaledDeltaTime, Time.maximumDeltaTime);
