@@ -134,7 +134,7 @@ namespace Milease.Core.Manager
                 
                 var set = _animations[i];
 
-                if (set.StopOnBindingDispose && !set.BindLifeCycleObject)
+                if (set.ShouldStop())
                 {
                     _aniHashSet.Remove(set);
                     _animations.RemoveAt(i);

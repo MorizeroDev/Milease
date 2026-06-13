@@ -325,69 +325,76 @@ namespace Milease.Core
             }
 
             lastProgress = progress;
-            
-            if (!IsPrepared)
-            {
-                IsPrepared = true;
-            
-                if (ValueGetter != null)
-                {
-                    OriginalValue = ValueGetter.Invoke(Target);
-            
-                    if (ControlInfo.PendingTo)
-                    {
-                        StartValue = OriginalValue;
-                    }
-#if MILEASE_ENABLE_CODEGEN
-                    delta = deltaFunc.Invoke(StartValue, ToValue);
-#endif
-                }
-            }
 
-            if (ValueType == ValueTypeEnum.SelfHandle || HandleFunction != null)
+            try
             {
-                HandleFunction(new MilHandleFunctionArgs<T, E>()
+                if (!IsPrepared)
                 {
-                    Animation = this,
-                    Target = Target,
-                    Progress = progress,
-                    Animator = ParentAnimator
-                });
-                return;
-            }
-#if MILEASE_ENABLE_EXPRESSION
-            if (expression == null)
-            {
-                return;
-            }
-
-            if (Source.BlendingMode == BlendingMode.Additive)
-            {
-#if UNITY_EDITOR
-                if (offsetExpression == null)
-                {
-                    throw new Exception(
-                        $"The type {typeof(E).Name} doesn't meet the requirements for additive animation mode.");
-                }                
-#endif
-                offsetExpression.Invoke(Target, StartValue, ToValue, progress, OriginalValue);
-            }
-            else
-            {
-                expression.Invoke(Target, StartValue, ToValue, progress);
-            }
-#elif MILEASE_ENABLE_CODEGEN
-            if (calcFunc == null)
-            {
-                return;
-            }
-            
-            var targetValue = ControlInfo.BlendingMode == BlendingMode.Additive
-                ? offsetCalcFunc.Invoke(StartValue, delta, progress, OriginalValue)
-                : calcFunc.Invoke(StartValue, delta, progress);
+                    IsPrepared = true;
                 
-            ValueSetter.Invoke(Target, targetValue);
+                    if (ValueGetter != null)
+                    {
+                        OriginalValue = ValueGetter.Invoke(Target);
+                
+                        if (ControlInfo.PendingTo)
+                        {
+                            StartValue = OriginalValue;
+                        }
+#if MILEASE_ENABLE_CODEGEN
+                        delta = deltaFunc.Invoke(StartValue, ToValue);
 #endif
+                    }
+                }
+
+                if (ValueType == ValueTypeEnum.SelfHandle || HandleFunction != null)
+                {
+                    HandleFunction(new MilHandleFunctionArgs<T, E>()
+                    {
+                        Animation = this,
+                        Target = Target,
+                        Progress = progress,
+                        Animator = ParentAnimator
+                    });
+                    return;
+                }
+#if MILEASE_ENABLE_EXPRESSION
+                if (expression == null)
+                {
+                    return;
+                }
+
+                if (Source.BlendingMode == BlendingMode.Additive)
+                {
+#if UNITY_EDITOR
+                    if (offsetExpression == null)
+                    {
+                        throw new Exception(
+                            $"The type {typeof(E).Name} doesn't meet the requirements for additive animation mode.");
+                    }                
+#endif
+                    offsetExpression.Invoke(Target, StartValue, ToValue, progress, OriginalValue);
+                }
+                else
+                {
+                    expression.Invoke(Target, StartValue, ToValue, progress);
+                }
+#elif MILEASE_ENABLE_CODEGEN
+                if (calcFunc == null)
+                {
+                    return;
+                }
+                
+                var targetValue = ControlInfo.BlendingMode == BlendingMode.Additive
+                    ? offsetCalcFunc.Invoke(StartValue, delta, progress, OriginalValue)
+                    : calcFunc.Invoke(StartValue, delta, progress);
+                    
+                ValueSetter.Invoke(Target, targetValue);
+#endif
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

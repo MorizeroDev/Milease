@@ -39,6 +39,7 @@ namespace Milease.Core.Animator
         internal bool EditorPauseSignal = false;
         internal int EditorEndPlayIndex = -1;
 
+        internal Func<bool> BindLifeCycleFunc;
         internal Object BindLifeCycleObject;
         internal bool StopOnBindingDispose = false;
 
@@ -160,6 +161,21 @@ namespace Milease.Core.Animator
             }
             return this;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool ShouldStop()
+        {
+            var stop = false;
+            if (BindLifeCycleFunc != null)
+            {
+                stop |= BindLifeCycleFunc.Invoke();
+            }
+            if (StopOnBindingDispose)
+            {
+                stop |= !BindLifeCycleObject;
+            }
+            return stop;
+        }
         
         /// <summary>
         /// The animator will automatically stop when the target object is destroyed.
@@ -170,6 +186,17 @@ namespace Milease.Core.Animator
         {
             BindLifeCycleObject = obj;
             StopOnBindingDispose = true;
+            return this;
+        }
+        
+        /// <summary>
+        /// The animator will automatically stop when the target function returns true.
+        /// Stopping by this way will not trigger the finish callback.
+        /// </summary>
+        /// <param name="func">Target function</param>
+        public MilInstantAnimator SetLifeCycleFunc(Func<bool> func)
+        {
+            BindLifeCycleFunc = func;
             return this;
         }
         
